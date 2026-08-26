@@ -1,0 +1,24 @@
+# Production environment values for Acme SampleApp Backend
+# Overrides values.yaml for the prod deployment
+
+backend:
+  replicaCount: 3
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+cloudSql:
+  proxy:
+    image: "gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0"
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi

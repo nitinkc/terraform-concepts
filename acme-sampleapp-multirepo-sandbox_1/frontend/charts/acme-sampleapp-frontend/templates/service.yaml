@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "acme-sampleapp-frontend.fullname" . }}
+  labels:
+    {{- include "acme-sampleapp-frontend.labels" . | nindent 4 }}
+  {{- if .Values.ingress.enabled }}
+  annotations:
+    # GCE ingress needs NEG-backed services to attach a Cloud Armor / CDN
+    # backend config to; container-native load balancing skips the extra
+    # kube-proxy hop this cluster would otherwise take to reach the pod.
+    cloud.google.com/neg: '{"ingress": true}'
+  {{- end }}
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "acme-sampleapp-frontend.selectorLabels" . | nindent 4 }}

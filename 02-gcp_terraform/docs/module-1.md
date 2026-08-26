@@ -21,7 +21,7 @@ and calculates a diff.
        region  = "us-central1"
      }
      ```
-   - Create `../backend.tf`:
+   - Create `../01-basics/backend.tf`:
      ```hcl
      terraform {
        backend "gcs" {

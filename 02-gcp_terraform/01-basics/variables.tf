@@ -4,3 +4,9 @@ variable "project_id" {
   default     = "my-devops-journey-502420" # Replace with your real GCP Project ID
 }
 
+variable "environments" {
+  # type    = list(string)
+  type    = set(string)
+  default = ["dev", "staging"]
+}
+

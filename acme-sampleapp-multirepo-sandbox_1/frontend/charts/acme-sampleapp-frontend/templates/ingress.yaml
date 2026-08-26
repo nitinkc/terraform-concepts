@@ -1,0 +1,42 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "acme-sampleapp-frontend.fullname" . }}
+  labels:
+    {{- include "acme-sampleapp-frontend.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.className }}
+    # Points at the static IP reserved in frontend/infra/vip.tf — the address
+    # itself lives in Terraform; this annotation just references it by name so
+    # the ingress doesn't need to know the IP value.
+    kubernetes.io/ingress.global-static-ip-name: {{ .Values.ingress.staticIpName | quote }}
+    {{- if .Values.ingress.tls }}
+    networking.gke.io/managed-certificates: {{ include "acme-sampleapp-frontend.fullname" . }}-cert
+    kubernetes.io/ingress.allow-http: "false"
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "acme-sampleapp-frontend.fullname" . }}
+                port:
+                  number: {{ .Values.frontend.service.port }}
+---
+{{- if .Values.ingress.tls }}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{ include "acme-sampleapp-frontend.fullname" . }}-cert
+  labels:
+    {{- include "acme-sampleapp-frontend.labels" . | nindent 4 }}
+spec:
+  domains:
+    - {{ .Values.ingress.host | quote }}
+{{- end }}
+{{- end }}
