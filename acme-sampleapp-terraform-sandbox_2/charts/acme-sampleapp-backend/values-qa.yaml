@@ -1,0 +1,24 @@
+# QA environment values for Acme SampleApp Backend
+# Overrides values.yaml for the qa deployment
+
+backend:
+  replicaCount: 2
+
+  resources:
+    requests:
+      cpu: 300m
+      memory: 512Mi
+    limits:
+      cpu: 750m
+      memory: 1Gi
+
+cloudSql:
+  proxy:
+    image: "gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi

@@ -3,6 +3,7 @@ resource "local_file" "fruits" {
   content  = var.content
 }
 
+# creates on console
 resource "random_pet" "my_pet" {
   prefix    = var.prefix
   separator = var.separator

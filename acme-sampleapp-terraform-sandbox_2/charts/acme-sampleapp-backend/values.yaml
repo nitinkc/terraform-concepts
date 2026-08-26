@@ -1,0 +1,109 @@
+# -- Override the chart name
+nameOverride: ""
+# -- Override the full release name
+fullnameOverride: ""
+
+# ──────────────────────────────────────────────
+# Backend (FastAPI + uvicorn)
+# ──────────────────────────────────────────────
+backend:
+  replicaCount: 1
+
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  # ClusterIP only — the backend is never exposed directly. The frontend's nginx
+  # proxies /api/ to this service in-cluster.
+  service:
+    type: ClusterIP
+    port: 8000
+
+  containerPort: 8000
+
+  env: []
+
+  resources: {}
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 30
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# ──────────────────────────────────────────────
+# Cloud SQL Configuration
+# ──────────────────────────────────────────────
+# NOTE: These values are overridden by Terraform from the cloudsql repo's Consul
+# outputs. See infra/main.tf for the values actually injected via helm_release.
+cloudSql:
+  # -- Enable the Cloud SQL Auth Proxy sidecar and DATABASE_URL wiring
+  enabled: false
+  # -- GCP project holding the instance (overridden by Terraform)
+  projectId: ""
+  # -- Cloud SQL region (overridden by Terraform)
+  region: ""
+  # -- Cloud SQL instance name (overridden by Terraform)
+  instanceName: ""
+  # -- Instance connection name, project:region:instance (overridden by Terraform)
+  connectionName: ""
+  # -- Database name (overridden by Terraform)
+  database: "sampleapp"
+  # -- IAM database user: the GSA email minus the .gserviceaccount.com suffix
+  # (overridden by Terraform)
+  user: ""
+  # -- Schema the backend's tables live in and the role that must own them
+  # (overridden by Terraform)
+  schema: ""
+
+  # Cloud SQL Proxy configuration
+  proxy:
+    image: "gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+# ──────────────────────────────────────────────
+# Common
+# ──────────────────────────────────────────────
+imagePullSecrets: []
+
+serviceAccount:
+  # -- Create the service account (required for Cloud SQL via Workload Identity)
+  create: false
+  # -- Service account name (bound to a GCP SA via Workload Identity)
+  name: ""
+  # -- Service account annotations (for the Workload Identity binding)
+  annotations: {}

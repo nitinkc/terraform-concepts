@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "acme-sampleapp-backend.fullname" . }}
+  labels:
+    {{- include "acme-sampleapp-backend.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "acme-sampleapp-backend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "acme-sampleapp-backend.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.serviceAccount.name | default (include "acme-sampleapp-backend.fullname" .) }}
+      securityContext:
+        {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
+      containers:
+        # --- Application Container ---
+        - name: backend
+          securityContext:
+            {{- toYaml .Values.backend.securityContext | nindent 12 }}
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.containerPort }}
+              protocol: TCP
+          env:
+            {{- range .Values.backend.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+            - name: API_PORT
+              value: {{ .Values.backend.containerPort | quote }}
+            {{- if .Values.cloudSql.enabled }}
+            - name: DATABASE_URL
+              value: {{ include "acme-sampleapp-backend.databaseUrl" . | quote }}
+            - name: DB_SCHEMA
+              value: {{ .Values.cloudSql.schema | quote }}
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.backend.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.backend.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+        # --- Cloud SQL Auth Proxy Sidecar ---
+        {{- if .Values.cloudSql.enabled }}
+        - name: cloud-sql-proxy
+          image: {{ .Values.cloudSql.proxy.image | quote }}
+          command:
+            - "/cloud-sql-proxy"
+            - "--port=5432"
+            - "--auto-iam-authn"
+            - "--private-ip"
+            - "--structured-logs"
+            - "--max-sigterm-delay=30s"
+            - "{{ .Values.cloudSql.projectId }}:{{ .Values.cloudSql.region }}:{{ .Values.cloudSql.instanceName }}"
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            {{- toYaml .Values.cloudSql.proxy.resources | nindent 12 }}
+        {{- end }}
+
+      volumes:
+        # readOnlyRootFilesystem is on, so give the app a writable scratch dir.
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.backend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

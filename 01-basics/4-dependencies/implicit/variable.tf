@@ -1,11 +1,11 @@
 variable "fileName" {
   description = "The path where the file will be created"
   type        = string
-  default     = "/tmp/hello.txt"
+  default     = "/tmp/hello_implicit_dependencies.txt"
 }
 
 variable "content" {
-  description = "The content to write into the file"
+  description = "The content to write into the file implicit dependencies"
   type        = string
   default     = "Hello World! Default Text"
 }

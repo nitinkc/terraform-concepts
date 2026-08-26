@@ -1,13 +1,13 @@
 variable "fileName" {
   description = "The path where the file will be created"
   type        = string
-  default     = "/tmp/hello.txt"
+  default     = "/tmp/helloFruits.txt"
 }
 
 variable "content" {
   description = "The content to write into the file"
   type        = string
-  default     = "Hello World! Default Text"
+  default     = "Hello World! Default Text coming from the variable"
 }
 
 variable "prefix" {
