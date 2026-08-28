@@ -1,5 +1,4 @@
-# Terraform Learning — Lab  (acme-sampleapp)
-
+# Terraform Learning — Lab Notes (acme-sampleapp)
 
 ## Lab 1 — Local State
 
@@ -343,7 +342,7 @@ acme-sampleapp/
         └── outputs.tf
 ```
 
-**`modules/service_account/variables.tf`:**
+**`test/modules/service_account/variables.tf`:**
 ```hcl
 variable "account_id" {
   type = string
@@ -358,7 +357,7 @@ variable "project_id" {
 }
 ```
 
-**`modules/service_account/main.tf`:**
+**`test/modules/service_account/main.tf`:**
 ```hcl
 resource "google_service_account" "this" {
   project      = var.project_id
@@ -367,7 +366,7 @@ resource "google_service_account" "this" {
 }
 ```
 
-**`modules/service_account/outputs.tf`:**
+**`test/modules/service_account/outputs.tf`:**
 ```hcl
 output "email" {
   value = google_service_account.this.email
@@ -379,16 +378,17 @@ output "account_id" {
 ```
 
 **Root `main.tf` addition:**
+
 ```hcl
 module "backend_sa" {
-  source       = "./modules/service_account"
-  project_id   = var.project_id
-  account_id   = "${local.name_prefix}-web-app-v2"
-  display_name = "My Test App v2 (via module)"
+   source       = "test/modules/service_account"
+   project_id   = var.project_id
+   account_id   = "${local.name_prefix}-web-app-v2"
+   display_name = "My Test App v2 (via module)"
 }
 
 output "backend_sa_email" {
-  value = module.backend_sa.email
+   value = module.backend_sa.email
 }
 ```
 
@@ -458,62 +458,369 @@ knowing for the isolation concept, but not always the production pattern.
 
 ---
 
-## Up Next
+## Lab 11 — Import + Drift Detection
 
-### Remaining Lab Plan
+**Concept:** Three-part lab covering:
+- (a) Terraform is blind to resources it doesn't manage, 
+- (b) drift detection reverts manual changes on managed resources back to match code, 
+- (c) `import` binds an existing unmanaged resource into state.
 
-**Lab 11 — Import + Drift Detection**
-- Create a resource manually in GCP console (outside Terraform).
-- `terraform plan` on existing config — observe Terraform is blind to it (no drift shown,
-  since it doesn't know the resource exists).
-- Manually change an attribute of a Terraform-managed resource via console (e.g. rename a
-  bucket's label) — run `terraform plan` — observe Terraform **does** detect this as drift
-  (config says X, real world says Y) and proposes to revert it back to match config.
-- Contrast: unmanaged resources = invisible to Terraform. Managed resources = drift-detected
-  and auto-corrected on next apply.
+**Part A — Unmanaged resource (created outside Terraform):**
+```bash
+gsutil mb -l us-central1 gs://acme-manual-bucket-YOUR_PROJECT_ID
+terraform plan
+```
+Expected: plan shows **no changes** — bucket isn't in config/state, so it's invisible to
+Terraform.
 
-**Lab 12 — `dynamic` blocks**
-- Generate repeated nested blocks (e.g. multiple `binding` entries in an IAM policy, or
-  multiple lifecycle rules on a bucket) from a list/map, instead of writing each by hand.
-- Uses `google_storage_bucket` lifecycle rules or `google_project_iam_policy` bindings as
-  the concrete example.
+**Part B — Drift on a managed resource:**
+Manually edit a label (e.g. `environment`) on an existing Terraform-managed bucket
+(from Lab 8/10) via console, then:
+```bash
+terraform plan   # shows an update reverting the label back to code's value
+terraform apply  # reverts it in the real bucket
+```
+Expected: drift detected, code wins, real world corrected back to match config.
 
-**Lab 13 — `for_each` over modules**
-- Take the `service_account` module from Lab 9 and call it multiple times via `for_each`
-  (e.g. one SA per environment) instead of one hardcoded `module` block per SA.
-- Shows module addressing in state: `module.backend_sa["dev"]`, `module.backend_sa["staging"]`.
+**Part C — Import the manually-created bucket:**
+```hcl
+resource "google_storage_bucket" "manual_import" {
+  name                        = "acme-manual-bucket-YOUR_PROJECT_ID"
+  location                    = "US"
+  uniform_bucket_level_access = true
+}
+```
+```bash
+terraform import google_storage_bucket.manual_import acme-manual-bucket-YOUR_PROJECT_ID
+terraform plan
+```
+Watch for a `location` mismatch (created as `us-central1`, code says `US`) — a good
+demonstration that `import` only binds state; it does not validate or correct your HCL
+against reality. Any mismatch surfaces as a plan diff you must resolve yourself.
 
-**Lab 14 — Provider aliasing (multi-region / multi-project)**
-- Configure a second `provider "google"` block with an `alias`, pointing at a different
-  region (or project, if a second one is available).
-- Create a resource explicitly using the aliased provider via `provider = google.alias_name`.
-- Useful for real multi-region GKE/Cloud SQL setups.
+**Status:** *Not yet run — pending your results.*
 
-**Lab 15 — `terraform.tfvars` + variable precedence**
-- Move hardcoded values (project_id, environments list) into a `terraform.tfvars` file.
-- Demonstrate precedence order: CLI `-var` flag > `*.auto.tfvars` > `terraform.tfvars` >
-  `variable "..." { default = ... }`.
-- Add a `.gitignore` entry for `*.tfvars` if it contains sensitive values.
-
-**Lab 16 — Lifecycle meta-argument (`create_before_destroy`, `prevent_destroy`, `ignore_changes`)**
-- Add `prevent_destroy = true` to a critical resource (e.g. the SA), attempt `terraform
-  destroy`, observe the guard rail.
-- Add `ignore_changes` to a field that gets modified outside Terraform (e.g. labels added
-  by another automation) so Terraform stops fighting over it.
-
-**Lab 17 — Provisioners & `null_resource`** *(brief — modern Terraform discourages these,
-but worth recognizing since they show up in older/real repos)*
-- Recognize `local-exec` / `remote-exec` provisioners and when they're a smell (should
-  usually be replaced by cloud-init, startup scripts, or separate config-management tools).
-
-**Lab 18 — Capstone: tie it together in your real `acme-sampleapp` repo**
-- Apply everything (modules, for_each, locals, remote state, lifecycle rules) to the actual
-  GKE/Cloud SQL/Workload Identity resources in your production learning repo, not just the
-  sandbox examples used in Labs 1–17.
+**Key takeaway (expected):** Unmanaged = invisible to Terraform (no drift shown at all).
+Managed = drift-detected and auto-corrected toward code on next apply. `import` only
+populates state — you're responsible for making the HCL attributes actually match the real
+resource, or the very next plan will show a diff.
 
 ---
 
-Labs 1–10 are complete and documented above. Labs 11–18 will be added to this file as each
-is completed, following the same format (Concept → Code → Commands run → Verified → Key
-takeaway).
+## Lab 12 — `dynamic` Blocks
 
+**Concept:** `dynamic` generates repeated nested blocks (not top-level resources) from a
+list/map — e.g. multiple lifecycle rules inside one bucket, or multiple bindings inside one
+IAM policy — instead of writing each nested block by hand.
+
+**Code — multiple lifecycle rules on a bucket, generated from a list:**
+```hcl
+locals {
+  lifecycle_rules = [
+    { age = 30, storage_class = "NEARLINE" },
+    { age = 90, storage_class = "COLDLINE" },
+    { age = 365, storage_class = "ARCHIVE" },
+  ]
+}
+
+resource "google_storage_bucket" "lifecycle_demo" {
+  name                        = "${local.name_prefix}-lifecycle-${var.project_id}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+
+  dynamic "lifecycle_rule" {
+    for_each = local.lifecycle_rules
+    content {
+      condition {
+        age = lifecycle_rule.value.age
+      }
+      action {
+        type          = "SetStorageClass"
+        storage_class = lifecycle_rule.value.storage_class
+      }
+    }
+  }
+}
+```
+
+**Commands to run:**
+```bash
+terraform plan
+terraform apply
+```
+
+**To verify:** Cloud Storage → bucket → Lifecycle tab → confirm 3 rules present, matching
+the 30/90/365-day transitions.
+
+**Status:** *Not yet run — pending your results.*
+
+**Key takeaway (expected):** `dynamic "<block_name>"` + `for_each` + `content {}` is the
+pattern for generating repeated *nested* blocks — different from resource-level `for_each`
+(Lab 5), which generates repeated *whole resources*. Use `dynamic` when the repetition is
+inside one resource, not across separate resource instances.
+
+---
+
+## Lab 13 — `for_each` Over Modules
+
+**Concept:** Apply `for_each` to a `module` call itself (not just a resource) — one module
+invocation per key, instead of one hardcoded `module` block per instance.
+
+**Code — replace the single Lab 9 module call with a keyed set:**
+
+```hcl
+variable "service_accounts" {
+   type = map(object({
+      account_id   = string
+      display_name = string
+   }))
+   default = {
+      dev = {
+         account_id   = "acme-dev-app"
+         display_name = "Dev App SA"
+      }
+      staging = {
+         account_id   = "acme-staging-app"
+         display_name = "Staging App SA"
+      }
+   }
+}
+
+module "app_sa" {
+   source       = "test/modules/service_account"
+   for_each     = var.service_accounts
+   project_id   = var.project_id
+   account_id   = each.value.account_id
+   display_name = each.value.display_name
+}
+
+output "app_sa_emails" {
+   value = {for k, m in module.app_sa : k => m.email}
+}
+```
+
+**Commands to run:**
+```bash
+terraform plan
+terraform apply
+terraform state list
+terraform output app_sa_emails
+```
+
+**To verify:** `terraform state list` shows `module.app_sa["dev"].google_service_account.this`
+and `module.app_sa["staging"].google_service_account.this`. Console shows both SAs created.
+
+**Status:** *Not yet run — pending your results.*
+
+**Key takeaway (expected):** Module state addressing nests the `for_each` key the same way
+resource `for_each` does: `module.<name>["<key>"]`. The `output` uses a `for` expression to
+build a map from each module instance's own output — a common pattern for surfacing
+per-instance values when using `for_each` over modules.
+
+---
+
+## Lab 14 — Provider Aliasing (Multi-Region / Multi-Project)
+
+**Concept:** A second `provider "google"` block with an `alias` lets you target a different
+region/project from within the same config, and explicitly route specific resources to it
+via `provider = google.<alias>`.
+
+**Code:**
+```hcl
+provider "google" {
+  alias   = "us_east"
+  project = var.project_id
+  region  = "us-east1"
+}
+
+resource "google_storage_bucket" "east_region_demo" {
+  provider                    = google.us_east
+  name                        = "${local.name_prefix}-east-${var.project_id}"
+  location                    = "US-EAST1"
+  uniform_bucket_level_access = true
+}
+```
+
+**Commands to run:**
+```bash
+terraform plan
+terraform apply
+```
+
+**To verify:** Cloud Storage → bucket → confirm location is `US-EAST1`, distinct from your
+other buckets (created via the default, unaliased `us-central1` provider).
+
+**Status:** *Not yet run — pending your results.*
+
+**Key takeaway (expected):** Without `provider = google.<alias>` on a resource, it uses the
+default (unaliased) provider block. Aliasing is the mechanism behind real multi-region or
+multi-project setups (e.g. a GKE cluster's primary and DR region, or resources split across
+two GCP projects) — one config, multiple provider configurations, explicit routing per
+resource.
+
+---
+
+## Lab 15 — `terraform.tfvars` + Variable Precedence
+
+**Concept:** Move hardcoded values into a `.tfvars` file instead of relying on `default`,
+and observe Terraform's variable precedence order in practice.
+
+**Code — `terraform.tfvars`:**
+```hcl
+project_id   = "my-devops-journey-502420"
+environments = ["dev", "staging"]
+```
+
+**`.gitignore` addition (if any value here were ever sensitive):**
+```
+*.tfvars
+!*.auto.tfvars.example
+```
+
+**Commands to run — prove precedence:**
+```bash
+terraform plan
+# uses terraform.tfvars value
+
+terraform plan -var="project_id=override-project"
+# CLI flag wins — highest precedence
+
+echo 'project_id = "auto-project"' > prod.auto.tfvars
+terraform plan
+# *.auto.tfvars wins over plain terraform.tfvars
+```
+
+**Status:** *Not yet run — pending your results.*
+
+**Key takeaway (expected):** This lab directly demonstrates, hands-on, the precedence order
+already documented in `Terraform_Theory_Reference.md` §4: CLI flag > `*.auto.tfvars` >
+`terraform.tfvars` > `variable { default }`. Running each command in sequence and watching
+which value plan resolves to converts that memorized ordering into observed behavior.
+
+---
+
+## Lab 16 — Lifecycle Meta-Arguments
+
+**Concept:** `lifecycle {}` block controls how Terraform handles specific resources outside
+normal create/update/destroy logic — guarding against destroys, or telling Terraform to stop
+fighting over fields changed outside its control.
+
+**Code — `prevent_destroy`:**
+```hcl
+resource "google_service_account" "gsa" {
+  account_id   = "${local.name_prefix}-web-app"
+  display_name = "My Test App"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+```
+
+**Commands to run:**
+```bash
+terraform apply             # apply with the guard in place
+terraform destroy           # should fail with an explicit prevent_destroy error
+```
+
+**Code — `ignore_changes` (for a field modified outside Terraform, e.g. by another
+automation adding labels):**
+```hcl
+resource "google_storage_bucket" "demo" {
+  name                        = "${local.name_prefix}-demo-${var.project_id}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  labels                      = local.common_labels
+
+  lifecycle {
+    ignore_changes = [labels]
+  }
+}
+```
+
+**Commands to run:**
+```bash
+terraform apply
+# manually add/change a label via console
+terraform plan   # should show NO changes now, despite drift on `labels`
+```
+
+**Status:** *Not yet run — pending your results.*
+
+**Key takeaway (expected):** `prevent_destroy` is a safety rail for critical resources —
+`terraform destroy` (or a plan that would replace the resource) errors out instead of
+proceeding. `ignore_changes` tells Terraform to stop treating a specific field as
+drift — useful when something outside Terraform (another automation, a human process)
+legitimately owns that one field. Contrast with Lab 11 Part B, where drift *was* corrected —
+`ignore_changes` is how you'd deliberately opt a field out of that correction behavior.
+
+---
+
+## Lab 17 — Provisioners & `null_resource` (brief)
+
+**Concept:** `local-exec`/`remote-exec` provisioners run arbitrary shell commands as part of
+apply. Modern Terraform guidance treats these as a last resort/code smell — most cases are
+better solved with cloud-init/startup scripts or dedicated config-management tools. Worth
+recognizing since they appear in older or real-world repos (including the security exploit
+pattern already covered in `Terraform_Theory_Reference.md` §9 — a malicious PR using
+`local-exec` to exfiltrate state).
+
+**Code — minimal recognition example, not recommended for real use:**
+```hcl
+resource "null_resource" "example" {
+  provisioner "local-exec" {
+    command = "echo 'This runs on apply, outside any real GCP resource'"
+  }
+}
+```
+
+**Commands to run:**
+```bash
+terraform apply
+```
+
+**To verify:** the echoed string appears in your terminal output during apply.
+
+**Status:** *Not yet run — pending your results.*
+
+**Key takeaway (expected):** `null_resource` + a provisioner isn't tied to any real cloud
+resource — it's a way to run arbitrary local/remote commands as a side effect of apply. This
+is exactly the mechanism a malicious CI/CD PR could abuse (see theory reference, GitOps
+security section) — good to recognize both as a legacy pattern and as an attack vector, not
+to reach for by default in new code.
+
+---
+
+## Lab 18 — Capstone: Apply to Real `acme-sampleapp` Repo
+
+**Concept:** Take every pattern practiced in the sandbox (Labs 1–17 — remote state, implicit
+dependencies, `count`/`for_each`, data sources, locals, modules, workspaces, state surgery,
+dynamic blocks, provider aliasing, variable precedence, lifecycle guards) and apply them to
+the actual GKE/Cloud SQL/Workload Identity resources in your production learning repo,
+rather than sandbox examples.
+
+**Suggested approach:**
+1. Re-read `acme-sampleapp`'s existing modules/resources with fresh eyes — identify which
+   sandbox pattern each part maps to (e.g. its `locals` block ↔ Lab 8, its Consul `data`
+   blocks ↔ Lab 7, any `for_each` over environments ↔ Lab 5/13).
+2. Pick one real, low-risk resource in the repo (not GKE/Cloud SQL directly — something
+   like an IAM binding or a bucket) and practice a full state-surgery cycle on it (Lab 6)
+   in a sandboxed workspace/environment, not production.
+3. Identify one place in the repo that could benefit from a `dynamic` block or
+   `lifecycle { ignore_changes }` guard, and propose (don't necessarily apply) the change.
+
+**Status:** *Not started — this is the wrap-up milestone once Labs 11–17 are complete.*
+
+**Key takeaway (expected):** This lab isn't about new syntax — it's the transfer step
+(Advisor persona's Gate 4/Gate 5 language): can the patterns learned in isolated, safe
+sandbox examples be recognized and reasoned about inside a real, complex, multi-file
+production-style repo.
+
+---
+
+## Up Next
+
+Labs 1–10 are complete and documented above. Lab 11 is drafted, pending your run results.
+Labs 12–18 are now fully drafted (code + commands + expected verification) above, each
+marked "Not yet run" — update each lab's **Status** and **Key takeaway** sections with your
+actual results as you complete them, same as Labs 1–10.
