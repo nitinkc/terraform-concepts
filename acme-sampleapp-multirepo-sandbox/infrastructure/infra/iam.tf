@@ -3,7 +3,7 @@
 # backend/infra (main.tf's google_service_account.app) — this repo only knows
 # its email because backend/infra's outputs are published back through
 # Consul and read here, mirroring the reverse of the dependency backend/infra
-# has on THIS repo's outputs. See README.md for the full dependency diagram.
+# has on THIS repo's outputs. See Multirepo_helm_sandbox.md for the full dependency diagram.
 
 data "consul_keys" "backend_outputs" {
   for_each = toset(local.environments)

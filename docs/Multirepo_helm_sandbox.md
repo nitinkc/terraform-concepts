@@ -1,11 +1,8 @@
 # acme-sampleapp — Terraform + Helm multi-repo learning sandbox
 
-Sanitized personal practice copy of a real 4-repo GCP/GKE deployment, restructured
-to mirror the actual project layout: each application owns its own `infra/`
+The actual project layout: each application owns its own `infra/`
 (and `charts/` where applicable), and repos coordinate through Consul-published
-outputs rather than `terraform_remote_state`. All org-specific naming has been
-genericized (`davita-transitcare` → `acme-sampleapp`, `davita.com` → `acme.com`);
-GCP is left as-is since that's the actual cloud in use.
+outputs rather than `terraform_remote_state`. 
 
 Nothing here will actually `terraform apply` anywhere real — the Consul paths
 and GCS backends don't exist. This is for reading, tracing the dependency
@@ -93,7 +90,7 @@ organizational preference. Each repo:
 ```
 
 `infrastructure` also reads `backend`'s published service-account email
-(`infrastructure/infra/iam.tf`) — the *grant* runs in `infrastructure` (it
+(`../acme-sampleapp-multirepo-sandbox/infrastructure/infra/iam.tf`) — the *grant* runs in `infrastructure` (it
 owns the secret) even though the *dependency* on knowing who to grant flows
 the other way. This is worth sitting with: **"who owns the resource" and
 "who initiates the Terraform read" aren't always the same repo.**
@@ -103,9 +100,9 @@ the other way. This is worth sitting with: **"who owns the resource" and
 | Path | Written by | Read by |
 |---|---|---|
 | `.../sample-program/default` | *(platform repo, out of scope)* | all 4 repos |
-| `.../infrastructure/{dev,qa,default}` | `infrastructure/infra` | `backend`, `frontend` |
-| `.../cloudsql/{dev,qa,default}` | `cloudsql/infra` | `backend` |
-| `.../backend/{workspace}` | `backend/infra` | `frontend`, `infrastructure` |
+| `.../infrastructure/{dev,qa,default}` | `../acme-sampleapp-multirepo-sandbox/infrastructure/infra` | `backend`, `frontend` |
+| `.../cloudsql/{dev,qa,default}` | `../acme-sampleapp-multirepo-sandbox/cloudsql/infra` | `backend` |
+| `.../backend/{workspace}` | `../acme-sampleapp-multirepo-sandbox/backend/infra` | `frontend`, `infrastructure` |
 
 Every one of these paths is decoded with `jsondecode(...)` on the reading
 side and encoded with `jsonencode(...)`/`consul_keys` on the writing side —
@@ -116,18 +113,18 @@ at plan time.
 
 ## What to trace first
 
-1. `infrastructure/infra/main.tf` and `secrets.tf` — the simplest repo, good
+1. `../acme-sampleapp-multirepo-sandbox/infrastructure/infra/main.tf` and `secrets.tf` — the simplest repo, good
    warm-up for the `for_each`-over-environments pattern (note: this repo does
    **not** use `terraform.workspace` per environment the way the other three
    do — it runs a single workspace and fans out with `for_each` instead. Ask
    yourself why that choice might make sense here specifically.)
-2. `cloudsql/infra/` — a self-contained, single-purpose repo. Good for seeing
+2. `../acme-sampleapp-multirepo-sandbox/cloudsql/infra` — a self-contained, single-purpose repo. Good for seeing
    a full `main.tf` → `iam.tf` → `outputs.tf` flow without the added
    complexity backend has.
-3. `backend/infra/main.tf` locals, then `cloudsql.tf`, then the `depends_on`
+3. `../acme-sampleapp-multirepo-sandbox/backend/infra/main.tf` locals, then `cloudsql.tf`, then the `depends_on`
    block at the bottom of `main.tf` — same as before, this is still the most
    architecturally dense file in the sandbox.
-4. `frontend/infra/vip.tf` + `iam.tf` — contrast against backend's `iam.tf`:
+4. `../acme-sampleapp-multirepo-sandbox/frontend/infra/vip.tf` + `iam.tf` — contrast against backend's `iam.tf`:
    notice everything backend needs (SQL roles, `shell_script` bridge,
    `sso_secret_id` access) that frontend deliberately does **not** need, and
    why (no database, and `sso_client_id` is non-sensitive so it skips Secret

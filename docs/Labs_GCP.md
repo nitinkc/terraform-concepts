@@ -53,6 +53,8 @@ Remote state moves the ledger to a GCS bucket, with locking and (if enabled) ver
 **Setup:**
 ```bash
 gsutil mb -l us-central1 gs://YOUR-UNIQUE-BUCKET-NAME-tfstate
+
+gsutil mb -l us-central1 gs://terraform-learning-tfstate
 ```
 
 **Code added to `terraform {}` block:**

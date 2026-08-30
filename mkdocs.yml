@@ -87,3 +87,4 @@ nav:
   - Theory: Terraform_Theory_Reference.md
   - No Cloud Practice: Terraform_NoCloud_Practice_Labs.md
   - Labs: Labs_GCP.md
+  - MultiRepo With Helm: Multirepo_helm_sandbox.md
