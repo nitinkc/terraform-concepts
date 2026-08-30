@@ -1,0 +1,90 @@
+site_name: Terraform Learning
+site_description: Comprehensive DevOps learning path from Docker to Kubernetes, Helm, and Flux
+docs_dir: docs
+repo_url: https://github.com/nitinkc/DevOpsLearning
+repo_name: nitinkc/DevOpsLearning
+
+theme:
+  name: material
+  features:
+    # Navigation
+    - navigation.tabs
+#    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top           # Back-to-top button
+    - navigation.footer        # Prev/Next page links
+    # navigation.instant disabled — breaks live reload (re-enable for production builds)
+    # - navigation.instant
+    # - navigation.instant.progress
+    # Search
+    - search.suggest
+    - search.highlight
+    - search.share
+    # Content
+    - content.code.copy
+    - content.code.annotate    # (1) style code annotations
+    - content.tabs.link        # Sync tabs across page
+    - content.tooltips
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: brown
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: brown
+      accent: blue
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+plugins:
+  - search:
+      lang: en
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      use_pygments: true
+      guess_lang: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+      title: On this page
+  - abbr
+  - attr_list
+  - md_in_html
+  - pymdownx.snippets:
+      base_path: docs
+  - tables
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js
+
+nav:
+  - Home: index.md
+  - Theory: Terraform_Theory_Reference.md
+  - No Cloud Practice: Terraform_NoCloud_Practice_Labs.md
+  - Labs: Labs_GCP.md
+  - Interview Prep: interview-prep.md

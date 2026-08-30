@@ -671,7 +671,7 @@ project_id   = "my-devops-journey-502420"
 environments = ["dev", "staging"]
 ```
 
-**`.gitignore` addition (if any value here were ever sensitive):**
+**`../.gitignore` addition (if any value here were ever sensitive):**
 ```
 *.tfvars
 !*.auto.tfvars.example

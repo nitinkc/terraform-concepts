@@ -69,11 +69,11 @@ by Terraform core — it reflects real API constraints of the underlying cloud s
 **not** create/update/delete it. Can point at something created manually, by another team,
 or by a completely separate Terraform config/state.
 
-| | `resource` | `data` |
-|---|---|---|
-| Lifecycle | Owned (create/update/delete) | Read-only |
-| `terraform destroy` effect | Deletes the real thing | Only forgets it locally; real thing untouched |
-| Refresh behavior | Refreshed to detect drift | Re-queried live on every `plan`/`apply` |
+|                            | `resource`                   | `data`                                        |
+|:---------------------------|:-----------------------------|:----------------------------------------------|
+| Lifecycle                  | Owned (create/update/delete) | Read-only                                     |
+| `terraform destroy` effect | Deletes the real thing       | Only forgets it locally; real thing untouched |
+| Refresh behavior           | Refreshed to detect drift    | Re-queried live on every `plan`/`apply`       |
 
 **Rule of thumb:** if this specific config should be responsible for the resource's
 lifecycle → `resource`. If it just needs to *read* something owned elsewhere → `data`.
