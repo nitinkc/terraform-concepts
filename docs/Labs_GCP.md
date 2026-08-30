@@ -810,17 +810,3 @@ rather than sandbox examples.
    `lifecycle { ignore_changes }` guard, and propose (don't necessarily apply) the change.
 
 **Status:** *Not started — this is the wrap-up milestone once Labs 11–17 are complete.*
-
-**Key takeaway (expected):** This lab isn't about new syntax — it's the transfer step
-(Advisor persona's Gate 4/Gate 5 language): can the patterns learned in isolated, safe
-sandbox examples be recognized and reasoned about inside a real, complex, multi-file
-production-style repo.
-
----
-
-## Up Next
-
-Labs 1–10 are complete and documented above. Lab 11 is drafted, pending your run results.
-Labs 12–18 are now fully drafted (code + commands + expected verification) above, each
-marked "Not yet run" — update each lab's **Status** and **Key takeaway** sections with your
-actual results as you complete them, same as Labs 1–10.
