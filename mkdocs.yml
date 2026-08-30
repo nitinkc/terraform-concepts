@@ -1,8 +1,8 @@
 site_name: Terraform Learning
 site_description: Comprehensive DevOps learning path from Docker to Kubernetes, Helm, and Flux
 docs_dir: docs
-repo_url: https://github.com/nitinkc/DevOpsLearning
-repo_name: nitinkc/DevOpsLearning
+repo_url: https://github.com/nitinkc/terraform-concepts
+repo_name: nitinkc/terraform-concepts
 
 theme:
   name: material
