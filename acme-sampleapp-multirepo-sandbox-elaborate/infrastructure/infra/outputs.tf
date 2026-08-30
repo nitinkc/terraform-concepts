@@ -4,7 +4,7 @@
 #   .outputs.gcp.us_central1[env]
 
 resource "consul_keys" "publish_outputs" {
-  for_each = toset(local.environments)
+  for_each = toset(local.available_environments)
 
   key {
     path = "gitlab/terraform_outputs/v2/sample-org/applications/acme-sampleapp/infrastructure/${each.key == "prod" ? "default" : each.key}"

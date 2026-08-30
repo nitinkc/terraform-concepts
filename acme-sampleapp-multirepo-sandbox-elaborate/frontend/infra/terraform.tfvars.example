@@ -1,0 +1,8 @@
+# Copy to terraform.tfvars and fill in real values.
+
+docker_image_repo = "us-central1-docker.pkg.dev/my-devops-journey-502420/sampleapp/frontend" # <-- your real Artifact Registry path, or any placeholder if you're only running `plan`
+docker_image_tag  = "latest"
+
+static_env = false
+
+# sampleapp_ops_ad_group = "gcp-sampleapp-ops@acme.com"

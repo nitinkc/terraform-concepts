@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars and fill in real values.
+# All three variables have defaults in variables.tf — this file is only
+# needed if you want to override them (e.g. a cheaper tier for lab use).
+
+database_name = "sampleapp"
+db_schema     = "sa-cloud-sql"
+
+# db-custom-1-3840 (1 vCPU / 3.75GB) is already fairly small, but
+# db-f1-micro is the cheapest real Cloud SQL tier if you want to go smaller
+# for a lab instance you'll destroy quickly.
+tier = "db-f1-micro"

@@ -4,7 +4,7 @@
 # future SampleApp service would need the same secret rather than a copy.
 
 resource "google_secret_manager_secret" "sso_config" {
-  for_each  = toset(local.environments)
+  for_each  = toset(local.available_environments)
   project   = local.program_gcp_by_env[each.key].gke.project
   secret_id = "acme-sampleapp-sso-config-${each.key}"
 
@@ -14,7 +14,7 @@ resource "google_secret_manager_secret" "sso_config" {
 }
 
 resource "google_secret_manager_secret_version" "sso_config" {
-  for_each = toset(local.environments)
+  for_each = toset(local.available_environments)
   secret   = google_secret_manager_secret.sso_config[each.key].id
 
   secret_data = jsonencode({

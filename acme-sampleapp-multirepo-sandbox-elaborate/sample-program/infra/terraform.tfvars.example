@@ -1,0 +1,21 @@
+# Copy to terraform.tfvars and fill in real values.
+# terraform.tfvars is gitignored by convention — never commit real project IDs
+# alongside secrets, even though project_id itself isn't sensitive.
+
+project_id = "my-devops-journey-502420" # <-- your real GCP project ID
+region     = "us-central1"
+zone       = "us-central1-a"
+dns_domain = "sampleapp.example.com" # placeholder is fine, doesn't need to resolve
+
+# ──────────────────────────────────────────────
+# GKE — OFF by default on purpose. Real money once true. Start with just
+# enable_gke_np = true (cheaper, and it's the cluster dev/qa/review environments
+# use) rather than turning both on at once.
+# ──────────────────────────────────────────────
+enable_gke_p  = false
+enable_gke_np = false
+
+# gke_prod_machine_type    = "e2-small"
+# gke_nonprod_machine_type = "e2-small"
+# gke_prod_node_count      = 1
+# gke_nonprod_node_count   = 1

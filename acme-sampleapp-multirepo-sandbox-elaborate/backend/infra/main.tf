@@ -24,6 +24,8 @@ data "consul_keys" "remote_outputs" {
 # ──────────────────────────────────────────────
 
 locals {
+  # the map is empty because no GKE cluster was ever created (enable_gke_p/enable_gke_np are still false).
+  # This is backend/infra correctly failing fast rather than silently limping forward with missing data
   p_or_np       = terraform.workspace == "default" ? "p" : "np"
   program_gcp   = jsondecode(data.consul_keys.remote_outputs.var.program).outputs.gcp.us_central1[local.p_or_np]
   is_review_env = terraform.workspace != "default" && !var.static_env
