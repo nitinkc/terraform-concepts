@@ -110,6 +110,9 @@ cd ../../sample-program/infra && terraform destroy
 
 Kill the Consul dev agent when done: `kill %1` (or find it with `jobs`).
 `-dev` mode is in-memory anyway — nothing persists once it's killed.
+```shell
+kill $(pgrep consul)
+```
 
 ---
 

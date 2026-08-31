@@ -46,6 +46,8 @@ theme:
 plugins:
   - search:
       lang: en
+  - mkdocs_quiz
+  - quizdown
 
 markdown_extensions:
   - admonition
@@ -88,3 +90,4 @@ nav:
   - No Cloud Practice: Terraform_NoCloud_Practice_Labs.md
   - Labs: Labs_GCP.md
   - MultiRepo With Helm: Multirepo_helm_sandbox.md
+  - Quiz: quiz.md
