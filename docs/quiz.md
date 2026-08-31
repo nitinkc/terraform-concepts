@@ -170,6 +170,23 @@ What's the actual difference between the `required_providers` block in a terrafo
 These are two independent mechanisms. required_providers (in the terraform block) is what init actually reads to know which provider plugin to fetch — removing the provider config block entirely doesn't stop init from working, since plugin download is unrelated to runtime config. The provider block itself is only about how that plugin authenticates and what defaults it applies at apply time.
 </quiz>
 
+<quiz>
+Why is `data "google_client_config"` used to supply the GCP access token to the provider, rather than a resource or a static/stored value?
+- [ ] Because resource blocks can't hold sensitive values like tokens
+- [x] Because a data source re-fetches live on every plan/apply, which matters since access tokens expire hourly — a resource only updates on apply when Terraform detects drift, so it could hand out a stale, expired token
+- [ ] Because provider blocks require an explicit alias to use a resource-sourced value
+- [ ] There's no real difference — either approach works identically
+GCP access tokens expire hourly. A resource is only re-evaluated on apply, and only then if Terraform actually detects drift — it wouldn't reliably refresh an hourly-expiring value. A data source re-queries live every single plan/apply, so it's the only mechanism that guarantees kubectl/Helm/the provider always get a fresh, valid token instead of an expired one.
+</quiz>
+
+<quiz>
+Compared to a `resource` block, which of the following is true of a `data` block?
+- [ ] Both are fully owned and managed (created, updated, destroyed) by Terraform
+- [x] A data block is read-only — Terraform never creates, updates, or destroys the underlying object, it only reads and re-verifies it live at every plan
+- [ ] A data block's value is never written to state, unlike a resource
+- [ ] A data block only refreshes when -refresh=true is explicitly passed, just like a resource
+A resource is fully owned by Terraform through its whole lifecycle (create/update/destroy) and tracked in state accordingly. A data block is purely read-only: Terraform never manages the underlying object's lifecycle, it just reads it — and unlike a resource, it re-verifies that read live on every plan/apply rather than trusting a cached state value.
+</quiz>
 
 <!-- mkdocs-quiz results -->
 
