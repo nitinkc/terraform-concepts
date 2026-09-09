@@ -47,10 +47,11 @@ provisioner runs again. Without `triggers`, it would run once and never again.
 !!! note "This is not a `dynamic` block"
     This example is `for_each` over a map. A `dynamic` block is a different thing: it
     generates repeated *nested blocks inside one resource*, not repeated resources. There
-    is no local-provider example of one in this repo — the only real `dynamic` block is the
-    `lifecycle_rule` generator in
-    [Lab 12](../gcp/02-lab-notes.md#lab-12-dynamic-blocks) and in
-    [`resources.tf`](../gcp/01-core-root.md) in the core GCP root.
+    is no local-provider example in this repo, because the local providers have no nested
+    blocks worth repeating. Both real ones are cloud resources: the `lifecycle_rule`
+    generator in [Lab 12](../gcp/02-lab-notes.md#lab-12-dynamic-blocks) and
+    [`resources.tf`](../gcp/01-core-root.md) in the core GCP root, and `dynamic "rule"` in
+    the sandbox's `backend/infra/rbac.tf`.
 
 ## Why provisioners are a code smell
 
@@ -106,6 +107,14 @@ managing it as owned state.
 deploying resource so that changing the source automatically triggers a redeploy, without
 anyone having to remember to bump a version. Good bridge between "toy local lab" and "real
 repo pattern", still without touching a cloud.
+
+## Key takeaway
+
+Both of these are escape hatches from the declarative model, and they escape differently.
+`local-exec` runs a command Terraform can't reason about, so its result lives outside the
+graph — treat it as a signal to look for a better mechanism. `archive_file` escapes safely,
+because what comes back is a hash that feeds *into* the graph. That's the distinction worth
+keeping: whether the escape hatch hands you something Terraform can still track.
 
 ---
 

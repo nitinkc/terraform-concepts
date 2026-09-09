@@ -7,8 +7,10 @@ lifecycle, the state file, the dependency graph and the plan/apply loop are the 
 thing, identical to what runs against GCP in [Stage 3](../gcp/index.md).
 
 The code lives in [`01-basics/`](https://github.com/nitinkc/terraform-concepts/tree/main/01-basics),
-seven self-contained Terraform roots. This section is the only prose — the folders hold
-`.tf` files and nothing else.
+seven numbered folders holding eight self-contained Terraform roots — `4-dependencies/`
+isn't a root itself, its `explicit/` and `implicit/` subdirectories are. This section is
+the only prose: the folders hold `.tf` files, plus one checked-in `graph.svg` where the
+graph is the point.
 
 ## Prerequisites
 
@@ -80,18 +82,22 @@ example, so don't "clean them up" without reading the relevant page first.
 Six topics are documented here but have no folder under `01-basics/`. The code on each
 page is complete and runnable — paste it into an empty directory and `terraform init`.
 
+Roughly in the order worth building them:
+
 | Topic | Why it's worth building |
 |---|---|
-| [Locals](03-locals.md) | — |
-| [count and for_each](07-count-and-for-each.md) | — |
-| [Conditionals](08-conditionals.md) | — |
-| [Validation and sensitive values](10-validation-and-sensitive-values.md) | — |
 | [State surgery](12-state-surgery.md) | **Highest value.** State surgery is far cheaper to practise on a `local_file` than on a GCP resource, and it's the same muscle needed for [GCP Lab 6](../gcp/02-lab-notes.md#lab-6-state-surgery-mv-rm-import) and [Lab 11](../gcp/02-lab-notes.md#lab-11-import-drift-detection). |
-| [Provisioners and archive_file](13-provisioners-and-archive.md) | — |
+| [Conditionals](08-conditionals.md) | The `count = 0` error and guard propagation are the cheapest possible rehearsal of the bug that cost a whole session in the sandbox ([Session 2](../sessions/session-02.md)). Reading it is not the same as hitting it. |
+| [count and for_each](07-count-and-for-each.md) | The destructive test — remove a middle element and diff `terraform state list` — has to be *run* to land. It's the entire argument for `for_each` and it takes two applies. |
+| [Locals](03-locals.md) | The `timestamp()` perpetual-diff experiment needs a real second `plan` to be convincing; a config that can never converge is a strange thing to take on trust. |
+| [Validation and sensitive values](10-validation-and-sensitive-values.md) | `grep`ping your own "secret" out of `terraform.tfstate` in plaintext is the moment `sensitive = true` stops sounding like encryption. Worth doing once, locally, where the secret is fake. |
+| [Provisioners and archive_file](13-provisioners-and-archive.md) | Lowest priority — the `triggers` re-run behaviour is the only part that needs observing, and provisioners are a pattern to recognise rather than adopt. |
 
 ## Conventions
 
-- One directory per concept, numbered in the order they were written.
+- One directory per concept, numbered in the order they were written — except
+  `4-dependencies/`, where one concept needs two roots side by side to contrast against
+  each other.
 - `main.tf` for resources, `variables.tf` for inputs — the same layout as
   [`02-gcp-terraform/`](../gcp/01-core-root.md) and every root in the
   [sandbox](../sandbox/index.md), so moving between them costs nothing.

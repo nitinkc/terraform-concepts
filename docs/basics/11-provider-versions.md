@@ -61,6 +61,12 @@ what was actually chosen, along with checksums. Without it committed, two machin
 `terraform init` a week apart can resolve to different provider versions from the same
 config.
 
+That last sentence is exactly why this folder's lock file is *not* committed — see the
+[note in Theory §3](../theory/03-init-and-version-constraints.md#what-init-creates). The
+whole point of this lab is that `init` resolves fresh, so you can watch `> 2.4.1` pick up
+whatever `local` provider is newest today. Do this in a throwaway root, never in a repo
+that ships.
+
 ## A provider block isn't always needed
 
 `required_providers` is required for every provider you use. A `provider {}` configuration
@@ -76,6 +82,12 @@ The inverse mistake shows up in the core GCP root, which
 This folder writes `hello.txt` into the **current directory**, not `/tmp`, unlike every
 other folder in this stage. The comment in `main.tf` says `/tmp`. Left in place on purpose:
 a stale comment is worse than no comment, because you'll trust it.
+
+## Key takeaway
+
+The constraint is intent, the lock file is fact, and `init` is where one becomes the other.
+When two machines behave differently from identical config, diff the lock file before you
+suspect anything else.
 
 ---
 

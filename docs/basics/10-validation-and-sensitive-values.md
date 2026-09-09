@@ -79,6 +79,13 @@ in whatever the resource writes.
   time, so the value is never in the config. The sandbox does this in
   `infrastructure/infra/secrets.tf`.
 
+## Key takeaway
+
+`validation` moves a failure from thirty seconds into an apply to instantly at plan — a
+real guarantee. `sensitive` keeps a value out of your terminal and nowhere else — a
+courtesy. Treating the second as though it were the first is exactly how secrets end up
+committed in a state file.
+
 ---
 
 Theory: [§7 Variables](../theory/07-variables-and-locals.md),

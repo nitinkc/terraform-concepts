@@ -92,6 +92,13 @@ The GCP version of both guards is
 [Lab 16](../gcp/02-lab-notes.md#lab-16-lifecycle-meta-arguments), and the sandbox uses
 `prevent_destroy` on its Cloud SQL instance for real.
 
+## Key takeaway
+
+`lifecycle` is how you tell Terraform to stop being the sole owner of something. Use it
+when another system legitimately owns a field — not to silence a diff you haven't explained
+yet. An ignored diff and drift you don't know about look identical from the outside, and
+only one of them is fine.
+
 ---
 
 Theory: [§5 Resource identity](../theory/05-resource-identity-and-change.md) ·

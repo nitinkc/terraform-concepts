@@ -22,7 +22,7 @@ Fast lookup. Each term links to the page that defines it properly.
 | **`import`** | binds an existing real resource into state under a given address | [§13](13-state-lifecycle.md) |
 | **`lifecycle`** | meta-argument overriding default create/update/destroy behaviour | [§5](05-resource-identity-and-change.md) |
 | **Local** (`locals`) | an internally computed value, never settable from outside | [§7](07-variables-and-locals.md) |
-| **Lock file** (`.terraform.lock.hcl`) | records the exact provider versions/checksums chosen; committed to git | [§3](03-init-and-version-constraints.md) |
+| **Lock file** (`.terraform.lock.hcl`) | records the exact provider versions/checksums chosen; normally committed to git, though this repo is a deliberate exception | [§3](03-init-and-version-constraints.md) |
 | **Meta-argument** | an argument interpreted by Terraform core rather than the provider (`count`, `for_each`, `provider`, `depends_on`, `lifecycle`) | [§9](09-count-for-each-and-dynamic.md) |
 | **Module** | a directory of `.tf` files used as a unit: inputs in, outputs out | [§12](12-modules.md) |
 | **`moved` block** | a committed, reviewable declaration that a resource changed address | [§5](05-resource-identity-and-change.md) |

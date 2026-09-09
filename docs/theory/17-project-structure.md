@@ -72,6 +72,12 @@ workspace you selected.
 - `.terraform/`, `terraform.tfstate*`, `*.tfvars` holding secrets, and `crash.log` are
   gitignored. `.terraform.lock.hcl` is committed
   ([§3](03-init-and-version-constraints.md)).
+- This repo deviates on both, on purpose: lock files are gitignored so the labs re-resolve
+  ([§3](03-init-and-version-constraints.md#what-init-creates)), and `terraform.tfvars` is
+  *committed* because every value in it is a lab placeholder or a non-sensitive project
+  ID — a reader who has to reconstruct tfvars before anything runs never runs anything.
+  The moment a real secret needs to reach a config, it goes through `TF_VAR_` or a secret
+  manager, not into a file. Copy the rule above, not this repo's exception.
 - `terraform fmt -recursive` and `terraform validate` are cheap and belong in CI.
 - One directory per concept is fine for *learning* repos — this one does exactly that in
   [`01-basics/`](../basics/index.md) — and is wrong for production, where the boundary

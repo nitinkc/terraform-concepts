@@ -99,8 +99,17 @@ sections are [Lab 4](../gcp/02-lab-notes.md#lab-4-count-indexed-multiple-resourc
 
 `count` and `for_each` repeat *whole resources*. A `dynamic` block repeats a *nested block
 inside one resource*. Different mechanism, easily confused — see
-[Lab 12](../gcp/02-lab-notes.md#lab-12-dynamic-blocks), which is the only real `dynamic`
-block in this repo.
+[Lab 12](../gcp/02-lab-notes.md#lab-12-dynamic-blocks). There are only two in this
+repository, both needing a cloud resource to be worth writing: the `lifecycle_rule`
+generator in the [core GCP root](../gcp/01-core-root.md#things-worth-noticing) and
+`dynamic "rule"` in the sandbox's `backend/infra/rbac.tf`.
+
+## Key takeaway
+
+`count` addresses instances by position, `for_each` by key, and that one difference decides
+whether editing the middle of a collection is a rename or a rebuild. Default to `for_each`;
+reserve `count` for N identical copies where position means nothing, and for the 0/1
+conditional.
 
 ---
 

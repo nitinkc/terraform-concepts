@@ -12,7 +12,7 @@ quiz that tests it.
 
 ```
 docs/                  The site. Theory, labs, quiz, session notes.
-01-basics/             7 local Terraform roots. No cloud, no auth, no cost.
+01-basics/             8 local Terraform roots in 7 folders. No cloud, no auth, no cost.
 02-gcp-terraform/      The same concepts against a real GCP project.
 acme-sampleapp-.../    The sandbox: 5 interdependent roots, Consul, GKE, Cloud SQL, Helm.
 ```
@@ -20,9 +20,10 @@ acme-sampleapp-.../    The sandbox: 5 interdependent roots, Consul, GKE, Cloud S
 The repository is deliberately two layers:
 
 - **`01-basics/` and `02-gcp-terraform/`** are small, isolated demonstrations. One concept
-  per directory, safe to break, safe to delete. These directories contain `.tf` files
-  only — every explanation lives in the docs, so there is one place to read and one place
-  to run. Start at [`docs/basics/`](docs/basics/index.md).
+  per directory, safe to break, safe to delete. These directories contain `.tf` files,
+  plus a checked-in `graph.svg` where the graph is the point — every explanation lives in
+  the docs, so there is one place to read and one place to run. Start at
+  [`docs/basics/`](docs/basics/index.md).
 - **`acme-sampleapp-multirepo-sandbox-elaborate/`** is the main project. Its five
   independent Terraform roots model organisation-style repository boundaries, state
   ownership, Consul contracts, GKE, Cloud SQL, Helm and Workload Identity. It bills real

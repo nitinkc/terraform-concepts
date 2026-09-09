@@ -73,6 +73,13 @@ produces an immediate diff.
 None of the three touches real infrastructure. All three change what Terraform believes,
 which is why the next `plan` after any of them is the one that matters.
 
+## Key takeaway
+
+State surgery is safe; the `apply` after it is not. And how badly a mistake hurts depends
+on the provider — a cloud API usually turns a state error into a loud rejection, while a
+file-based provider turns it into a silent overwrite. Practise here, where the silence
+costs nothing.
+
 ---
 
 Theory: [§13 State lifecycle](../theory/13-state-lifecycle.md) ·

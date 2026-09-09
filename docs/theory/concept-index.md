@@ -91,6 +91,14 @@ what's genuinely covered versus what only looks covered:
 - **`helm_release`, Kubernetes RBAC and Cloud SQL** exist only in the sandbox, with no
   isolated lab to learn them in. They were learned in-place during sessions 2 and 3.
 - **`archive_file` has no theory entry and no GCP lab** — it's a single Stage 2 page.
+- **19 of the rows above have no quiz question at all.** The quiz grew out of things that
+  actually broke in live sessions, so it over-covers what went wrong — providers, guards,
+  GKE, Consul — and under-covers what simply worked first time. The honest gaps worth
+  closing first are the ones that are core mechanics rather than reference material:
+  outputs, `locals`, attribute references, implicit vs explicit dependencies, `lifecycle`
+  meta-arguments, variable validation, and remote backends. Each already has a theory page
+  and a lab; nothing tests them. A missing `Quiz:` link in a page footer means exactly
+  this, and not an oversight.
 
 Closed since the last revision: `count`, `for_each`, `dynamic`, modules, workspaces,
 `lifecycle` meta-arguments and provider aliasing all now have theory sections

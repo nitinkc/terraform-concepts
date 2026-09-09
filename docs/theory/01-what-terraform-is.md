@@ -90,4 +90,6 @@ things differently than you assumed.
 
 ---
 
+Labs: [Resources and state](../basics/01-resources-and-state.md) — the plan/apply loop on
+one local file ·
 Next: [Providers and authentication](02-providers-and-authentication.md)

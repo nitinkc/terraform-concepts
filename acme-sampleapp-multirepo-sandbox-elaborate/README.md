@@ -8,13 +8,14 @@ outputs rather than `terraform_remote_state`. All org-specific naming has been
 genericized (`davita-transitcare` → `acme-sampleapp`, `davita.com` → `acme.com`);
 GCP is left as-is since that's the actual cloud in use.
 
-Nothing here will actually `terraform apply` anywhere real — the Consul paths
-and GCS backends don't exist. This is for reading, tracing the dependency
-graph, and rewriting pieces by hand.
+The *original* project's Consul cluster and GCS backends don't exist here, so
+none of the inherited paths resolve as-written. `RUNBOOK.md` stands up local
+substitutes for both — a Consul dev agent and `backend "local"` — which is
+what makes this copy runnable against a GCP project of your own.
 
-`cloudsql`'s `frontend`'s app source (Angular/FastAPI) and `cloudsql`'s SQL
-migrations are intentionally **not** reconstructed — out of scope for a
-Terraform-focused sandbox.
+`frontend`'s app source (Angular/FastAPI) and `cloudsql`'s SQL migrations are
+intentionally **not** reconstructed — out of scope for a Terraform-focused
+sandbox.
 
 ## Repo layout
 
@@ -80,8 +81,11 @@ organizational preference. Each repo:
 - Has **its own lifecycle** — the database shouldn't be destroyed/recreated
   just because the backend redeploys, and the frontend shouldn't need a plan
   run every time a DB migration ships.
-- Has **its own state file** (`backend "gcs" {}` per repo, no shared backend
-  config) — blast radius of a bad `apply` is contained to one repo.
+- Has **its own state file**, with no shared backend config — blast radius of a
+  bad `apply` is contained to one repo. The real project does this with
+  `backend "gcs" {}` per repo; this copy uses `backend "local"` per repo so it
+  needs no pre-existing bucket. Same isolation property either way: what
+  matters is one state file per root, not where that file lives.
 - **Publishes what other repos need, and nothing else**, through Consul rather
   than `terraform_remote_state`. `terraform_remote_state` would create a hard
   coupling to another repo's *entire* state file (including things it never

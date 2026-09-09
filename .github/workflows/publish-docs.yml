@@ -23,7 +23,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # full history so mkdocs git-revision-date works
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -35,7 +35,9 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Build docs
-        run: mkdocs build
+        # --strict turns the link/anchor warnings configured in mkdocs.yml into
+        # build failures, so a broken cross-reference can't reach the site.
+        run: mkdocs build --strict
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

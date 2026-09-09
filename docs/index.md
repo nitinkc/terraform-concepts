@@ -80,12 +80,13 @@ Read in order; each page assumes only the one before it.
 ## Code in this repository
 
 ```
-01-basics/             7 local Terraform roots. No cloud, no auth, no cost.
+01-basics/             8 local Terraform roots in 7 folders. No cloud, no auth, no cost.
 02-gcp-terraform/      The same concepts against a real GCP project.
 acme-sampleapp-.../    5 interdependent roots, Consul, GKE, Cloud SQL, Helm.
 ```
 
-The code directories contain `.tf` files only — every explanation lives here in the docs,
+The code directories contain `.tf` files, plus a checked-in `graph.svg` in the two roots
+where the dependency graph is itself the lesson. Every explanation lives here in the docs,
 linked from the tables above, so there is one place to read and one place to run.
 
 ## Running these docs locally

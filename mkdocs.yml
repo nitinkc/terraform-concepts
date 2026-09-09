@@ -48,7 +48,6 @@ plugins:
   - search:
       lang: en
   - mkdocs_quiz
-  - quizdown
 
 markdown_extensions:
   - admonition

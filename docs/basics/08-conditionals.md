@@ -82,6 +82,13 @@ resource "google_sql_database_instance" "main" {
 the same flag, or `one(google_sql_database_instance.main)` which returns `null` instead of
 erroring on an empty list.
 
+## Key takeaway
+
+A conditional resource is a zero-or-one-element list, not a nullable object. The condition
+gets written once; coping with the empty case gets written everywhere the resource is read.
+That asymmetry is the entire lesson, and forgetting it is what turns a one-line feature
+flag into a debugging session.
+
 ---
 
 Theory: [§8 Expressions & conditionals](../theory/08-expressions-and-conditionals.md) ·

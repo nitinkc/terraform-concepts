@@ -107,6 +107,13 @@ referenced somewhere. A declared-but-unused variable is either a leftover from a
 refactor or a wiring bug where the code hardcodes what it should read from `var`.
 Terraform will not warn you about either.
 
+## Key takeaway
+
+A `default` is the value of last resort, not the value — every other source outranks it. So
+when a config behaves as though your edit didn't happen, don't edit harder: work out which
+layer is actually supplying the value first. That one habit is most of what this page is
+for.
+
 ---
 
 Theory: [§7 Variables & locals](../theory/07-variables-and-locals.md) ·

@@ -40,18 +40,24 @@ mode.
 
 ---
 
-## 1. Copy every tfvars example
+## 1. Point the tfvars at your own project
+
+All five roots already ship a committed `terraform.tfvars` holding lab
+placeholders, so there is nothing to copy — **edit them in place.** At minimum,
+`sample-program/infra/terraform.tfvars` needs your real `project_id`; every
+other value works as shipped.
 
 ```bash
-for repo in sample-program infrastructure cloudsql backend frontend; do
-  dir=$repo
-  [ "$repo" != "sample-program" ] && [ -d "$repo/infra" ] && cp "$repo/infra/terraform.tfvars.example" "$repo/infra/terraform.tfvars"
-done
-cp sample-program/infra/terraform.tfvars.example sample-program/infra/terraform.tfvars
+grep -rn "my-devops-journey-502420" */infra/terraform.tfvars
 ```
 
-Then edit each `terraform.tfvars` — at minimum, `sample-program/infra/terraform.tfvars`
-needs your real `project_id`.
+Each `terraform.tfvars.example` sits alongside as the annotated reference copy,
+explaining what every variable does and which ones cost money. Read the example,
+edit the real file. To reset a root back to shipped defaults:
+
+```bash
+cp sample-program/infra/terraform.tfvars.example sample-program/infra/terraform.tfvars
+```
 
 ---
 

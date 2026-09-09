@@ -11,7 +11,7 @@ unsure.
 | Path | What it is | Committed? |
 |---|---|---|
 | `.terraform/` | the downloaded provider plugin binaries, plus backend config cache | **No** — machine/OS-specific |
-| `.terraform.lock.hcl` | the dependency lock file: exact provider versions plus checksums | **Yes** |
+| `.terraform.lock.hcl` | the dependency lock file: exact provider versions plus checksums | **Yes** — except in this repo, see the note below |
 
 **The nuance that matters:** the lock file is committed, the binaries are not. A teammate
 who clones the repo still has to run `init` themselves even with the lock file present —
@@ -22,6 +22,15 @@ demanding initialization.
 `init` also configures the [backend](14-backends-and-state-security.md). Changing a
 `backend` block requires re-running `init`, and Terraform will offer to migrate the
 existing state for you.
+
+!!! note "This repo gitignores its lock files — deliberately, and it's the exception"
+    Commit the lock file in anything real. This repository does the opposite: every
+    `01-basics/` folder is a throwaway root whose whole purpose is to be re-resolved from
+    scratch, and pinning them would hide the very behaviour the
+    [provider versions lab](../basics/11-provider-versions.md) asks you to observe. A
+    learning repo optimises for "what does `init` decide today"; a production repo
+    optimises for "two machines behave identically". Those wants are opposite, and this is
+    the one place in these docs where the repo is not a model to copy.
 
 ## Constraint vs. lock
 

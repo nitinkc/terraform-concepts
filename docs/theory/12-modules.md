@@ -128,4 +128,6 @@ move state deliberately.
 Labs: [Lab 9](../gcp/02-lab-notes.md#lab-9-modules-packaging-reusable-infra),
 [Lab 13](../gcp/02-lab-notes.md#lab-13-for_each-over-modules),
 [Core GCP root](../gcp/01-core-root.md) ·
+Quiz: [Variables, expressions & guards](../quiz/03-variables-expressions-and-guards.md) —
+`for_each` over modules ·
 Next: [State lifecycle](13-state-lifecycle.md)

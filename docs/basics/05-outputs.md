@@ -75,6 +75,13 @@ in the directory — but scattering them makes them hard to find. The core GCP r
 [breaks this rule in two places](../gcp/01-core-root.md#things-worth-noticing), which is
 worth seeing precisely so you don't inherit the habit.
 
+## Key takeaway
+
+An output is a published interface and a plaintext state entry at the same time. Declare
+one because something *outside* this config needs the value — a parent module, another
+root, a human running `terraform output`. Declaring one just to look at a value yourself is
+what `terraform state show` already does, without widening the contract.
+
 ---
 
 Theory: [§10 Outputs](../theory/10-outputs.md) ·

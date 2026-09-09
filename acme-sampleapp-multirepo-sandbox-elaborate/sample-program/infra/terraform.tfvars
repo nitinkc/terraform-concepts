@@ -1,8 +1,12 @@
-# Copy to terraform.tfvars and fill in real values.
-# terraform.tfvars is gitignored by convention — never commit real project IDs
-# alongside secrets, even though project_id itself isn't sensitive.
+# Committed on purpose: every value here is a lab placeholder or a
+# non-sensitive ID, so the sandbox runs without reconstructing tfvars first.
+# `terraform.tfvars.example` is the annotated reference copy — edit this file
+# in place. Real secrets never belong here; pass them via TF_VAR_* instead.
+#
+# Production convention is the opposite — gitignore tfvars — see
+# docs/theory/17-project-structure.md for why this repo deviates.
 
-project_id = "my-devops-journey-502420" # <-- your real GCP project ID
+project_id = "my-devops-journey-502420" # <-- replace with your own GCP project ID
 region     = "us-central1"
 zone       = "us-central1-a"
 dns_domain = "sampleapp.example.com" # placeholder is fine, doesn't need to resolve

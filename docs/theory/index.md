@@ -45,9 +45,12 @@ where the expensive mistakes live.
 
 ## Reading it as reference
 
-- Every page opens with an **Assumes** line naming its one prerequisite.
-- Every page closes with links to the labs that run the concept for real and the quiz that
-  tests it.
+- Pages 1–18 open with an **Assumes** line naming its one prerequisite. The
+  [glossary](19-glossary.md) has no prerequisite — it's a lookup table.
+- Every page closes with a `Next:` link, and most also link to the labs that run the
+  concept for real and the quiz that tests it. A missing `Quiz:` link means exactly what it
+  looks like: no question has been written for that concept yet. The
+  [concept index](concept-index.md) tracks those gaps in one place.
 - Section numbers (`§4`, `§13`) used elsewhere in these docs refer to the numbers in the
   table above.
 

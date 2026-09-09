@@ -13,8 +13,8 @@ runtime. Terraform itself does not care about file names; you and everyone after
 
 | File | Concept | Theory |
 |---|---|---|
-| `main.tf` | `required_providers` (google + random) and the `provider "google"` config block | [§2](../theory/02-providers-and-authentication.md) |
-| `backend.tf` | Remote state in a GCS bucket, with a `prefix` | [§14](../theory/14-backends-and-state-security.md) |
+| `main.tf` | `required_version`, `required_providers` (google + random), and the `provider "google"` config block | [§2](../theory/02-providers-and-authentication.md), [§3](../theory/03-init-and-version-constraints.md) |
+| `backend.tf` | Remote state in a GCS bucket, as a *partial* config — `bucket`/`prefix` come from `-backend-config` | [§14](../theory/14-backends-and-state-security.md) |
 | `variables.tf` | Typed inputs; note `set(string)` vs the commented-out `list(string)` | [§7](../theory/07-variables-and-locals.md) |
 | `terraform.tfvars` | Values, overriding the defaults in `variables.tf` | [§7](../theory/07-variables-and-locals.md) |
 | `locals.tf` | Derived values — `name_prefix`, `common_labels`, and a list driving a `dynamic` block | [§7](../theory/07-variables-and-locals.md) |
@@ -35,18 +35,24 @@ and it cost real debugging time in [Session 2](../sessions/session-02.md). Chang
 the default and wondering why nothing happened is the classic version of this mistake.
 
 **Create the state bucket first** — see [the stage prerequisites](index.md#create-the-state-bucket-first).
-`backend.tf` points at a bucket that must already exist.
+`backend.tf` is a *partial* configuration: it names the `gcs` backend but supplies neither
+`bucket` nor `prefix`, so both come from `-backend-config` at init time. That is deliberate
+— a bucket name hardcoded in a public repo is a name someone else already owns, and the
+prefix has to be yours so two roots never write state to the same path.
 
-!!! warning "The backend prefix collides with the sandbox"
-    `backend.tf` hardcodes `prefix = "acme-sampleapp/state"` — the same prefix
-    [Lab 2](02-lab-notes.md#lab-2-remote-state-gcs-backend) uses for the acme repo. Two
-    different roots writing state to one prefix will overwrite each other. Change the
-    prefix before you `init`, or point this root at a different bucket.
+Worth knowing the failure mode before you hit it: forgetting `-backend-config` does **not**
+produce "bucket not set". Terraform accepts the empty value and asks Cloud Storage about it
+anyway, so you get `Failed to get existing workspaces: storage: bucket doesn't exist … 404`
+— the same error you'd get from a typo in a real bucket name. If you see that on your first
+`init`, check whether you passed the flag at all before you go looking at IAM.
 
 ## Run
 
 ```bash
-terraform init -backend-config="bucket=YOUR-UNIQUE-BUCKET-NAME-tfstate"
+terraform init \
+  -backend-config="bucket=YOUR-UNIQUE-BUCKET-NAME-tfstate" \
+  -backend-config="prefix=core-gcp-resources/state"
+
 terraform plan  -var="project_id=YOUR_PROJECT_ID"
 terraform apply -var="project_id=YOUR_PROJECT_ID"
 
@@ -95,7 +101,8 @@ by failing an apply, not by reading docs. The failure mode is
 **The `dynamic "lifecycle_rule"` block** in `resources.tf` generates three storage-class
 transitions from `local.lifecycle_rules`. Add a fourth entry to the local and re-plan: one
 line of data, no new resource block. That's the point of `dynamic`, and this is the only
-real `dynamic` block in the repository.
+`dynamic` block in this root — the other one in the repository is
+`dynamic "rule"` in the sandbox's `backend/infra/rbac.tf`.
 
 **Both `required_providers` and the `provider` block live in `main.tf`.** Every root in the
 [sandbox](../sandbox/index.md) splits these into `versions.tf` and `providers.tf` instead —
