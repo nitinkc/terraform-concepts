@@ -18,18 +18,24 @@ SKIP_EMPTY=false
 destroy_repo() {
   local dir=$1
   local label=$2
+  local workspace=${3:-default}
   if [ ! -d "$dir" ]; then
     echo "-- $label: directory not found, skipping"
     return
   fi
   echo ""
-  echo "=== Destroying $label ($dir) ==="
-  (cd "$dir" && terraform destroy)
+  echo "=== Destroying $label ($dir, workspace: $workspace) ==="
+  (
+    cd "$dir"
+    terraform init -input=false > /dev/null
+    terraform workspace select "$workspace" > /dev/null
+    terraform destroy -input=false -auto-approve
+  )
 }
 
 if [ "$SKIP_EMPTY" = false ]; then
   destroy_repo "frontend/infra"      "frontend"
-  destroy_repo "backend/infra"       "backend"
+  destroy_repo "backend/infra"       "backend" "dev"
   destroy_repo "cloudsql/infra"      "cloudsql"
 fi
 
