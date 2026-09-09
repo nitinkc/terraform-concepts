@@ -1,5 +1,5 @@
 site_name: Terraform Learning
-site_description: Comprehensive DevOps learning path from Docker to Kubernetes, Helm, and Flux
+site_description: An incremental Terraform learning path — theory, local labs, GCP labs, and a multi-repo GKE/Helm sandbox
 docs_dir: docs
 repo_url: https://github.com/nitinkc/terraform-concepts
 repo_name: nitinkc/terraform-concepts
@@ -12,6 +12,7 @@ theme:
 #    - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
+    - navigation.indexes      # section landing pages (quiz/, sessions/)
     - navigation.path
     - navigation.top           # Back-to-top button
     - navigation.footer        # Prev/Next page links
@@ -78,16 +79,85 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - pymdownx.snippets:
-      base_path: docs
+      base_path:
+        - docs
+        - .            # lets docs pages single-source the sandbox README/RUNBOOK
+      check_paths: true
   - tables
 
 extra_javascript:
   - https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js
 
+# The personal learner-state assessment lives under docs/sessions/ so it sits next to the
+# session notes it summarises, but it is deliberately kept out of the published site.
+# Note: this repo is public, so these files are still readable on GitHub — excluding them
+# here reduces discoverability, not exposure.
+validation:
+  links:
+    absolute_links: relative_to_docs
+    unrecognized_links: warn
+    anchors: warn
+
+exclude_docs: |
+  sessions/learner-state.md
+  sessions/archive/
+
 nav:
   - Home: index.md
-  - Theory: Terraform_Theory_Reference.md
-  - No Cloud Practice: Terraform_NoCloud_Practice_Labs.md
-  - Labs: Labs_GCP.md
-  - MultiRepo With Helm: Multirepo_helm_sandbox.md
-  - Quiz: quiz.md
+  - Stage 1 — Theory:
+      - theory/index.md
+      - 1. What Terraform is: theory/01-what-terraform-is.md
+      - 2. Providers and authentication: theory/02-providers-and-authentication.md
+      - 3. init and version constraints: theory/03-init-and-version-constraints.md
+      - 4. Resources and state: theory/04-resources-and-state.md
+      - 5. Resource identity and change: theory/05-resource-identity-and-change.md
+      - 6. Dependencies and the graph: theory/06-dependencies-and-the-graph.md
+      - 7. Variables and locals: theory/07-variables-and-locals.md
+      - 8. Expressions and conditionals: theory/08-expressions-and-conditionals.md
+      - 9. count, for_each and dynamic: theory/09-count-for-each-and-dynamic.md
+      - 10. Outputs: theory/10-outputs.md
+      - 11. Data sources: theory/11-data-sources.md
+      - 12. Modules: theory/12-modules.md
+      - 13. State lifecycle: theory/13-state-lifecycle.md
+      - 14. Backends and state security: theory/14-backends-and-state-security.md
+      - 15. Cross-config composition: theory/15-cross-config-composition.md
+      - 16. GitOps and CI/CD: theory/16-gitops-and-cicd.md
+      - 17. Project structure: theory/17-project-structure.md
+      - 18. CLI reference: theory/18-cli-reference.md
+      - 19. Glossary: theory/19-glossary.md
+      - Concept index: theory/concept-index.md
+  - Stage 2 — Basics:
+      - basics/index.md
+      - 1. Resources and state: basics/01-resources-and-state.md
+      - 2. Variables: basics/02-variables.md
+      - 3. Locals: basics/03-locals.md
+      - 4. References and dependencies: basics/04-references-and-dependencies.md
+      - 5. Outputs: basics/05-outputs.md
+      - 6. Data sources: basics/06-data-sources.md
+      - 7. count and for_each: basics/07-count-and-for-each.md
+      - 8. Conditionals: basics/08-conditionals.md
+      - 9. Lifecycle: basics/09-lifecycle.md
+      - 10. Validation and sensitive values: basics/10-validation-and-sensitive-values.md
+      - 11. Provider versions: basics/11-provider-versions.md
+      - 12. State surgery: basics/12-state-surgery.md
+      - 13. Provisioners and archive_file: basics/13-provisioners-and-archive.md
+  - Stage 3 — GCP:
+      - gcp/index.md
+      - Core GCP root: gcp/01-core-root.md
+      - Lab notes 1–18: gcp/02-lab-notes.md
+  - Stage 4 — Sandbox:
+      - sandbox/index.md
+      - Runbook: sandbox/runbook.md
+  - Sessions:
+      - sessions/index.md
+      - Session 1: sessions/session-01.md
+      - Session 2: sessions/session-02.md
+      - Session 3: sessions/session-03.md
+  - Quiz:
+      - quiz/index.md
+      - Providers & auth: quiz/01-providers-and-auth.md
+      - Resources, state & drift: quiz/02-resources-state-and-drift.md
+      - Variables, expressions & guards: quiz/03-variables-expressions-and-guards.md
+      - Multi-repo & Consul: quiz/04-multirepo-and-consul.md
+      - GKE & Workload Identity: quiz/05-gke-and-workload-identity.md
+      - Debugging & verification: quiz/06-debugging-and-verification.md

@@ -1,5 +1,6 @@
 # acme-sampleapp — Terraform + Helm multi-repo learning sandbox
 
+<!-- --8<-- [start:body] -->
 Sanitized personal practice copy of a real multi-repo GCP/GKE deployment, restructured
 to mirror the actual project layout: each application owns its own `infra/`
 (and `charts/` where applicable), and repos coordinate through Consul-published
@@ -50,7 +51,7 @@ a local Consul dev agent, and where to put real GCP values via
 
 The repository is intentionally split into two layers:
 
-- `01-basics/` and `02-gcp_terraform/` are small, isolated demonstrations. Use them
+- `01-basics/` and `02-gcp-terraform/` are small, isolated demonstrations. Use them
   to learn one Terraform concept at a time without the Acme dependency graph.
 - `acme-sampleapp-multirepo-sandbox-elaborate/` is the main project. Its five
   independent Terraform roots model the organization-style repository boundaries,
@@ -66,7 +67,7 @@ script also verifies that the GKE cluster has a `Ready` node before waiting on
 Helm, and supports `--repair-failed-helm` for a failed Helm release left outside
 Terraform state.
 
-The learning history is kept separately in the repository-level `learning_sessions/`
+The learning history is kept separately in the repository-level `docs/sessions/`
 directory. Session notes explain why the current code and run order look the way they
 do; they are not Terraform configuration and should not be mixed into an Acme root.
 
@@ -166,3 +167,5 @@ at plan time.
    `sso_secret_id` access) that frontend deliberately does **not** need, and
    why (no database, and `sso_client_id` is non-sensitive so it skips Secret
    Manager IAM entirely).
+
+<!-- --8<-- [end:body] -->

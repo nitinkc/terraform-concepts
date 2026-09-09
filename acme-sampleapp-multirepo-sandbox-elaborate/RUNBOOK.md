@@ -1,5 +1,6 @@
 # RUNBOOK — actually running this sandbox
 
+<!-- --8<-- [start:body] -->
 Everything here is runnable against a real GCP project. It is **not**
 runnable against your organization's real GKE cluster/Consul cluster — it
 needs its own, which this runbook sets up (a lab-sized GKE cluster you create
@@ -222,3 +223,5 @@ either to `true`:
 - Check current GKE/Compute Engine pricing for your region before leaving
   anything running unattended — prices change and this file won't stay
   current.
+
+<!-- --8<-- [end:body] -->

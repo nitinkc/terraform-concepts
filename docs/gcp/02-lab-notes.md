@@ -1,4 +1,21 @@
-# Terraform Learning — Lab Notes (acme-sampleapp)
+# Lab notes 1–18
+
+Chronological notes from working each concept against a real GCP project: the code as it
+was written, the commands as they were run, what was verified in the console, and what
+broke. Some later labs are still marked *not yet run* — that's the honest state, not an
+oversight.
+
+!!! note "These ran against `acme-sampleapp`, not `02-gcp-terraform/`"
+    The code in these labs belongs to the
+    [sandbox repo](../sandbox/index.md), not to the
+    [core GCP root](01-core-root.md) documented on the previous page. The concepts are the
+    same and the [mapping table](01-core-root.md#where-each-file-shows-up-in-the-lab-notes)
+    links them row by row, but don't expect the file paths here to exist under
+    `02-gcp-terraform/`.
+
+The order runs roughly easiest to hardest: state, then dependencies, then the repetition
+mechanics, then modules and workspaces, then the operational skills (import, drift,
+aliasing) that only matter once something has already gone wrong.
 
 ## Lab 1 — Local State
 
@@ -695,7 +712,7 @@ terraform plan
 **Status:** *Not yet run — pending your results.*
 
 **Key takeaway (expected):** This lab directly demonstrates, hands-on, the precedence order
-already documented in `Terraform_Theory_Reference.md` §4: CLI flag > `*.auto.tfvars` >
+already documented in [Theory §7](../theory/07-variables-and-locals.md#variable-precedence): CLI flag > `*.auto.tfvars` >
 `terraform.tfvars` > `variable { default }`. Running each command in sequence and watching
 which value plan resolves to converts that memorized ordering into observed behavior.
 
@@ -764,8 +781,8 @@ legitimately owns that one field. Contrast with Lab 11 Part B, where drift *was*
 apply. Modern Terraform guidance treats these as a last resort/code smell — most cases are
 better solved with cloud-init/startup scripts or dedicated config-management tools. Worth
 recognizing since they appear in older or real-world repos (including the security exploit
-pattern already covered in `Terraform_Theory_Reference.md` §9 — a malicious PR using
-`local-exec` to exfiltrate state).
+pattern already covered in [Theory §16](../theory/16-gitops-and-cicd.md)
+— a malicious PR using `local-exec` to exfiltrate state).
 
 **Code — minimal recognition example, not recommended for real use:**
 ```hcl
