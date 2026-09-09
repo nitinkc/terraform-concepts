@@ -19,14 +19,3 @@ locals {
     env => try(jsondecode(data.consul_keys.backend_outputs[env].var.backend).service_account.email, null)
   }
 }
-
-resource "google_secret_manager_secret_iam_member" "backend_reads_sso_config" {
-  for_each = {
-    for env in local.environments : env => env
-    if local.backend_sa_email_by_env[env] != null
-  }
-
-  secret_id = google_secret_manager_secret.sso_config[each.key].id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${local.backend_sa_email_by_env[each.key]}"
-}

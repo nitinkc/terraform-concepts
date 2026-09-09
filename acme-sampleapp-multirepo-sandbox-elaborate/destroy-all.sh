@@ -9,6 +9,9 @@
 
 set -euo pipefail
 
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+cd "$SCRIPT_DIR"
+
 SKIP_EMPTY=false
 [ "${1:-}" = "-s" ] && SKIP_EMPTY=true
 

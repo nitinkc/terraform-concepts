@@ -54,11 +54,63 @@ needs your real `project_id`.
 
 ---
 
-## 2. Apply order (matches the dependency graph in README.md)
+## 2. Resume or bootstrap the sandbox
+
+For normal learning sessions, run the restore script from the Acme directory:
+
+```bash
+./restore-session.sh
+```
+
+The script resolves its own directory, preserves the local Consul KV data, runs
+`terraform plan -detailed-exitcode`, and applies only when a change is needed.
+It also refuses to apply when an expected local state file is missing, so a lost
+state file cannot silently recreate the environment. If the local Consul dev
+agent was restarted, its in-memory data is gone; republish the tracked outputs
+explicitly:
+
+```bash
+./restore-session.sh --refresh-consul
+```
+
+Before applying the backend, the script verifies that the GKE cluster has at
+least one `Ready` node. This avoids waiting ten minutes for Helm when the
+cluster has no node pool or the Kubernetes API is unreachable. The development
+values request only `100m` CPU and `256Mi` memory so the backend can schedule on
+the single `e2-small` non-production lab node. A pullable image must still exist
+at the `docker_image_repo` and `docker_image_tag` configured in
+`backend/infra/terraform.tfvars`; this repository does not contain the backend
+application source or build that image.
+
+If a previous
+Helm attempt left a failed release outside Terraform state, repair it explicitly:
+
+```bash
+./restore-session.sh --repair-failed-helm
+```
+
+Use `--skip-backend` when you intentionally want to restore only the platform
+and shared infrastructure:
+
+```bash
+./restore-session.sh --skip-backend
+```
+
+For the first intentional setup only, allow creation from empty state:
+
+```bash
+./restore-session.sh --bootstrap
+```
+
+Do not use `--bootstrap` as a recovery shortcut for a missing state file. Recover
+or import the existing state first; otherwise Terraform cannot know that the
+real resources already belong to this configuration.
+
+## 3. Apply order (matches the dependency graph in README.md)
 
 Each repo is `terraform init && terraform plan && terraform apply` from its
 own `infra/` directory — they are genuinely independent state files, run
-independently, exactly like the real 4-repo project.
+independently, exactly like the real 5-repo project.
 
 ```bash
 cd sample-program/infra
@@ -96,7 +148,41 @@ graph in `README.md` is the actual troubleshooting order.
 
 ---
 
-## 3. Tearing down
+## 4. Verifying a learning session
+
+Use the read-only health check after restoring or before teaching a session:
+
+```bash
+./verify-session.sh
+```
+
+It checks local tools and ADC, Consul contracts, Terraform state files, the GKE
+cluster and node pool, Kubernetes connectivity, Ready nodes, the backend
+namespace/workloads, recent events, and Helm status. It exits nonzero when a
+required check fails. Add Terraform refresh plans when you want drift/change
+checks as well:
+
+```bash
+./verify-session.sh --plans
+```
+
+`--plans` is read-only but can take longer because each Terraform root refreshes
+its providers and compares state with the live resources.
+
+## 5. Tearing down
+
+The destroy helper resolves its own directory, so it can be run from any
+working directory. Run it only after reviewing the Terraform confirmation
+prompts:
+
+```bash
+./destroy-all.sh
+```
+
+It destroys in reverse dependency order. A failed Helm release that is not in
+Terraform state is removed when its GKE cluster is destroyed; if you are
+preserving the cluster and only repairing the backend, use
+`restore-session.sh --repair-failed-helm` instead.
 
 **Reverse order**, same as any dependency graph:
 

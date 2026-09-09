@@ -188,5 +188,120 @@ Compared to a `resource` block, which of the following is true of a `data` block
 A resource is fully owned by Terraform through its whole lifecycle (create/update/destroy) and tracked in state accordingly. A data block is purely read-only: Terraform never manages the underlying object's lifecycle, it just reads it — and unlike a resource, it re-verifies that read live on every plan/apply rather than trusting a cached state value.
 </quiz>
 
-<!-- mkdocs-quiz results -->
+<quiz>
+Two `data "consul_keys"` blocks live side by side in the same file. One's path is parameterized by environment (`${local.env_key}`); the other is hardcoded to end in `/default`. The hardcoded one starts failing with an empty-string read. What's the most likely explanation?
+- [ ] Consul itself is down
+- [x] The hardcoded key was never actually meant to vary by environment when it was written, but the repo publishing to it only ever publishes to non-default environment paths — a genuine inconsistency between two structurally similar blocks, not a Consul or workspace problem
+- [ ] The parameterized key is broken and corrupting the hardcoded one
+- [ ] Terraform evaluates key blocks in a fixed, alphabetical order that can cause stale reads
+That's exactly the kind of bug worth ruling other things out before finding: environment/terminal mismatch and wrong-workspace were both checked and ruled out with direct evidence first. The actual cause was found by reading the code directly — one key was parameterized, the structurally identical one beside it wasn't, and the publisher never wrote to the hardcoded path.
+</quiz>
 
+<quiz>
+When a real, unexpected Terraform error appears with more than one plausible cause, what's the better debugging approach — testing hypotheses in order with direct evidence, or reading through the whole codebase first to find the bug?
+- [ ] Always read the whole codebase first — testing hypotheses wastes time
+- [x] Test the most likely hypotheses first with direct, falsifiable checks (e.g. `pgrep`, `workspace show`, `kv get`), and only fall back to reading code carefully once cheaper explanations are ruled out
+- [ ] Hypotheses don't matter — just retry the command until it works
+- [ ] Ask someone else immediately rather than debugging yourself
+Real incident: environment/terminal mismatch was ruled out via `pgrep` + `consul kv get` (fast, direct). Wrong workspace was ruled out via `terraform workspace show` (fast, direct). Only once both cheap hypotheses were exhausted did reading the actual code pay off — a hardcoded, non-parameterized path sitting right next to a correctly parameterized one. Cheap checks first, code review once those are exhausted, is generally faster than either extreme alone.
+</quiz>
+
+<quiz>
+A Kubernetes ServiceAccount named `my-app-sa` and a GCP IAM service account named `sa-backend-dev@project.iam.gserviceaccount.com` both exist. Are these the same identity?
+- [ ] Yes — GKE automatically renames GCP service accounts to match Kubernetes ServiceAccounts
+- [x] No — they're two separate identities in two separate systems, linked (if at all) via an annotation on the Kubernetes ServiceAccount, not by name matching
+- [ ] Yes, as long as they're created in the same apply
+- [ ] No — Workload Identity requires them to have different names by design
+Workload Identity links a Kubernetes ServiceAccount to a GCP IAM service account through the `iam.gke.io/gcp-service-account` annotation on the K8s SA — not through any naming convention. Two objects can have completely unrelated names and still be correctly linked, or have similar names and NOT be linked, if the annotation is missing or wrong. Always verify the actual annotation, not the names, when confirming the binding is real.
+</quiz>
+
+<quiz>
+`terraform apply` finishes with no errors and prints a Kubernetes namespace name as an output. Is that sufficient proof the namespace actually exists and is healthy on the real cluster?
+- [ ] Yes — a successful apply guarantees the resource is healthy
+- [x] No — apply succeeding means the API request was accepted, not that the underlying object is actually healthy; independent verification (e.g. `kubectl get ns`, `kubectl get pods`) against the real cluster is the actual proof
+- [ ] Only for `data` blocks, not `resource` blocks
+- [ ] Yes, but only if `-auto-approve` was used
+A `helm_release` can report "created but has a failed status" — Terraform successfully told Kubernetes what to do, but that doesn't mean the workload came up healthy. `kubectl` reading the same live cluster independently is stronger evidence than trusting Terraform's own state or apply log alone.
+</quiz>
+
+<quiz>
+Two separate Terraform repos both try to create a `google_secret_manager_secret_iam_member` granting the same access — one references the other repo's service-account email via cross-repo data, the other only needs data it already has locally. Which one should actually own the grant?
+- [ ] Whichever repo owns the secret container, regardless of data dependencies
+- [x] The one that's self-sufficient with data already available before it runs — the one requiring a "backward" reference to a repo that hasn't run yet creates an unresolvable circular ordering problem
+- [ ] Both should keep the resource, for redundancy
+- [ ] Whichever repo was written first
+If repo A must run before repo B (by design, e.g. A publishes data B consumes), then A cannot depend on data B produces — B doesn't exist yet when A runs. The grant belongs in whichever repo needs only data that's already available in the correct apply order, even if that repo isn't the one that "owns" the underlying resource in a data-modeling sense.
+</quiz>
+
+<quiz>
+A local Consul dev agent (`consul agent -dev`, in-memory only) still has old KV data describing a service account, even though that service account's Terraform state was fully destroyed and rebuilt from scratch. Why?
+- [ ] Consul automatically re-validates its data against the real cloud provider
+- [x] `terraform destroy` only removes real cloud resources — it has no mechanism to tell an unrelated system like Consul that the data it's holding is now stale, so a `-dev` in-memory agent can keep serving outdated data indefinitely across rebuild cycles
+- [ ] The data must have been manually re-entered
+- [ ] Consul data expires automatically after a fixed TTL
+Nothing connects a `terraform destroy` in one repo to Consul's own data. If a Consul key was published describing a resource that's since been destroyed and never republished (e.g. because the publishing repo hasn't been re-applied yet), the old data simply sits there until it's overwritten or manually flushed. This can cause confusing errors where GCP says a referenced resource doesn't exist, even though Consul "remembers" it fine.
+</quiz>
+
+<quiz>
+`terraform apply` fails on a resource with a transient network error (e.g. `TLS handshake timeout`) on a follow-up API read, right after the resource's creation call. What should you check before deciding whether to retry, import, or delete-and-recreate?
+- [ ] Always retry immediately without checking anything
+- [x] Check whether the resource actually exists and is healthy in the real cloud provider (e.g. `gcloud ... describe`) AND whether Terraform's state already tracks it (`terraform state list`) — a transient error on a read-back doesn't necessarily mean the underlying create failed
+- [ ] Always assume the resource needs to be imported
+- [ ] Always assume the resource needs to be deleted and recreated
+A network timeout on a follow-up read is a different failure class from a creation that genuinely failed partway through. Checking the real resource's health directly, and whether it's already tracked in state, tells you whether this is a non-issue (just retry apply) or something that needs the import/recreate decision framework at all.
+</quiz>
+
+<quiz>
+You have `roles/owner` on a GCP project, confirmed via `gcloud projects get-iam-policy`, but `kubectl get pods` still returns "Forbidden" on a freshly created GKE cluster. What's the most likely explanation?
+- [ ] `roles/owner` doesn't include any GKE permissions
+- [x] GKE enforces two separate authorization layers — GCP IAM and Kubernetes-native RBAC — and a brand-new cluster typically has no RBAC binding yet for your individual identity, even if your IAM role is broad; a one-time bootstrap binding (e.g. a `cluster-admin` ClusterRoleBinding for your account) is often needed
+- [ ] The IAM policy needs up to 24 hours to propagate
+- [ ] `kubectl` cannot read IAM policies at all, regardless of role
+GCP IAM controls whether you can reach the GKE API and manage the cluster resource itself; Kubernetes RBAC (a separate, cluster-internal system) controls what you can do once you're talking to the cluster's own API server. A fresh cluster often has no RBAC binding for your personal account (Terraform-created bindings frequently target a Google Group, not individual users) — hence Forbidden despite `roles/owner`.
+</quiz>
+
+<quiz>
+`kubectl get pods` fails with a Forbidden error, but IAM policy checks confirm the active account has `roles/owner` with no conditions attached. What's a likely cause worth checking before assuming the IAM policy itself is wrong?
+- [ ] The cluster's control plane is down
+- [x] A stale kubeconfig — if the active `gcloud` account changed since the kubeconfig entry was generated, or multiple credentialed accounts exist, `kubectl` may be authenticating as a different identity than the one just verified in IAM. Re-running `gcloud container clusters get-credentials` refreshes it against the currently active account.
+- [ ] `kubectl` caches permission failures for 24 hours
+- [ ] IAM policies never apply to newly created clusters
+When multiple `gcloud` accounts are credentialed on one machine, kubeconfig entries can become mismatched with whichever account is "active" versus which one was active when the entry was generated. Regenerating the kubeconfig entry and re-testing with a non-destructive check like `kubectl auth can-i` isolates whether the identity itself — not the IAM policy — was the actual problem.
+</quiz>
+
+<quiz>
+You change a GKE node pool's `machine_type` in Terraform (e.g. `e2-small` to `e2-standard-2`) and run `apply`. What should you expect?
+- [ ] An in-place update with no disruption
+- [x] Destroy-then-create of the entire node pool — a running VM's machine type can't be changed underneath it, so Terraform must replace the whole node pool, and any pods running on it will be rescheduled elsewhere or become pending until new nodes are ready
+- [ ] Terraform will refuse to apply the change at all
+- [ ] Only the node's labels change; the underlying VM stays the same size
+Machine type is a forces-replacement attribute for node pools — Terraform destroys the old pool and creates a new one with the new size. This is a real operational consideration: on a production workload, this would cause visible disruption while nodes cycle, not just a lab inconvenience.
+</quiz>
+
+<quiz>
+A GKE node shows `Capacity: cpu: 2` but `Allocatable: cpu: 940m` in `kubectl describe node`. Why is allocatable so much lower than capacity?
+- [ ] It's a measurement error — they should always be equal
+- [x] GKE reserves a portion of every node's CPU/memory for the kubelet and OS (a documented sliding-scale formula), and cluster-wide DaemonSets (kube-proxy, logging agents, the GKE metadata server for Workload Identity, etc.) further consume allocatable resources — neither shows up in "Capacity," only in what's actually left over for your own pods
+- [ ] Allocatable only reflects the first CPU core; the second is always reserved for the OS
+- [ ] The difference is caused by node autoscaling being enabled
+System reservations plus DaemonSet requests can consume a large fraction of a small node's resources before any application pod is scheduled — on a 2-vCPU node, ending up with under 1 full vCPU allocatable is normal, not a misconfiguration. This is exactly why a pod's resource request that looks small on paper can still fail to schedule with "Insufficient cpu/memory."
+</quiz>
+
+<quiz>
+A pod's `FailedScheduling` event says "Insufficient memory" on an `e2-small` node. You resize the node pool to `e2-medium` and the memory error disappears — but scheduling still fails, now with "Insufficient cpu" alone. Why didn't the resize fix the CPU side too?
+- [ ] e2-medium has less CPU than e2-small
+- [x] e2-small and e2-medium are both "shared-core" machine types with the same 2-vCPU ceiling — only memory scales between them (2GiB to 4GiB). Real additional vCPU headroom requires a different family entirely, like e2-standard-2.
+- [ ] CPU requests are ignored by the scheduler, only memory requests matter
+- [ ] The node pool needs a manual restart for CPU changes to take effect
+Shared-core machine types (`e2-micro`/`e2-small`/`e2-medium`) all cap out at the same 2 vCPUs — stepping between them only changes memory. Fixing a CPU-allocatable shortfall specifically requires moving to a machine family that actually scales vCPU count, such as the `e2-standard-*` line.
+</quiz>
+
+<quiz>
+A verification script checks GKE cluster status via `gcloud`, checks node pool existence, and separately checks `kubectl get nodes` for Ready status. Why check all three instead of just confirming the cluster status is `RUNNING`?
+- [ ] They're redundant — cluster status alone is sufficient
+- [x] A cluster can report `RUNNING` at the control-plane level while its node pool is missing entirely (zero compute capacity) — these are genuinely independent failure points, and checking only the top-level status would miss a real, severe problem
+- [ ] `RUNNING` status only applies to node pools, not the control plane
+- [ ] gcloud's status field is unreliable and should never be trusted
+This happened for real: `gcloud container clusters describe` reported `RUNNING`, but the node pool had been destroyed independently (e.g. during a machine-type change or an interrupted apply), leaving zero schedulable capacity. A single high-level status check would have missed this entirely — independent checks at each layer (cluster, node pool, node readiness, namespace, workload) catch failures a single check can't.
+</quiz>
+<!-- mkdocs-quiz results -->

@@ -2,5 +2,7 @@
 .terraform/
 terraform.tfstate.backup
 terraform.tfstate
+.terraform.tfstate.lock.info
+*.tfplan
 
 .idea

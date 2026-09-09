@@ -77,6 +77,10 @@ resource "google_container_cluster" "main" {
 
   deletion_protection = false # this is a lab cluster — make it easy to tear down
 
+  lifecycle {
+    ignore_changes = [node_config]
+  }
+
   depends_on = [google_project_iam_member.node_roles]
 }
 

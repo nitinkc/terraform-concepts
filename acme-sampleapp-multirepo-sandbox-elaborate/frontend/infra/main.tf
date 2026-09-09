@@ -5,7 +5,7 @@ data "consul_keys" "remote_outputs" {
   }
   key {
     name = "infrastructure"
-    path = "gitlab/terraform_outputs/v2/sample-org/applications/acme-sampleapp/infrastructure/default"
+    path = "gitlab/terraform_outputs/v2/sample-org/applications/acme-sampleapp/infrastructure/${local.infra_env_key}"
   }
   key {
     name = "backend"

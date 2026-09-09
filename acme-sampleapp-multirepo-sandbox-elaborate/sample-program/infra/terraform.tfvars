@@ -16,6 +16,6 @@ enable_gke_p  = false
 enable_gke_np = true
 
 # gke_prod_machine_type    = "e2-small"
-# gke_nonprod_machine_type = "e2-small"
+gke_nonprod_machine_type = "e2-standard-2"
 # gke_prod_node_count      = 1
 # gke_nonprod_node_count   = 1
