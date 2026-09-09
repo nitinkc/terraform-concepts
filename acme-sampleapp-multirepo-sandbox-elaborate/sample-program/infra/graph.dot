@@ -1,0 +1,123 @@
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] consul_keys.publish_outputs (expand)" [label = "consul_keys.publish_outputs", shape = "box"]
+		"[root] google_artifact_registry_repository.sampleapp (expand)" [label = "google_artifact_registry_repository.sampleapp", shape = "box"]
+		"[root] module.dns.google_dns_managed_zone.public (expand)" [label = "module.dns.google_dns_managed_zone.public", shape = "box"]
+		"[root] module.gke.google_container_cluster.main (expand)" [label = "module.gke.google_container_cluster.main", shape = "box"]
+		"[root] module.gke.google_container_node_pool.main (expand)" [label = "module.gke.google_container_node_pool.main", shape = "box"]
+		"[root] module.gke.google_project_iam_member.node_roles (expand)" [label = "module.gke.google_project_iam_member.node_roles", shape = "box"]
+		"[root] module.gke.google_service_account.node (expand)" [label = "module.gke.google_service_account.node", shape = "box"]
+		"[root] module.vpc.google_compute_network.main (expand)" [label = "module.vpc.google_compute_network.main", shape = "box"]
+		"[root] module.vpc.google_compute_router.main (expand)" [label = "module.vpc.google_compute_router.main", shape = "box"]
+		"[root] module.vpc.google_compute_router_nat.main (expand)" [label = "module.vpc.google_compute_router_nat.main", shape = "box"]
+		"[root] module.vpc.google_compute_subnetwork.subnet (expand)" [label = "module.vpc.google_compute_subnetwork.subnet", shape = "box"]
+		"[root] provider[\"registry.terraform.io/hashicorp/consul\"]" [label = "provider[\"registry.terraform.io/hashicorp/consul\"]", shape = "diamond"]
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"]" [label = "provider[\"registry.terraform.io/hashicorp/google\"]", shape = "diamond"]
+		"[root] var.dns_domain" [label = "var.dns_domain", shape = "note"]
+		"[root] var.enable_gke_np" [label = "var.enable_gke_np", shape = "note"]
+		"[root] var.enable_gke_p" [label = "var.enable_gke_p", shape = "note"]
+		"[root] var.gke_nonprod_machine_type" [label = "var.gke_nonprod_machine_type", shape = "note"]
+		"[root] var.gke_nonprod_node_count" [label = "var.gke_nonprod_node_count", shape = "note"]
+		"[root] var.gke_prod_machine_type" [label = "var.gke_prod_machine_type", shape = "note"]
+		"[root] var.gke_prod_node_count" [label = "var.gke_prod_node_count", shape = "note"]
+		"[root] var.project_id" [label = "var.project_id", shape = "note"]
+		"[root] var.region" [label = "var.region", shape = "note"]
+		"[root] var.zone" [label = "var.zone", shape = "note"]
+		"[root] consul_keys.publish_outputs (expand)" -> "[root] module.dns.output.public_zone (expand)"
+		"[root] consul_keys.publish_outputs (expand)" -> "[root] module.gke (close)"
+		"[root] consul_keys.publish_outputs (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/consul\"]"
+		"[root] google_artifact_registry_repository.sampleapp (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"]"
+		"[root] local.gke_clusters (expand)" -> "[root] var.enable_gke_np"
+		"[root] local.gke_clusters (expand)" -> "[root] var.enable_gke_p"
+		"[root] local.gke_clusters (expand)" -> "[root] var.gke_nonprod_machine_type"
+		"[root] local.gke_clusters (expand)" -> "[root] var.gke_nonprod_node_count"
+		"[root] local.gke_clusters (expand)" -> "[root] var.gke_prod_machine_type"
+		"[root] local.gke_clusters (expand)" -> "[root] var.gke_prod_node_count"
+		"[root] local.gke_clusters_enabled (expand)" -> "[root] local.gke_clusters (expand)"
+		"[root] module.dns (close)" -> "[root] module.dns.output.public_zone (expand)"
+		"[root] module.dns.google_dns_managed_zone.public (expand)" -> "[root] module.dns.var.domain (expand)"
+		"[root] module.dns.google_dns_managed_zone.public (expand)" -> "[root] module.dns.var.project_id (expand)"
+		"[root] module.dns.google_dns_managed_zone.public (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"]"
+		"[root] module.dns.output.public_zone (expand)" -> "[root] module.dns.google_dns_managed_zone.public (expand)"
+		"[root] module.dns.var.domain (expand)" -> "[root] module.dns (expand)"
+		"[root] module.dns.var.domain (expand)" -> "[root] var.dns_domain"
+		"[root] module.dns.var.project_id (expand)" -> "[root] module.dns (expand)"
+		"[root] module.dns.var.project_id (expand)" -> "[root] var.project_id"
+		"[root] module.gke (close)" -> "[root] module.gke.google_container_node_pool.main (expand)"
+		"[root] module.gke (close)" -> "[root] module.gke.output.cluster_ca_certificate (expand)"
+		"[root] module.gke (close)" -> "[root] module.gke.output.host (expand)"
+		"[root] module.gke (close)" -> "[root] module.gke.output.name (expand)"
+		"[root] module.gke (close)" -> "[root] module.gke.output.project (expand)"
+		"[root] module.gke (expand)" -> "[root] local.gke_clusters_enabled (expand)"
+		"[root] module.gke.google_container_cluster.main (expand)" -> "[root] module.gke.google_project_iam_member.node_roles (expand)"
+		"[root] module.gke.google_container_cluster.main (expand)" -> "[root] module.gke.var.network (expand)"
+		"[root] module.gke.google_container_cluster.main (expand)" -> "[root] module.gke.var.subnetwork (expand)"
+		"[root] module.gke.google_container_cluster.main (expand)" -> "[root] module.gke.var.zone (expand)"
+		"[root] module.gke.google_container_node_pool.main (expand)" -> "[root] module.gke.google_container_cluster.main (expand)"
+		"[root] module.gke.google_container_node_pool.main (expand)" -> "[root] module.gke.var.machine_type (expand)"
+		"[root] module.gke.google_container_node_pool.main (expand)" -> "[root] module.gke.var.node_count (expand)"
+		"[root] module.gke.google_container_node_pool.main (expand)" -> "[root] module.gke.var.spot (expand)"
+		"[root] module.gke.google_project_iam_member.node_roles (expand)" -> "[root] module.gke.google_service_account.node (expand)"
+		"[root] module.gke.google_service_account.node (expand)" -> "[root] module.gke.var.name (expand)"
+		"[root] module.gke.google_service_account.node (expand)" -> "[root] module.gke.var.project_id (expand)"
+		"[root] module.gke.google_service_account.node (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"]"
+		"[root] module.gke.output.cluster_ca_certificate (expand)" -> "[root] module.gke.google_container_cluster.main (expand)"
+		"[root] module.gke.output.host (expand)" -> "[root] module.gke.google_container_cluster.main (expand)"
+		"[root] module.gke.output.name (expand)" -> "[root] module.gke.google_container_cluster.main (expand)"
+		"[root] module.gke.output.project (expand)" -> "[root] module.gke.var.project_id (expand)"
+		"[root] module.gke.var.machine_type (expand)" -> "[root] module.gke (expand)"
+		"[root] module.gke.var.name (expand)" -> "[root] module.gke (expand)"
+		"[root] module.gke.var.network (expand)" -> "[root] module.gke (expand)"
+		"[root] module.gke.var.network (expand)" -> "[root] module.vpc.output.network_self_link (expand)"
+		"[root] module.gke.var.node_count (expand)" -> "[root] module.gke (expand)"
+		"[root] module.gke.var.project_id (expand)" -> "[root] module.gke (expand)"
+		"[root] module.gke.var.project_id (expand)" -> "[root] var.project_id"
+		"[root] module.gke.var.spot (expand)" -> "[root] module.gke (expand)"
+		"[root] module.gke.var.subnetwork (expand)" -> "[root] module.gke (expand)"
+		"[root] module.gke.var.subnetwork (expand)" -> "[root] module.vpc.output.subnets (expand)"
+		"[root] module.gke.var.zone (expand)" -> "[root] module.gke (expand)"
+		"[root] module.gke.var.zone (expand)" -> "[root] var.zone"
+		"[root] module.vpc (close)" -> "[root] module.vpc.google_compute_router_nat.main (expand)"
+		"[root] module.vpc (close)" -> "[root] module.vpc.output.network_name (expand)"
+		"[root] module.vpc (close)" -> "[root] module.vpc.output.network_self_link (expand)"
+		"[root] module.vpc (close)" -> "[root] module.vpc.output.subnets (expand)"
+		"[root] module.vpc.google_compute_network.main (expand)" -> "[root] module.vpc.var.project_id (expand)"
+		"[root] module.vpc.google_compute_network.main (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"]"
+		"[root] module.vpc.google_compute_router.main (expand)" -> "[root] module.vpc.google_compute_network.main (expand)"
+		"[root] module.vpc.google_compute_router.main (expand)" -> "[root] module.vpc.var.region (expand)"
+		"[root] module.vpc.google_compute_router_nat.main (expand)" -> "[root] module.vpc.google_compute_router.main (expand)"
+		"[root] module.vpc.google_compute_subnetwork.subnet (expand)" -> "[root] module.vpc.google_compute_network.main (expand)"
+		"[root] module.vpc.google_compute_subnetwork.subnet (expand)" -> "[root] module.vpc.var.region (expand)"
+		"[root] module.vpc.google_compute_subnetwork.subnet (expand)" -> "[root] module.vpc.var.subnets (expand)"
+		"[root] module.vpc.output.network_name (expand)" -> "[root] module.vpc.google_compute_network.main (expand)"
+		"[root] module.vpc.output.network_self_link (expand)" -> "[root] module.vpc.google_compute_network.main (expand)"
+		"[root] module.vpc.output.subnets (expand)" -> "[root] module.vpc.google_compute_subnetwork.subnet (expand)"
+		"[root] module.vpc.var.project_id (expand)" -> "[root] module.vpc (expand)"
+		"[root] module.vpc.var.project_id (expand)" -> "[root] var.project_id"
+		"[root] module.vpc.var.region (expand)" -> "[root] module.vpc (expand)"
+		"[root] module.vpc.var.region (expand)" -> "[root] var.region"
+		"[root] module.vpc.var.subnets (expand)" -> "[root] local.subnets (expand)"
+		"[root] module.vpc.var.subnets (expand)" -> "[root] module.vpc (expand)"
+		"[root] output.dns_name_servers (expand)" -> "[root] module.dns.output.public_zone (expand)"
+		"[root] output.gke_clusters_created (expand)" -> "[root] local.gke_clusters_enabled (expand)"
+		"[root] output.mock_backend_image (expand)" -> "[root] google_artifact_registry_repository.sampleapp (expand)"
+		"[root] output.vpc_network (expand)" -> "[root] module.vpc.output.network_name (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/consul\"] (close)" -> "[root] consul_keys.publish_outputs (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)" -> "[root] google_artifact_registry_repository.sampleapp (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)" -> "[root] module.dns.google_dns_managed_zone.public (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)" -> "[root] module.gke.google_container_node_pool.main (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)" -> "[root] module.vpc.google_compute_router_nat.main (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"]" -> "[root] var.project_id"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"]" -> "[root] var.region"
+		"[root] root" -> "[root] module.dns (close)"
+		"[root] root" -> "[root] module.vpc (close)"
+		"[root] root" -> "[root] output.dns_name_servers (expand)"
+		"[root] root" -> "[root] output.gke_clusters_created (expand)"
+		"[root] root" -> "[root] output.mock_backend_image (expand)"
+		"[root] root" -> "[root] output.vpc_network (expand)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/consul\"] (close)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)"
+	}
+}

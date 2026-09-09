@@ -1,0 +1,36 @@
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] consul_keys.publish_outputs (expand)" [label = "consul_keys.publish_outputs", shape = "box"]
+		"[root] data.consul_keys.backend_outputs (expand)" [label = "data.consul_keys.backend_outputs", shape = "box"]
+		"[root] data.consul_keys.program (expand)" [label = "data.consul_keys.program", shape = "box"]
+		"[root] google_secret_manager_secret.sso_config (expand)" [label = "google_secret_manager_secret.sso_config", shape = "box"]
+		"[root] google_secret_manager_secret_version.sso_config (expand)" [label = "google_secret_manager_secret_version.sso_config", shape = "box"]
+		"[root] provider[\"registry.terraform.io/hashicorp/consul\"]" [label = "provider[\"registry.terraform.io/hashicorp/consul\"]", shape = "diamond"]
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"]" [label = "provider[\"registry.terraform.io/hashicorp/google\"]", shape = "diamond"]
+		"[root] var.sso_client_id" [label = "var.sso_client_id", shape = "note"]
+		"[root] var.sso_client_secret" [label = "var.sso_client_secret", shape = "note"]
+		"[root] consul_keys.publish_outputs (expand)" -> "[root] google_secret_manager_secret.sso_config (expand)"
+		"[root] consul_keys.publish_outputs (expand)" -> "[root] var.sso_client_id"
+		"[root] data.consul_keys.backend_outputs (expand)" -> "[root] local.environments (expand)"
+		"[root] data.consul_keys.backend_outputs (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/consul\"]"
+		"[root] data.consul_keys.program (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/consul\"]"
+		"[root] google_secret_manager_secret.sso_config (expand)" -> "[root] local.available_environments (expand)"
+		"[root] google_secret_manager_secret.sso_config (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"]"
+		"[root] google_secret_manager_secret_version.sso_config (expand)" -> "[root] google_secret_manager_secret.sso_config (expand)"
+		"[root] google_secret_manager_secret_version.sso_config (expand)" -> "[root] var.sso_client_id"
+		"[root] google_secret_manager_secret_version.sso_config (expand)" -> "[root] var.sso_client_secret"
+		"[root] local.available_environments (expand)" -> "[root] local.program_gcp_by_env (expand)"
+		"[root] local.backend_sa_email_by_env (expand)" -> "[root] data.consul_keys.backend_outputs (expand)"
+		"[root] local.program_gcp_by_env (expand)" -> "[root] local.environments (expand)"
+		"[root] local.program_gcp_by_env (expand)" -> "[root] local.program_outputs_raw (expand)"
+		"[root] local.program_outputs_raw (expand)" -> "[root] data.consul_keys.program (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/consul\"] (close)" -> "[root] consul_keys.publish_outputs (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/consul\"] (close)" -> "[root] data.consul_keys.backend_outputs (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)" -> "[root] google_secret_manager_secret_version.sso_config (expand)"
+		"[root] root" -> "[root] local.backend_sa_email_by_env (expand)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/consul\"] (close)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)"
+	}
+}

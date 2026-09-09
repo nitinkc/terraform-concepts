@@ -10,7 +10,6 @@ cd "$SCRIPT_DIR"
 
 BOOTSTRAP=false
 REFRESH_CONSUL=false
-REPAIR_FAILED_HELM=false
 SKIP_BACKEND=false
 
 usage() {
@@ -23,8 +22,8 @@ Options:
   --refresh-consul  Clear the local Consul KV namespace before applying and
                     republish tracked Consul outputs from Terraform state.
   --repair-failed-helm
-                    Uninstall an orphaned Helm release whose status is failed
-                    but which is absent from Terraform state.
+                    Compatibility option; orphaned failed Helm releases are
+                    now detected and repaired automatically.
   --skip-backend    Apply sample-program and infrastructure only.
   -h, --help        Show this help.
 
@@ -38,7 +37,7 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --bootstrap) BOOTSTRAP=true ;;
     --refresh-consul) REFRESH_CONSUL=true ;;
-    --repair-failed-helm) REPAIR_FAILED_HELM=true ;;
+    --repair-failed-helm) ;;
     --skip-backend) SKIP_BACKEND=true ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage >&2; exit 2 ;;
@@ -148,6 +147,27 @@ apply_repo() {
   cd "$SCRIPT_DIR" || exit 1
 }
 
+ensure_mock_backend_image() {
+  image=$(terraform -chdir="$SCRIPT_DIR/sample-program/infra" output -raw mock_backend_image)
+  registry=${image%%/*}
+
+  if gcloud artifacts docker images describe "$image" > /dev/null 2>&1; then
+    echo "Backend image already exists: $image"
+    return
+  fi
+
+  if ! command -v docker > /dev/null 2>&1 || ! docker info > /dev/null 2>&1; then
+    echo "ERROR: $image does not exist and Docker is not running." >&2
+    echo "Start Docker Desktop so restore-session.sh can build the sandbox backend image." >&2
+    exit 1
+  fi
+
+  echo "Building and publishing sandbox backend image: $image"
+  gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin "https://$registry" > /dev/null
+  docker build --platform linux/amd64 -t "$image" "$SCRIPT_DIR/backend/app"
+  docker push "$image"
+}
+
 ensure_backend_cluster_ready() {
   echo ""
   echo "=== Checking GKE nodes before applying backend ==="
@@ -178,10 +198,28 @@ ensure_backend_cluster_ready() {
   printf '%s\n' "$ready_nodes"
 }
 
+generate_graph() {
+  dir=$1
+  label=$2
+  workspace=${3:-default}
+
+  echo ""
+  echo "=== Generating $label Terraform graph ==="
+  cd "$dir" || exit 1
+    terraform init -input=false > /dev/null
+    if [ "$workspace" != "default" ]; then
+      terraform workspace select "$workspace" > /dev/null 2>&1 || terraform workspace new "$workspace" > /dev/null
+    fi
+    terraform graph -type=plan > graph.dot
+    dot -Tsvg graph.dot -o graph.svg
+    echo "Generated $dir/graph.dot and $dir/graph.svg."
+  cd "$SCRIPT_DIR" || exit 1
+}
+
 repair_failed_helm_release() {
   helm_status=""
   if ! command -v helm > /dev/null 2>&1; then
-    echo "ERROR: helm is required for --repair-failed-helm." >&2
+    echo "ERROR: helm is required to check the backend release." >&2
     exit 1
   fi
 
@@ -189,16 +227,16 @@ repair_failed_helm_release() {
     --namespace acme-sampleapp-backend-dev 2>&1 || true)
   case "$helm_status" in
     *"STATUS: failed"*)
-      echo "Removing orphaned failed Helm release before Terraform apply."
-      helm uninstall acme-sampleapp-backend \
-        --namespace acme-sampleapp-backend-dev
+      terraform -chdir="$SCRIPT_DIR/backend/infra" workspace select dev > /dev/null
+      if terraform -chdir="$SCRIPT_DIR/backend/infra" state list | grep -Fxq "helm_release.acme_sampleapp_backend"; then
+        echo "Failed Helm release is tracked by Terraform; Terraform will reconcile it."
+      else
+        echo "Removing orphaned failed Helm release before Terraform apply."
+        helm uninstall acme-sampleapp-backend \
+          --namespace acme-sampleapp-backend-dev
+      fi
       ;;
     *"release: not found"*|*"Release not loaded"*)
-      ;;
-    *)
-      if [ -n "$helm_status" ]; then
-        echo "$helm_status"
-      fi
       ;;
   esac
 }
@@ -218,12 +256,20 @@ apply_repo "infrastructure/infra" "infrastructure (SSO secrets)"
 if [ "$SKIP_BACKEND" = true ]; then
   echo "Backend skipped by request."
 else
+  ensure_mock_backend_image
   ensure_backend_cluster_ready
-  if [ "$REPAIR_FAILED_HELM" = true ]; then
-    repair_failed_helm_release
-  fi
+  repair_failed_helm_release
   apply_repo "backend/infra" "backend (dev workspace)" "dev"
 fi
+
+if ! command -v dot > /dev/null 2>&1; then
+  echo "ERROR: Graphviz dot is required to generate Terraform graph SVGs." >&2
+  exit 1
+fi
+
+generate_graph "sample-program/infra" "sample-program"
+generate_graph "infrastructure/infra" "infrastructure"
+generate_graph "backend/infra" "backend (dev workspace)" "dev"
 
 echo ""
 echo "=== Done. ==="

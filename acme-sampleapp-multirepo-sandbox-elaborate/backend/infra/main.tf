@@ -41,7 +41,7 @@ locals {
   # workspace and keys its outputs by environment name, so map this workspace
   # onto one of those keys. Review environments fall back to dev.
   infra_env_key = terraform.workspace == "default" ? "prod" : contains(local.static_envs, terraform.workspace) ? terraform.workspace : "dev"
-  app_infra      = jsondecode(data.consul_keys.remote_outputs.var.infrastructure).outputs.gcp.us_central1[local.infra_env_key]
+  app_infra     = jsondecode(data.consul_keys.remote_outputs.var.infrastructure).outputs.gcp.us_central1[local.infra_env_key]
 
   # The frontend is served same-origin (its nginx proxies /api/ to this service
   # in-cluster), so CORS is only needed for direct browser calls. Scope it to the
@@ -68,8 +68,8 @@ resource "kubernetes_namespace_v1" "main" {
     labels = {
       "networking/namespace" = local.namespace_name
       "cluster"              = local.program_gcp.gke.name
-      "project"               = local.program_gcp.gke.project
-      "region"                = "us-central1"
+      "project"              = local.program_gcp.gke.project
+      "region"               = "us-central1"
     }
   }
   lifecycle {
@@ -94,10 +94,12 @@ resource "google_service_account_iam_member" "workload_identity" {
 # ──────────────────────────────────────────────
 
 resource "helm_release" "acme_sampleapp_backend" {
-  name      = "acme-sampleapp-backend"
-  chart     = "${path.module}/../charts/acme-sampleapp-backend"
-  namespace = kubernetes_namespace_v1.main.metadata[0].name
-  timeout   = 600
+  name            = "acme-sampleapp-backend"
+  chart           = "${path.module}/../charts/acme-sampleapp-backend"
+  namespace       = kubernetes_namespace_v1.main.metadata[0].name
+  atomic          = true
+  cleanup_on_fail = true
+  timeout         = 600
 
   values = [
     file("${path.module}/../charts/acme-sampleapp-backend/values${terraform.workspace == "default" ? "-prod" : contains(local.static_envs, terraform.workspace) ? "-${terraform.workspace}" : "-dev"}.yaml"),

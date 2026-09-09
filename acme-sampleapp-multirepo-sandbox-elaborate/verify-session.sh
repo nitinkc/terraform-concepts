@@ -191,6 +191,8 @@ if command -v kubectl > /dev/null 2>&1; then
     pass "Backend namespace"
     run_check "Backend deployment" kubectl get deployment \
       acme-sampleapp-backend -n acme-sampleapp-backend-dev -o wide
+    run_check "Backend deployment is available" kubectl rollout status deployment/acme-sampleapp-backend \
+      -n acme-sampleapp-backend-dev --timeout=10s
     run_check "Backend ReplicaSet" kubectl get replicasets \
       -n acme-sampleapp-backend-dev -o wide
     run_check "Backend pods" kubectl get pods \
@@ -205,8 +207,8 @@ if command -v kubectl > /dev/null 2>&1; then
 fi
 
 if command -v helm > /dev/null 2>&1; then
-  run_check "Backend Helm release" helm status acme-sampleapp-backend \
-    --namespace acme-sampleapp-backend-dev
+  run_check "Backend Helm release is deployed" sh -c \
+    'helm status acme-sampleapp-backend --namespace acme-sampleapp-backend-dev -o json | grep -Eq '\''"status"[[:space:]]*:[[:space:]]*"deployed"'\'''
 fi
 
 if [ "$RUN_PLANS" = true ] && command -v terraform > /dev/null 2>&1; then

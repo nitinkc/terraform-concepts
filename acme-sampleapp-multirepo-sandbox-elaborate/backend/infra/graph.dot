@@ -1,0 +1,127 @@
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] consul_keys.publish_outputs (expand)" [label = "consul_keys.publish_outputs", shape = "box"]
+		"[root] data.consul_keys.remote_outputs (expand)" [label = "data.consul_keys.remote_outputs", shape = "box"]
+		"[root] data.google_client_config.default (expand)" [label = "data.google_client_config.default", shape = "box"]
+		"[root] data.google_client_openid_userinfo.current (expand)" [label = "data.google_client_openid_userinfo.current", shape = "box"]
+		"[root] google_project_iam_member.backend_sql_access (expand)" [label = "google_project_iam_member.backend_sql_access", shape = "box"]
+		"[root] google_secret_manager_secret_iam_member.backend_sso_config (expand)" [label = "google_secret_manager_secret_iam_member.backend_sso_config", shape = "box"]
+		"[root] google_service_account.app (expand)" [label = "google_service_account.app", shape = "box"]
+		"[root] google_service_account_iam_member.workload_identity (expand)" [label = "google_service_account_iam_member.workload_identity", shape = "box"]
+		"[root] google_sql_user.backend_sa (expand)" [label = "google_sql_user.backend_sa", shape = "box"]
+		"[root] helm_release.acme_sampleapp_backend (expand)" [label = "helm_release.acme_sampleapp_backend", shape = "box"]
+		"[root] kubernetes_namespace_v1.main (expand)" [label = "kubernetes_namespace_v1.main", shape = "box"]
+		"[root] kubernetes_role_binding_v1.sampleapp_team (expand)" [label = "kubernetes_role_binding_v1.sampleapp_team", shape = "box"]
+		"[root] kubernetes_role_v1.sampleapp_team (expand)" [label = "kubernetes_role_v1.sampleapp_team", shape = "box"]
+		"[root] provider[\"registry.terraform.io/hashicorp/consul\"]" [label = "provider[\"registry.terraform.io/hashicorp/consul\"]", shape = "diamond"]
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"]" [label = "provider[\"registry.terraform.io/hashicorp/google\"]", shape = "diamond"]
+		"[root] provider[\"registry.terraform.io/hashicorp/helm\"]" [label = "provider[\"registry.terraform.io/hashicorp/helm\"]", shape = "diamond"]
+		"[root] provider[\"registry.terraform.io/hashicorp/kubernetes\"]" [label = "provider[\"registry.terraform.io/hashicorp/kubernetes\"]", shape = "diamond"]
+		"[root] provider[\"registry.terraform.io/hashicorp/random\"]" [label = "provider[\"registry.terraform.io/hashicorp/random\"]", shape = "diamond"]
+		"[root] provider[\"registry.terraform.io/scottwinkler/shell\"]" [label = "provider[\"registry.terraform.io/scottwinkler/shell\"]", shape = "diamond"]
+		"[root] random_id.role_suffix (expand)" [label = "random_id.role_suffix", shape = "box"]
+		"[root] random_string.suffix (expand)" [label = "random_string.suffix", shape = "box"]
+		"[root] shell_script.backend_sa_sql_access (expand)" [label = "shell_script.backend_sa_sql_access", shape = "box"]
+		"[root] var.docker_image_repo" [label = "var.docker_image_repo", shape = "note"]
+		"[root] var.docker_image_tag" [label = "var.docker_image_tag", shape = "note"]
+		"[root] var.sampleapp_ops_ad_group" [label = "var.sampleapp_ops_ad_group", shape = "note"]
+		"[root] var.static_env" [label = "var.static_env", shape = "note"]
+		"[root] consul_keys.publish_outputs (expand)" -> "[root] google_service_account.app (expand)"
+		"[root] consul_keys.publish_outputs (expand)" -> "[root] kubernetes_namespace_v1.main (expand)"
+		"[root] data.consul_keys.remote_outputs (expand)" -> "[root] local.infra_env_key (expand)"
+		"[root] data.consul_keys.remote_outputs (expand)" -> "[root] local.permanent_envs (expand)"
+		"[root] data.consul_keys.remote_outputs (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/consul\"]"
+		"[root] data.google_client_config.default (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"]"
+		"[root] data.google_client_openid_userinfo.current (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"]"
+		"[root] google_project_iam_member.backend_sql_access (expand)" -> "[root] google_service_account.app (expand)"
+		"[root] google_project_iam_member.backend_sql_access (expand)" -> "[root] local.cloudsql_enabled (expand)"
+		"[root] google_project_iam_member.backend_sql_access (expand)" -> "[root] local.cloudsql_project_id (expand)"
+		"[root] google_secret_manager_secret_iam_member.backend_sso_config (expand)" -> "[root] google_service_account.app (expand)"
+		"[root] google_secret_manager_secret_iam_member.backend_sso_config (expand)" -> "[root] local.app_infra (expand)"
+		"[root] google_service_account.app (expand)" -> "[root] local.namespace_name (expand)"
+		"[root] google_service_account.app (expand)" -> "[root] local.program_gcp (expand)"
+		"[root] google_service_account.app (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"]"
+		"[root] google_service_account.app (expand)" -> "[root] random_string.suffix (expand)"
+		"[root] google_service_account_iam_member.workload_identity (expand)" -> "[root] google_service_account.app (expand)"
+		"[root] google_service_account_iam_member.workload_identity (expand)" -> "[root] kubernetes_namespace_v1.main (expand)"
+		"[root] google_service_account_iam_member.workload_identity (expand)" -> "[root] local.backend_sa_name (expand)"
+		"[root] google_sql_user.backend_sa (expand)" -> "[root] google_project_iam_member.backend_sql_access (expand)"
+		"[root] google_sql_user.backend_sa (expand)" -> "[root] local.cloudsql_instance_name (expand)"
+		"[root] helm_release.acme_sampleapp_backend (expand)" -> "[root] google_service_account_iam_member.workload_identity (expand)"
+		"[root] helm_release.acme_sampleapp_backend (expand)" -> "[root] local.cloudsql_connection_name (expand)"
+		"[root] helm_release.acme_sampleapp_backend (expand)" -> "[root] local.cloudsql_database_name (expand)"
+		"[root] helm_release.acme_sampleapp_backend (expand)" -> "[root] local.cloudsql_db_schema (expand)"
+		"[root] helm_release.acme_sampleapp_backend (expand)" -> "[root] local.cloudsql_region (expand)"
+		"[root] helm_release.acme_sampleapp_backend (expand)" -> "[root] local.frontend_host_name (expand)"
+		"[root] helm_release.acme_sampleapp_backend (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/helm\"]"
+		"[root] helm_release.acme_sampleapp_backend (expand)" -> "[root] shell_script.backend_sa_sql_access (expand)"
+		"[root] helm_release.acme_sampleapp_backend (expand)" -> "[root] var.docker_image_repo"
+		"[root] helm_release.acme_sampleapp_backend (expand)" -> "[root] var.docker_image_tag"
+		"[root] kubernetes_namespace_v1.main (expand)" -> "[root] local.namespace_name (expand)"
+		"[root] kubernetes_namespace_v1.main (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/kubernetes\"]"
+		"[root] kubernetes_role_binding_v1.sampleapp_team (expand)" -> "[root] kubernetes_role_v1.sampleapp_team (expand)"
+		"[root] kubernetes_role_binding_v1.sampleapp_team (expand)" -> "[root] local.sampleapp_ops_ad_group (expand)"
+		"[root] kubernetes_role_v1.sampleapp_team (expand)" -> "[root] kubernetes_namespace_v1.main (expand)"
+		"[root] kubernetes_role_v1.sampleapp_team (expand)" -> "[root] random_id.role_suffix (expand)"
+		"[root] local.app_infra (expand)" -> "[root] data.consul_keys.remote_outputs (expand)"
+		"[root] local.cloudsql (expand)" -> "[root] local.cloudsql_raw (expand)"
+		"[root] local.cloudsql_connection_name (expand)" -> "[root] local.cloudsql (expand)"
+		"[root] local.cloudsql_database_name (expand)" -> "[root] local.cloudsql (expand)"
+		"[root] local.cloudsql_db_schema (expand)" -> "[root] local.cloudsql (expand)"
+		"[root] local.cloudsql_enabled (expand)" -> "[root] local.cloudsql (expand)"
+		"[root] local.cloudsql_grant_url (expand)" -> "[root] local.cloudsql (expand)"
+		"[root] local.cloudsql_instance_name (expand)" -> "[root] local.cloudsql (expand)"
+		"[root] local.cloudsql_project_id (expand)" -> "[root] local.cloudsql (expand)"
+		"[root] local.cloudsql_raw (expand)" -> "[root] data.consul_keys.remote_outputs (expand)"
+		"[root] local.cloudsql_revoke_url (expand)" -> "[root] local.cloudsql (expand)"
+		"[root] local.frontend_host_name (expand)" -> "[root] local.program_gcp (expand)"
+		"[root] local.frontend_host_name (expand)" -> "[root] local.workspace_suffix (expand)"
+		"[root] local.infra_env_key (expand)" -> "[root] local.static_envs (expand)"
+		"[root] local.is_review_env (expand)" -> "[root] var.static_env"
+		"[root] local.namespace_name (expand)" -> "[root] local.workspace_suffix (expand)"
+		"[root] local.permanent_envs (expand)" -> "[root] local.static_envs (expand)"
+		"[root] local.program_gcp (expand)" -> "[root] data.consul_keys.remote_outputs (expand)"
+		"[root] local.program_gcp (expand)" -> "[root] local.p_or_np (expand)"
+		"[root] local.sampleapp_ops_ad_group (expand)" -> "[root] var.sampleapp_ops_ad_group (validation)"
+		"[root] output.backend_service_url (expand)" -> "[root] kubernetes_namespace_v1.main (expand)"
+		"[root] output.cloudsql_enabled (expand)" -> "[root] local.cloudsql_enabled (expand)"
+		"[root] output.namespace (expand)" -> "[root] kubernetes_namespace_v1.main (expand)"
+		"[root] output.service_account (expand)" -> "[root] google_service_account.app (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/consul\"] (close)" -> "[root] consul_keys.publish_outputs (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)" -> "[root] data.google_client_openid_userinfo.current (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)" -> "[root] google_secret_manager_secret_iam_member.backend_sso_config (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)" -> "[root] google_service_account_iam_member.workload_identity (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)" -> "[root] google_sql_user.backend_sa (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/helm\"] (close)" -> "[root] helm_release.acme_sampleapp_backend (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/helm\"]" -> "[root] data.google_client_config.default (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/helm\"]" -> "[root] local.program_gcp (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/kubernetes\"] (close)" -> "[root] kubernetes_role_binding_v1.sampleapp_team (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/kubernetes\"]" -> "[root] data.google_client_config.default (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/kubernetes\"]" -> "[root] local.program_gcp (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/random\"] (close)" -> "[root] random_id.role_suffix (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/random\"] (close)" -> "[root] random_string.suffix (expand)"
+		"[root] provider[\"registry.terraform.io/scottwinkler/shell\"] (close)" -> "[root] shell_script.backend_sa_sql_access (expand)"
+		"[root] random_id.role_suffix (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/random\"]"
+		"[root] random_string.suffix (expand)" -> "[root] local.is_review_env (expand)"
+		"[root] random_string.suffix (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/random\"]"
+		"[root] root" -> "[root] output.backend_service_url (expand)"
+		"[root] root" -> "[root] output.cloudsql_enabled (expand)"
+		"[root] root" -> "[root] output.namespace (expand)"
+		"[root] root" -> "[root] output.service_account (expand)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/consul\"] (close)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/google\"] (close)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/helm\"] (close)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/kubernetes\"] (close)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/random\"] (close)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/scottwinkler/shell\"] (close)"
+		"[root] shell_script.backend_sa_sql_access (expand)" -> "[root] data.google_client_config.default (expand)"
+		"[root] shell_script.backend_sa_sql_access (expand)" -> "[root] data.google_client_openid_userinfo.current (expand)"
+		"[root] shell_script.backend_sa_sql_access (expand)" -> "[root] google_sql_user.backend_sa (expand)"
+		"[root] shell_script.backend_sa_sql_access (expand)" -> "[root] local.cloudsql_grant_url (expand)"
+		"[root] shell_script.backend_sa_sql_access (expand)" -> "[root] local.cloudsql_revoke_url (expand)"
+		"[root] shell_script.backend_sa_sql_access (expand)" -> "[root] provider[\"registry.terraform.io/scottwinkler/shell\"]"
+		"[root] var.sampleapp_ops_ad_group (validation)" -> "[root] var.sampleapp_ops_ad_group"
+	}
+}
