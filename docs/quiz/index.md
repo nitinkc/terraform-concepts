@@ -1,6 +1,6 @@
 # Quiz
 
-Thirty-three questions, split by topic so you can revise one area at a time instead of
+Thirty-six questions, split by topic so you can revise one area at a time instead of
 scrolling one long page. Each page scores independently.
 
 Every question here came out of something that actually happened — a live experiment, a
@@ -13,8 +13,8 @@ explanation.
 | [Providers, Auth & Initialization](01-providers-and-auth.md) | 5 | ADC, `required_providers` vs `provider`, provider defaults as fallback, `init` |
 | [Resources, Data Sources, State & Drift](02-resources-state-and-drift.md) | 5 | `data` vs `resource`, non-atomic apply, import vs recreate |
 | [Variables, Expressions & Guards](03-variables-expressions-and-guards.md) | 6 | precedence, `count = 0`, `for_each` over modules, guard propagation |
-| [Multi-Repo & Consul Contracts](04-multirepo-and-consul.md) | 5 | Consul KV vs `terraform_remote_state`, publish order, grant ownership |
-| [GKE, Kubernetes & Workload Identity](05-gke-and-workload-identity.md) | 8 | node service accounts, WI annotation linkage, capacity vs allocatable |
+| [Multi-Repo & Consul Contracts](04-multirepo-and-consul.md) | 6 | Consul KV vs `terraform_remote_state`, publish order, grant ownership |
+| [GKE, Kubernetes & Workload Identity](05-gke-and-workload-identity.md) | 10 | node service accounts, WI annotation linkage, capacity vs allocatable |
 | [Debugging & Verification Methodology](06-debugging-and-verification.md) | 4 | hypothesis ordering, independent verification |
 
 ## Where each question came from

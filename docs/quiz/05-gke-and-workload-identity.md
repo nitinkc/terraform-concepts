@@ -7,7 +7,7 @@ primary_color: '#007bff'
 <!-- mkdocs-quiz intro -->
 Node service accounts, the two-identities-linked-by-annotation model of Workload Identity, and the node-sizing arithmetic that decides whether a pod can actually be scheduled. Most of these came from real failures, not from reading docs.
 
-**8 questions.** [Back to all topics](index.md)
+**10 questions.** [Back to all topics](index.md)
 
 <!-- source: session-02 -->
 <quiz>
@@ -87,6 +87,26 @@ A pod's `FailedScheduling` event says "Insufficient memory" on an `e2-small` nod
 - [ ] CPU requests are ignored by the scheduler, only memory requests matter
 - [ ] The node pool needs a manual restart for CPU changes to take effect
 Shared-core machine types (`e2-micro`/`e2-small`/`e2-medium`) all cap out at the same 2 vCPUs — stepping between them only changes memory. Fixing a CPU-allocatable shortfall specifically requires moving to a machine family that actually scales vCPU count, such as the `e2-standard-*` line.
+</quiz>
+
+<!-- source: unfiled -->
+<quiz>
+A GKE cluster has `workload_identity_config` set correctly. Pods still can't use Workload Identity to authenticate as their intended GCP service account. What's a likely missing piece?
+- [ ] Workload Identity must also be enabled in the VPC's firewall rules
+- [x] The NODE POOL also needs `workload_metadata_config { mode = "GKE_METADATA" }` — enabling Workload Identity on the cluster alone isn't sufficient, it must also be opted into on every node pool that will run pods needing it
+- [ ] Workload Identity only works with Autopilot clusters, never Standard
+- [ ] The GCP service account must be created before the GKE cluster, never after
+Workload Identity configuration exists at two separate levels: the cluster-wide `workload_identity_config` block enables the mechanism in principle, but each node pool independently needs `workload_metadata_config` set to `GKE_METADATA` for pods scheduled on it to actually be able to use that mechanism. Missing it on the node pool is a common, easy-to-overlook gap even when the cluster-level config looks correct.
+</quiz>
+
+<!-- source: unfiled -->
+<quiz>
+Why create a GKE cluster with `remove_default_node_pool = true` plus a separate, explicit `google_container_node_pool` resource, instead of just letting the cluster's inline default node pool exist?
+- [ ] It's purely cosmetic — both approaches behave identically
+- [x] A node pool created inline as part of the cluster resource can't be resized, upgraded, or reconfigured independently of the cluster itself — a separate, explicit node pool resource can be managed (scaled, upgraded, replaced) on its own without touching the cluster resource
+- [ ] Inline default node pools don't support Workload Identity at all
+- [ ] `remove_default_node_pool` is required by GCP for all clusters created after 2023
+Coupling node pool lifecycle to the cluster resource itself removes your ability to independently scale, upgrade, or reconfigure nodes without a cluster-level change. Separating them is standard practice specifically to decouple those lifecycles — even for a single-node lab cluster, it's worth building the habit rather than treating it as unnecessary ceremony.
 </quiz>
 
 <!-- mkdocs-quiz results -->

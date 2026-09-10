@@ -7,7 +7,7 @@ primary_color: '#007bff'
 <!-- mkdocs-quiz intro -->
 Why the sandbox publishes through Consul KV instead of `terraform_remote_state`, what breaks when an upstream repo hasn't published yet, and who should own a grant when the resource and the dependency point in opposite directions.
 
-**5 questions.** [Back to all topics](index.md)
+**6 questions.** [Back to all topics](index.md)
 
 <!-- source: session-01 -->
 <quiz>
@@ -57,6 +57,16 @@ A local Consul dev agent (`consul agent -dev`, in-memory only) still has old KV 
 - [ ] The data must have been manually re-entered
 - [ ] Consul data expires automatically after a fixed TTL
 Nothing connects a `terraform destroy` in one repo to Consul's own data. If a Consul key was published describing a resource that's since been destroyed and never republished (e.g. because the publishing repo hasn't been re-applied yet), the old data simply sits there until it's overwritten or manually flushed. This can cause confusing errors where GCP says a referenced resource doesn't exist, even though Consul "remembers" it fine.
+</quiz>
+
+<!-- source: unfiled -->
+<quiz>
+A real production Consul deployment and the `consul agent -dev` used in this sandbox both work with identical Terraform HCL. What's actually different between them?
+- [ ] Nothing meaningful — dev mode is just a rebranded production mode
+- [x] Production Consul is a shared, centrally-reachable service (its own cluster, a stable network address every CI/CD runner can reach, real ACL tokens for auth) that many independent pipelines read/write concurrently; `-dev` mode is single-machine, in-memory, and has zero access control — never appropriate outside a local laptop
+- [ ] Production Consul requires a different provider block syntax
+- [ ] `-dev` mode persists data to disk while production mode doesn't
+The provider and resource blocks are mechanically identical either way — only WHERE `CONSUL_HTTP_ADDR` points, and whether real ACL tokens protect it, differ. This is why `-dev` mode data can vanish or go stale with no warning: it's an intentionally minimal stand-in for a real shared service, not a smaller version of the same guarantees.
 </quiz>
 
 <!-- mkdocs-quiz results -->
