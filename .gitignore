@@ -6,6 +6,7 @@ terraform.tfstate.backup
 terraform.tfstate.d/
 .terraform.tfstate.lock.info
 *.tfplan
+.acme-clean-destroy
 
 # MkDocs
 site/

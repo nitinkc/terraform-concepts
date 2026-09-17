@@ -36,7 +36,8 @@ consul kv get test/hello   # should print "world"
 
 If you don't have the `consul` CLI: `brew install consul` (macOS) or grab a
 binary from releases.hashicorp.com/consul. No Docker required for `-dev`
-mode.
+mode. The restore script checks for Consul before running Terraform and waits
+until the local agent responds; if startup fails, inspect `/tmp/consul-dev.log`.
 
 ---
 
@@ -71,9 +72,12 @@ For normal learning sessions, run the restore script from the Acme directory:
 
 The script resolves its own directory, preserves the local Consul KV data, runs
 `terraform plan -detailed-exitcode`, and applies only when a change is needed.
-It also refuses to apply when an expected local state file is missing, so a lost
-state file cannot silently recreate the environment. If the local Consul dev
-agent was restarted, its in-memory data is gone; republish the tracked outputs
+A successful `destroy-all.sh` records a local clean-destroy marker, so the next
+plain `restore-session.sh` can rebuild the normal learning environment without
+an extra flag. Unexpectedly empty or missing state still fails closed because it
+may indicate lost ownership; use `--bootstrap` only for the first intentional
+setup after confirming no matching live resources exist. If the local Consul dev
+agent was restarted, its in-memory data is gone; republish tracked outputs
 explicitly:
 
 ```bash
@@ -81,13 +85,12 @@ explicitly:
 ```
 
 Before applying the backend, the script verifies that the GKE cluster has at
-least one `Ready` node. This avoids waiting ten minutes for Helm when the
-cluster has no node pool or the Kubernetes API is unreachable. The development
-values request only `100m` CPU and `256Mi` memory so the backend can schedule on
-the single `e2-small` non-production lab node. A pullable image must still exist
-at the `docker_image_repo` and `docker_image_tag` configured in
-`backend/infra/terraform.tfvars`; this repository does not contain the backend
-application source or build that image.
+least one `Ready` node and waits up to five minutes for startup. This avoids a
+Helm timeout when the cluster has no usable node pool. The development values
+request only `100m` CPU and `256Mi` memory so the backend can schedule on the
+single non-production lab node. After a clean destroy removes Artifact Registry,
+the script rebuilds `backend/app` for `linux/amd64` and pushes the configured
+image automatically; Docker Desktop must be running when that image is absent.
 
 If a previous
 Helm attempt left a failed release outside Terraform state, repair it explicitly:
@@ -179,16 +182,20 @@ its providers and compares state with the live resources.
 ## 5. Tearing down
 
 The destroy helper resolves its own directory, so it can be run from any
-working directory. Run it only after reviewing the Terraform confirmation
-prompts:
+working directory. It asks you to type `destroy` once, then creates and applies
+saved destroy plans in reverse dependency order:
 
 ```bash
 ./destroy-all.sh
 ```
 
-It destroys in reverse dependency order. A failed Helm release that is not in
-Terraform state is removed when its GKE cluster is destroyed; if you are
-preserving the cluster and only repairing the backend, use
+It checks every existing frontend, backend, and Cloud SQL workspace, skips empty
+state, destroys in reverse dependency order, clears stale local Consul contracts,
+and records the clean teardown used by the next plain restore. Both lifecycle
+scripts print potentially billable versus no-direct-charge Terraform resource
+action counts; these are resource counts, not price estimates. A failed Helm
+release that is not in Terraform state is removed when its GKE cluster is
+destroyed; if you are preserving the cluster and only repairing the backend, use
 `restore-session.sh --repair-failed-helm` instead.
 
 **Reverse order**, same as any dependency graph:
@@ -229,5 +236,10 @@ either to `true`:
 - Check current GKE/Compute Engine pricing for your region before leaving
   anything running unattended — prices change and this file won't stay
   current.
+
+```shell
+sh restore-session.sh --repair-failed-helm
+sh verify-session.sh
+```
 
 <!-- --8<-- [end:body] -->

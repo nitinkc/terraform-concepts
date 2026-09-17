@@ -12,6 +12,9 @@ BOOTSTRAP=false
 REFRESH_CONSUL=false
 REPAIR_FAILED_HELM=false
 SKIP_BACKEND=false
+CLEAN_DESTROY_MARKER="$SCRIPT_DIR/.acme-clean-destroy"
+BILLABLE_ADDED=0
+FREE_ADDED=0
 
 usage() {
   cat <<'EOF'
@@ -28,9 +31,9 @@ Options:
   --skip-backend    Apply sample-program and infrastructure only.
   -h, --help        Show this help.
 
-The default mode is a safe resume: it preserves local Consul data and refuses
-an apply when a Terraform state file is missing, preventing an accidental
-recreation of the sandbox.
+The default mode resumes existing resources or rebuilds resources after a
+successful ./destroy-all.sh. Missing or unexpectedly empty state still fails
+closed; use --bootstrap only for an intentional first setup.
 EOF
 }
 
@@ -46,6 +49,26 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
+require_command() {
+  command_name=$1
+  install_hint=${2:-}
+  if ! command -v "$command_name" > /dev/null 2>&1; then
+    echo "ERROR: $command_name is required.${install_hint:+ $install_hint}" >&2
+    exit 1
+  fi
+}
+
+require_command terraform
+require_command jq
+require_command gcloud
+require_command consul "Install it with: brew install consul"
+if [ "$SKIP_BACKEND" != true ]; then
+  require_command kubectl
+  require_command helm
+  require_command docker
+fi
+require_command dot "Install it with: brew install graphviz"
+
 echo "=== 1. Starting local Consul dev agent ==="
 CONSUL_STARTED=false
 if pgrep -f "consul agent -dev" > /dev/null; then
@@ -53,10 +76,31 @@ if pgrep -f "consul agent -dev" > /dev/null; then
 else
   consul agent -dev > /tmp/consul-dev.log 2>&1 &
   CONSUL_STARTED=true
-  sleep 2
-  echo "Started fresh (log: /tmp/consul-dev.log)."
 fi
 export CONSUL_HTTP_ADDR=http://127.0.0.1:8500
+
+consul_ready=false
+attempt=1
+while [ "$attempt" -le 10 ]; do
+  if consul members > /dev/null 2>&1; then
+    consul_ready=true
+    break
+  fi
+  sleep 1
+  attempt=$((attempt + 1))
+done
+if [ "$consul_ready" != true ]; then
+  echo "ERROR: local Consul agent did not become ready at $CONSUL_HTTP_ADDR." >&2
+  if [ -f /tmp/consul-dev.log ]; then
+    cat /tmp/consul-dev.log >&2
+  fi
+  exit 1
+fi
+if [ "$CONSUL_STARTED" = true ]; then
+  echo "Started fresh and verified ready (log: /tmp/consul-dev.log)."
+else
+  echo "Verified local Consul is ready."
+fi
 
 if [ "$REFRESH_CONSUL" = true ]; then
   echo "Refreshing local Consul KV data by request."
@@ -87,6 +131,29 @@ state_path() {
   fi
 }
 
+is_potentially_billable() {
+  case "$1" in
+    google_artifact_registry_repository|google_cloudfunctions2_function|google_compute_global_address|google_compute_router_nat|google_container_cluster|google_container_node_pool|google_dns_managed_zone|google_secret_manager_secret_version|google_sql_database_instance) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+count_create_actions() {
+  plan_file=$1
+  resource_types=""
+  resource_type=""
+
+  resource_types=$(terraform show -json "$plan_file" | jq -r '.resource_changes[]? | select(.change.actions == ["create"]) | .type')
+  while IFS= read -r resource_type; do
+    [ -z "$resource_type" ] && continue
+    if is_potentially_billable "$resource_type"; then
+      BILLABLE_ADDED=$((BILLABLE_ADDED + 1))
+    else
+      FREE_ADDED=$((FREE_ADDED + 1))
+    fi
+  done <<< "$resource_types"
+}
+
 apply_repo() {
   dir=$1
   label=$2
@@ -114,6 +181,13 @@ apply_repo() {
       exit 1
     fi
 
+    if [ "$BOOTSTRAP" != true ] && [ ! -f "$CLEAN_DESTROY_MARKER" ] && [ -z "$(terraform state list 2>/dev/null)" ]; then
+      echo "ERROR: Terraform state contains no tracked resources without a clean-destroy marker: $state" >&2
+      echo "Refusing to recreate infrastructure because state may have been lost." >&2
+      echo "Recover/import live resources, or use --bootstrap for an intentional first setup." >&2
+      exit 1
+    fi
+
     if [ "$CONSUL_STARTED" = true ] || [ "$REFRESH_CONSUL" = true ]; then
       state_list_file=$(mktemp)
       terraform state list > "$state_list_file" 2>/dev/null || true
@@ -136,6 +210,7 @@ apply_repo() {
         echo "$label is already in sync; no resources will be created."
         ;;
       2)
+        count_create_actions "$plan_file"
         terraform apply -input=false -auto-approve "$plan_file"
         rm -f "$plan_file"
         ;;
@@ -146,6 +221,25 @@ apply_repo() {
         ;;
     esac
   cd "$SCRIPT_DIR" || exit 1
+}
+
+ensure_backend_image() {
+  image=$(terraform -chdir="$SCRIPT_DIR/sample-program/infra" output -raw mock_backend_image)
+  if gcloud artifacts docker images describe "$image" > /dev/null 2>&1; then
+    echo "Backend image already exists: $image"
+    return
+  fi
+
+  echo ""
+  echo "=== Building backend learning image ==="
+  if ! docker info > /dev/null 2>&1; then
+    echo "ERROR: Docker is required to rebuild the backend image after a clean destroy." >&2
+    echo "Start Docker Desktop, then rerun ./restore-session.sh." >&2
+    exit 1
+  fi
+  registry=${image%%/*}
+  gcloud auth configure-docker "$registry" --quiet
+  docker buildx build --platform linux/amd64 --tag "$image" --push "$SCRIPT_DIR/backend/app"
 }
 
 ensure_backend_cluster_ready() {
@@ -161,8 +255,15 @@ ensure_backend_cluster_ready() {
       --zone=us-central1-a > /dev/null
   fi
 
-  nodes=$(kubectl get nodes --no-headers 2>/tmp/acme-kubectl-error || true)
-  ready_nodes=$(printf '%s\n' "$nodes" | awk '$2 ~ /^Ready/ {print}')
+  attempt=1
+  ready_nodes=""
+  while [ "$attempt" -le 30 ]; do
+    nodes=$(kubectl get nodes --no-headers 2>/tmp/acme-kubectl-error || true)
+    ready_nodes=$(printf '%s\n' "$nodes" | awk '$2 ~ /^Ready/ {print}')
+    [ -n "$ready_nodes" ] && break
+    sleep 10
+    attempt=$((attempt + 1))
+  done
   if [ -z "$ready_nodes" ]; then
     echo "ERROR: no Ready GKE nodes are reachable." >&2
     echo "The backend Helm release waits for a scheduled pod and will otherwise time out." >&2
@@ -235,6 +336,7 @@ apply_repo "infrastructure/infra" "infrastructure (SSO secrets)"
 if [ "$SKIP_BACKEND" = true ]; then
   echo "Backend skipped by request."
 else
+  ensure_backend_image
   ensure_backend_cluster_ready
   if [ "$REPAIR_FAILED_HELM" = true ]; then
     repair_failed_helm_release
@@ -251,7 +353,14 @@ generate_graph "sample-program/infra" "sample-program"
 generate_graph "infrastructure/infra" "infrastructure"
 generate_graph "backend/infra" "backend (dev workspace)" "dev"
 
+if [ "$SKIP_BACKEND" != true ]; then
+  rm -f "$CLEAN_DESTROY_MARKER"
+fi
+
 echo ""
-echo "=== Done. ==="
-echo "The Acme learning sandbox was resumed without clearing Terraform state."
-echo "cloudsql and frontend were not applied; run them manually when ready."
+echo "=== Restore complete ==="
+printf 'Potentially billable Terraform resources added: %s\n' "$BILLABLE_ADDED"
+printf 'No-direct-charge Terraform resources added: %s\n' "$FREE_ADDED"
+echo "These are Terraform resource counts, not a price estimate. Usage-based services can still incur charges."
+echo "Run ./destroy-all.sh when the learning session ends to stop cloud charges."
+echo "cloudsql and frontend were not applied; run them manually when those milestones begin."

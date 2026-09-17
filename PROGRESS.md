@@ -75,7 +75,8 @@ Additional operational work now present:
 - `terraform fmt -check -recursive` fails on 12 pre-existing files: eight basics `main.tf` files plus Acme frontend `iam.tf`/`main.tf`, VPC module `main.tf`, and sample-program `variables.tf`.
 - `backend/infra/variables.tf` still contains a TODO to replace the sample operations group.
 - Root/Acme documentation says application source is absent, but a minimal `backend/app` health service now exists; documentation needs reconciliation.
-- Current live GCP resource status is unknown from source alone. Run `./verify-session.sh` before assuming resources still exist.
+- On 2026-09-17, read-only recovery checks found the `sample-program-np` cluster and one-node Spot pool healthy, with the node becoming `Ready`; infrastructure/default and backend/dev state files existed but tracked zero resources, and their expected secrets, backend GSA, namespace, Helm release, and backend image were absent.
+- The session lifecycle now prioritizes low-cost learning: `restore-session.sh` rebuilds after a recorded clean teardown, recreates the amd64 backend image when Artifact Registry is empty, waits for GKE readiness, and reports billable/no-direct-charge create counts; `destroy-all.sh` checks all environment workspaces, applies saved destroy plans in reverse order, clears stale Consul contracts, records a clean teardown, and reports corresponding destroy counts.
 - Full `terraform validate` for every root has not been re-run in this review because provider initialization/live credentials may be required.
 
 ## Next Recommended Milestones
@@ -90,7 +91,7 @@ Additional operational work now present:
 
 ## Evidence Sources
 
-- `docs/sessions/session-01.md` through `session-03.md`
+- `docs/sessions/session-01.md` through `session-04.md`
 - `docs/sessions/learner-state.md`
 - Acme `README.md`, `RUNBOOK.md`, Terraform roots, Helm charts, and helper scripts
 - Recent repository history through commit `139a8fd`

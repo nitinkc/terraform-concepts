@@ -152,6 +152,7 @@ nav:
       - Session 1: sessions/session-01.md
       - Session 2: sessions/session-02.md
       - Session 3: sessions/session-03.md
+      - Session 4: sessions/session-04.md
   - Quiz:
       - quiz/index.md
       - Providers & auth: quiz/01-providers-and-auth.md
