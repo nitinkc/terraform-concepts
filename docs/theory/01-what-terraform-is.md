@@ -62,6 +62,20 @@ block_type "label_one" "label_two" {
 }
 ```
 
+The quoted strings after the block type are **labels** — identifiers that make this block
+unique within the file. Together, the block type plus its labels form the block's address:
+
+| Piece | Meaning | Example |
+|---|---|---|
+| block type | which construct Terraform creates | `resource` |
+| label one | the provider-defined kind of thing | `"google_compute_instance"` |
+| label two | the name *you* give this instance | `"web"` |
+
+So `resource "google_compute_instance" "web"` produces the address
+`google_compute_instance.web`, and every `var.foo`/`local.bar` reference follows the same
+pattern. How many labels a block takes is fixed by its type: `resource` and `data` need
+two, `variable`/`output`/`module`/`provider` need one, `terraform`/`locals` take none.
+
 Every block you will meet is one of a small set: `terraform`, `provider`, `resource`,
 `data`, `variable`, `locals`, `output`, `module`, and `moved`/`import`. This section covers
 them in the order they become useful.

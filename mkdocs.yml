@@ -144,7 +144,6 @@ nav:
       - gcp/index.md
       - Core GCP root: gcp/01-core-root.md
       - Lab notes 1–18: gcp/02-lab-notes.md
-  - Stage 4 — Sandbox:
       - sandbox/index.md
       - Runbook: sandbox/runbook.md
   - Sessions:
