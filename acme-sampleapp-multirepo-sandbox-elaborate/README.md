@@ -95,43 +95,32 @@ organizational preference. Each repo:
 
 ## Dependency graph
 
-```
-        ┌────────────────────────┐
-        │    sample-program/      │  publishes: GKE clusters (p + np), VPC,
-        │                        │              public DNS zone
-        └────────────┬───────────┘
-                      │
-        ┌─────────────┼─────────────┐
-        ▼                            ▼
-┌──────────────┐            ┌──────────────┐
-│  cloudsql/    │            │              │
-│               │            │              │
-│  publishes:   │            │              │
-│  connection   │            │              │
-│  info, grant/ │            │              │
-│  revoke URLs  │            │              │
-└───────┬───────┘            │              │
-        │                    │              │
-        ▼                    ▼              │
-┌───────────────────────────────┐           │
-│           backend/             │◄──────────┘
-│                                │   reads: sso_secret_id (grants itself
-│  publishes: backend_service_url│   secretAccessor), cloudsql outputs
-│  service_account.email         │
-└───────────────┬────────────────┘
-                 │
-                 ▼
-        ┌─────────────────┐
-        │   frontend/       │  reads: backend_service_url, sso_client_id
-        │                   │  (never touches sso_secret_id/client_secret)
-        └───────────────────┘
-```
+[![Acme Sample App service and Terraform dependency graph](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/service-dependency-architecture.svg)](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/service-dependency-architecture.svg)
+
+_Arrows show dependency direction. Each colored service box owns an independent Terraform
+state and lifecycle. [Open the editable draw.io source](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/service-dependency-architecture.drawio)._
 
 `infrastructure` also reads `backend`'s published service-account email
 (`infrastructure/infra/iam.tf`) — the *grant* runs in `infrastructure` (it
 owns the secret) even though the *dependency* on knowing who to grant flows
 the other way. This is worth sitting with: **"who owns the resource" and
 "who initiates the Terraform read" aren't always the same repo.**
+
+## Detailed system overview
+
+[![Detailed Acme Sample App runtime, platform, contract, and Terraform ownership diagram](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/acme-application-system-overview.svg)](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/acme-application-system-overview.svg)
+
+Use this view to recall four aspects together:
+
+1. **Runtime path:** user → DNS → ingress → frontend → backend → Cloud SQL.
+2. **Identity and secrets:** the backend uses Workload Identity and reads shared SSO
+   credentials from Secret Manager rather than embedding credentials in the pod.
+3. **Ownership:** each colored Terraform state owns a separate slice of the platform and
+   can be planned and applied independently.
+4. **Cross-root contracts:** dashed purple lines represent deliberately published JSON
+   outputs in Consul, not direct access to another root's state.
+
+[Open the editable draw.io source](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/acme-application-system-overview.drawio).
 
 ## Consul key map (the actual contract between repos)
 

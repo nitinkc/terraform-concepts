@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="760" viewBox="0 0 1160 760" role="img" aria-labelledby="title desc">
+  <title id="title">Acme Sample App service and Terraform dependencies</title>
+  <desc id="desc">Dependency flow from the shared platform through infrastructure and Cloud SQL to backend and frontend services.</desc>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#455a64"/></marker><style>.box{stroke-width:2}.name{font:700 18px sans-serif;fill:#17202a;text-anchor:middle}.detail{font:13px sans-serif;fill:#34495e;text-anchor:middle}.edge{fill:none;stroke:#455a64;stroke-width:2;marker-end:url(#arrow)}.label{font:12px sans-serif;fill:#37474f;text-anchor:middle}.title{font:700 25px sans-serif;fill:#17202a;text-anchor:middle}</style></defs>
+  <rect width="1160" height="760" fill="#fff"/>
+  <text x="580" y="38" class="title">Acme Sample App — Service and Terraform Dependencies</text>
+  <rect x="475" y="75" width="210" height="70" rx="12" fill="#fff2cc" stroke="#d6b656" class="box"/><text x="580" y="104" class="name">Consul KV</text><text x="580" y="127" class="detail">versioned cross-root contracts</text>
+  <rect x="420" y="190" width="320" height="75" rx="12" fill="#dae8fc" stroke="#6c8ebf" class="box"/><text x="580" y="220" class="name">sample-program</text><text x="580" y="244" class="detail">VPC · GKE · DNS · Artifact Registry</text>
+  <rect x="70" y="350" width="250" height="75" rx="12" fill="#e1d5e7" stroke="#9673a6" class="box"/><text x="195" y="380" class="name">infrastructure</text><text x="195" y="404" class="detail">SSO secrets · IAM grants</text>
+  <path d="M465 350 Q465 335 480 335 H680 Q695 335 695 350 V425 Q695 440 680 440 H480 Q465 440 465 425Z" fill="#f8cecc" stroke="#b85450" class="box"/><ellipse cx="580" cy="350" rx="115" ry="15" fill="#f8cecc" stroke="#b85450" stroke-width="2"/><text x="580" y="385" class="name">cloudsql</text><text x="580" y="410" class="detail">Database · grant/revoke functions</text>
+  <rect x="815" y="350" width="270" height="75" rx="12" fill="#d5e8d4" stroke="#82b366" class="box"/><text x="950" y="380" class="name">backend</text><text x="950" y="404" class="detail">FastAPI · Helm · Workload Identity</text>
+  <rect x="815" y="535" width="270" height="75" rx="12" fill="#ffe6cc" stroke="#d79b00" class="box"/><text x="950" y="565" class="name">frontend</text><text x="950" y="589" class="detail">Angular/nginx · Ingress · DNS</text>
+  <circle cx="950" cy="690" r="18" fill="#f5f5f5" stroke="#666" stroke-width="2"/><path d="M950 708V750M920 725H980M950 750L925 780M950 750L975 780" fill="none" stroke="#666" stroke-width="3"/><text x="950" y="665" class="name">Users</text>
+  <path d="M580 190V145" class="edge"/><text x="700" y="170" class="label">publishes platform outputs</text>
+  <path d="M500 265L235 350" class="edge"/><text x="340" y="295" class="label">GKE / network</text>
+  <path d="M580 265V335" class="edge"/><text x="630" y="305" class="label">network</text>
+  <path d="M660 265L910 350" class="edge"/><text x="815" y="295" class="label">GKE / registry</text>
+  <path d="M320 388V485H785V388H815" class="edge"/><text x="545" y="475" class="label">SSO secret</text>
+  <path d="M695 388H815" class="edge"/><text x="755" y="376" class="label">connection + IAM</text>
+  <path d="M950 425V535" class="edge"/><text x="1000" y="485" class="label">service URL</text>
+  <path d="M950 672V610" class="edge"/><text x="990" y="646" class="label">HTTPS</text>
+  <rect x="70" y="535" width="500" height="80" rx="8" fill="#f5f5f5" stroke="#666"/><text x="90" y="565" style="font:14px sans-serif;fill:#34495e">Arrows show dependency direction.</text><text x="90" y="590" style="font:14px sans-serif;fill:#34495e">Each colored box owns an independent Terraform state and lifecycle.</text>
+</svg>

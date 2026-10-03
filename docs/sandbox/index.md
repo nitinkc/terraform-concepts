@@ -11,6 +11,14 @@ The single most important difference: **no root here can be understood in isolat
 `sample-program/infra` published. Break one and you learn what a dependency graph
 actually feels like.
 
+## Service architecture
+
+[![Acme Sample App service and Terraform dependency diagram](../assets/diagrams/service-dependency-architecture.svg)](../assets/diagrams/service-dependency-architecture.svg)
+
+The arrows show dependency direction; each colored service box owns an independent Terraform
+state and lifecycle. Select the diagram to open the full-size lightbox view. The editable
+source is [`service-dependency-architecture.drawio`](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/service-dependency-architecture.drawio).
+
 ## Before you touch it
 
 | | |
