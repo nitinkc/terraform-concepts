@@ -9,7 +9,8 @@ resource "local_file" "pet" {
     # prevent_destroy = true
     # ignore_changes = all
     ignore_changes = [
-      tags
+      file_permission,
+      # content,
     ]
   }
 }

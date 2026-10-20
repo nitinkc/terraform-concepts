@@ -10,6 +10,7 @@ variable "content" {
   default     = "Hello World! Default Text coming from the variable"
 }
 
+# For Random Pet - https://registry.terraform.io/providers/hashicorp/random/3.9.0/docs/resources/pet
 variable "prefix" {
   description = "The prefix for the random pet name"
   type        = string
@@ -19,7 +20,7 @@ variable "prefix" {
 variable "separator" {
   description = "The separator for the random pet name"
   type        = string
-  default     = "-"
+  default     = "."
 }
 
 variable "name_length" {

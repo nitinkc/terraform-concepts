@@ -1,10 +1,8 @@
 # 3 — Locals
 
-**Folder:** none yet — paste this into a scratch root.
-
 `locals` compute a value once and let you reuse it. Unlike a `variable`, a local is never
 set from outside: no `.tfvars`, no CLI flag, no environment variable. It is derived from
-other values inside the config.
+**other values inside the config**.
 
 ## The code
 
@@ -42,7 +40,7 @@ terraform plan     # still shows a diff
 `timestamp()` re-evaluates on every plan, so any resource referencing a value derived from
 it is *always* different. The resource can never converge.
 
-This is why volatile functions are used carefully in real configs. When you genuinely need
+This is why **volatile functions** are used carefully in real configs. When you genuinely need
 one — a build timestamp, a nonce — the usual fix is to stop Terraform caring about the
 resulting drift:
 

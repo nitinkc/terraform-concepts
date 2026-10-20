@@ -7,7 +7,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 6.0" # This pins your provider version for stability
+      version = "~> 8.0" # This pins your provider version for stability
     }
 
     # required_providers is always required per provider you use; a provider {} config block is only

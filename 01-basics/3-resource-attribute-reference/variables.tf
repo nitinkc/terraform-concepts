@@ -10,6 +10,7 @@ variable "content" {
   default     = "Hello World! Default Text from resource attribute"
 }
 
+# For Random Pet
 variable "prefix" {
   description = "The prefix for the random pet name"
   type        = string
@@ -19,7 +20,7 @@ variable "prefix" {
 variable "separator" {
   description = "The separator for the random pet name"
   type        = string
-  default     = "-"
+  default     = "."
 }
 
 variable "name_length" {

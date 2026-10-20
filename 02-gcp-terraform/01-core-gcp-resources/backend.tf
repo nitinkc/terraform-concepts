@@ -12,9 +12,10 @@
 #
 # An empty backend block still selects the gcs backend — that choice is code.
 # Only the values are left to the operator.
+
 terraform {
   backend "gcs" {
-    bucket = "terraform-learning-tfstate"
+    bucket = "terraform-learn-tfstate"
     prefix = "acme-sampleapp/state"
   }
 }

@@ -16,6 +16,20 @@ resource "local_file" "pet" {
 }
 ```
 
+!! Locate the resources on Terraform Registry
+
+## The syntax
+
+The First String ("local_file") is the Resource Type
+- **Purpose**: This tells Terraform exactly which provider and component to manage.
+- **Rules**: You _**cannot invent**_ this string. It is hardcoded by the provider (in this case, the local provider).
+- **Meaning**: It tells Terraform: "I want to create a physical file on the local machine."
+
+The Second String ("pet") is the Resource Name
+- **Purpose**: local identifier (or label) created to reference the specific resource elsewhere in the Terraform code.
+- **Rules**: You can name this whatever you want (e.g., "pet", "config", "output_file").
+- **Meaning**: It tells Terraform: "Within my code, I will refer to this specific file as 'pet'."
+
 ## Run it
 
 ```bash

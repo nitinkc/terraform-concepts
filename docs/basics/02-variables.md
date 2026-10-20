@@ -1,6 +1,6 @@
 # 2 — Variables
 
-**Folder:** [`01-basics/2-variable-use/`](https://github.com/nitinkc/terraform-concepts/tree/main/01-basics/2-variable-use)
+**Folder:** [`../../01-basics/2-variable-locals`](https://github.com/nitinkc/terraform-concepts/tree/main/01-basics/2-variable-use)
 
 `variable` blocks are inputs — like function arguments. Declared in `variables.tf` with a
 type and a default, referenced as `var.name`.
@@ -15,6 +15,7 @@ resource "local_file" "fruits" {
   content  = var.content
 }
 
+# https://registry.terraform.io/providers/hashicorp/random/3.9.0/docs/resources/pet
 resource "random_pet" "my_pet" {
   prefix    = var.prefix
   separator = var.separator

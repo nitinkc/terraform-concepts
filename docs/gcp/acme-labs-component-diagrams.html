@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acme Labs — Component Architecture Diagrams</title>
+<style>
+:root{--navy:#1a4470;--green:#1f7a4d;--orange:#e8622a;--blue:#2c6aa3;--red:#c0392b;--bg:#f2f5f9;--ink:#1c2733;--mut:#5b6b7b;--line:#d5dde6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.45}
+header{background:linear-gradient(135deg,#12324f,#1a4470 60%,#2c6aa3);color:#fff;padding:28px 5vw}
+header h1{margin:0 0 6px;font-size:28px}header p{margin:0;color:#cfe0f0;max-width:900px}
+nav{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding:8px 5vw;display:flex;flex-wrap:wrap;gap:6px}
+nav a{font-size:12px;text-decoration:none;color:var(--navy);background:#eaf0f7;border-radius:99px;padding:3px 10px;white-space:nowrap}
+nav a:hover{background:var(--navy);color:#fff}
+main{max-width:1180px;margin:0 auto;padding:20px 3vw 60px}
+section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:22px 0}
+section h2{margin:0 0 4px;color:var(--navy);font-size:20px}
+section h2 span{display:inline-block;background:var(--orange);color:#fff;border-radius:6px;padding:0 8px;font-size:13px;margin-right:8px;vertical-align:2px}
+.sub{color:var(--mut);margin:0 0 10px;font-size:14px}
+svg.d{width:100%;height:auto;background:#fafcfe;border:1px solid var(--line);border-radius:8px}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px;font-size:13px}
+.read div{background:#f6f8fb;border-left:4px solid var(--blue);padding:8px 10px;border-radius:4px}
+.read b{color:var(--navy)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:#eef2f6;padding:0 4px;border-radius:3px}
+/* svg classes */
+.bx{fill:#fff;stroke:#8aa0b5;stroke-width:1.5}
+.nv{fill:#eaf0f7;stroke:#1a4470;stroke-width:2}
+.gr{fill:#eef7f1;stroke:#1f7a4d;stroke-width:2}
+.or{fill:#fff4ee;stroke:#e8622a;stroke-width:2}
+.bl{fill:#e8f1fa;stroke:#2c6aa3;stroke-width:2}
+.rd{fill:#fdf0ee;stroke:#c0392b;stroke-width:2}
+.gy{fill:#f3f5f8;stroke:#8aa0b5;stroke-width:1.5;stroke-dasharray:5 4}
+.dk{fill:#1a4470}.dg{fill:#1f7a4d}.do{fill:#e8622a}.db{fill:#2c6aa3}.dr{fill:#c0392b}
+text{font-family:Inter,system-ui,sans-serif}
+.t{font-size:12px;font-weight:600;fill:#1c2733}
+.h{font-size:13px;font-weight:700;fill:#1a4470}
+.s{font-size:11px;fill:#5b6b7b}
+.m{font-size:10.5px;font-family:ui-monospace,Menlo,Consolas,monospace;fill:#1c2733}
+.w{font-size:11.5px;font-weight:600;fill:#fff}
+.re{font-size:11px;font-weight:600;fill:#c0392b}
+.ln,.lg,.lo,.lr,.lb{stroke-width:1.7;fill:none}
+.ln{stroke:#5b6b7b;marker-end:url(#ar)}
+.lg{stroke:#1f7a4d;marker-end:url(#arg)}
+.lo{stroke:#e8622a;marker-end:url(#aro)}
+.lb{stroke:#2c6aa3;marker-end:url(#arb)}
+.lr{stroke:#c0392b;marker-end:url(#arr);stroke-dasharray:6 4}
+.dsh{stroke-dasharray:5 4}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5b6b7b"/></marker>
+<marker id="arg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1f7a4d"/></marker>
+<marker id="aro" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e8622a"/></marker>
+<marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2c6aa3"/></marker>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#c0392b"/></marker>
+</defs></svg>
+
+<header>
+<h1>Acme Labs — component architecture diagrams</h1>
+<p>One detailed diagram per component of the plan (identity &amp; CI → Terraform stacks → network → egress doors → DNS → firewall → GKE → pod → logging → Flux → mesh → ingress → delivery → stretch labs). Companion to <code>acme-labs-design.html</code> and <code>acme-labs-plan.md</code>.</p>
+</header>
+<nav>
+<a href="#d1">1 Identity &amp; CI</a><a href="#d2">2 Terraform stacks</a><a href="#d3">3 VPC &amp; IPAM</a><a href="#d4">4 Routes &amp; doors</a><a href="#d5">5 DNS path</a><a href="#d6">6 Firewall</a><a href="#d7">7 GKE internals</a><a href="#d8">8 Pod &amp; sidecars</a><a href="#d9">9 Logging</a><a href="#d10">10 Flux GitOps</a><a href="#d11">11 Mesh request</a><a href="#d12">12 Ingress</a><a href="#d13">13 Delivery</a><a href="#d14">14 Stretch</a>
+</nav>
+<main>
+
+<!-- ============ 1 ============ -->
+<section id="d1">
+<h2><span>1</span>Identity &amp; CI — GitLab → GCP federation</h2>
+<p class="sub">Component: <code>platform/bootstrap</code> + <code>platform/ci-templates</code>. No JSON keys anywhere.</p>
+<svg class="d" viewBox="0 0 1000 470">
+<rect class="bx" x="8" y="8" width="268" height="454" rx="10"/>
+<text class="h" x="20" y="30">GitLab.com · acme-labs-&lt;handle&gt;</text>
+<rect class="gr" x="22" y="44" width="240" height="98" rx="8"/>
+<text class="t" x="32" y="63">Job on main (protected)</text>
+<text class="m" x="32" y="81">ref=main · ref_protected=true</text>
+<text class="m" x="32" y="97">id_tokens → GCP_OIDC (JWT)</text>
+<text class="m" x="32" y="113">aud = …/providers/gitlab-oidc</text>
+<text class="m" x="32" y="129">project_path = &lt;root&gt;/…</text>
+<rect class="bx" x="22" y="156" width="240" height="98" rx="8"/>
+<text class="t" x="32" y="175">Job on feature/x</text>
+<text class="m" x="32" y="193">ref=feature/x · ref_protected=false</text>
+<text class="m" x="32" y="209">id_tokens → GCP_OIDC (JWT)</text>
+<text class="m" x="32" y="225">aud = …/providers/gitlab-oidc</text>
+<text class="m" x="32" y="241">project_path = &lt;root&gt;/…</text>
+<rect class="nv" x="22" y="268" width="240" height="88" rx="8"/>
+<text class="t" x="32" y="287">Group CI variables (inherited)</text>
+<text class="m" x="32" y="305">WIF_PROVIDER · SA_NP · SA_P_RO</text>
+<text class="m" x="32" y="321">SA_P, STATE_P [protected only]</text>
+<text class="m" x="32" y="337">AR_REPO: applications/ only</text>
+<rect class="or" x="22" y="370" width="240" height="78" rx="8"/>
+<text class="t" x="32" y="389">include: ci-templates/terraform.yml</text>
+<text class="m" x="32" y="407">modules: git+CI_JOB_TOKEN</text>
+<text class="m" x="32" y="423">(allow-list in terraform-modules)</text>
+<text class="s" x="32" y="440">stages: validate → plan → apply</text>
+
+<rect class="bl" x="320" y="30" width="300" height="300" rx="10"/>
+<text class="h" x="332" y="52">Workload Identity Federation (np)</text>
+<text class="m" x="334" y="78">pool: gitlab-pool</text>
+<text class="m" x="334" y="94">provider: gitlab-oidc</text>
+<text class="m" x="334" y="110">issuer: https://gitlab.com</text>
+<text class="t" x="334" y="136">attribute mapping</text>
+<text class="m" x="334" y="153">root_group = path.split('/')[0]</text>
+<text class="m" x="334" y="169">root_group_ref = group:ref:protected</text>
+<text class="t" x="334" y="195">attribute condition</text>
+<text class="m" x="334" y="212">path.startsWith('&lt;root&gt;/')</text>
+<text class="t" x="334" y="238">evaluation</text>
+<text class="s" x="334" y="255">① verify JWT signature (GitLab JWKS)</text>
+<text class="s" x="334" y="271">② evaluate attribute condition</text>
+<text class="s" x="334" y="287">③ match principalSet on the target SA</text>
+<text class="s" x="334" y="310">anything outside the root group → rejected</text>
+<rect class="gr" x="320" y="350" width="300" height="100" rx="8"/>
+<text class="t" x="332" y="372">STS + IAM Credentials</text>
+<text class="m" x="332" y="392">sts.googleapis.com token exchange</text>
+<text class="m" x="332" y="408">generateAccessToken (impersonation)</text>
+<text class="s" x="332" y="430">→ short-lived access token (~1 h)</text>
+
+<rect class="nv" x="680" y="30" width="312" height="84" rx="8"/>
+<text class="t" x="692" y="50">pipeline-np  (np project)</text>
+<text class="m" x="692" y="68">binds attribute.root_group/&lt;root&gt;</text>
+<text class="m" x="692" y="84">editor · projectIamAdmin ·</text>
+<text class="m" x="692" y="100">serviceAccountAdmin · container.admin</text>
+<rect class="bx" x="680" y="128" width="312" height="72" rx="8"/>
+<text class="t" x="692" y="148">pipeline-p-ro  (prod project)</text>
+<text class="m" x="692" y="166">binds attribute.root_group/&lt;root&gt;</text>
+<text class="m" x="692" y="182">roles/viewer → feature-branch plans</text>
+<rect class="or" x="680" y="214" width="312" height="84" rx="8"/>
+<text class="t" x="692" y="234">pipeline-p  (prod project)</text>
+<text class="m" x="692" y="252">binds root_group_ref/&lt;root&gt;:main:true</text>
+<text class="m" x="692" y="268">editor · projectIamAdmin</text>
+<text class="s" x="692" y="287">only a PROTECTED main token matches</text>
+<text class="re" x="640" y="323">✘ feature job → pipeline-p : STS denies (attr ≠ …:main:true)</text>
+<rect class="nv" x="680" y="340" width="150" height="110" rx="8"/>
+<text class="t" x="690" y="360">np project</text>
+<text class="s" x="690" y="378">state_np bucket</text>
+<text class="s" x="690" y="394">VPC · GKE · AR</text>
+<text class="s" x="690" y="410">logging · apps</text>
+<text class="s" x="690" y="436">← pipeline-np acts</text>
+<rect class="bx" x="842" y="340" width="150" height="110" rx="8"/>
+<text class="t" x="852" y="360">prod project</text>
+<text class="s" x="852" y="378">state_p bucket</text>
+<text class="s" x="852" y="394">(empty by design)</text>
+<text class="s" x="852" y="412">proves the boundary</text>
+<text class="s" x="852" y="436">← pipeline-p / -ro</text>
+
+<path class="lg" d="M262 93 L320 93"/><text class="s" x="284" y="86">①</text>
+<path class="ln" d="M262 205 L320 205"/><text class="s" x="284" y="198">①</text>
+<path class="ln" d="M470 330 L470 350"/>
+<path class="lg" d="M620 100 L680 72"/>
+<path class="lg" d="M620 150 L680 164"/>
+<path class="lg" d="M620 200 L680 250"/>
+<path class="lr" d="M620 250 L682 296"/>
+</svg>
+<div class="read">
+<div><b>Read it:</b> job → JWT → WIF checks → STS mints a short-lived token for the SA the job asks to impersonate. ① the same JWT shape comes from every job; the <i>claims</i> differ.</div>
+<div><b>Trust boundary:</b> lives in the provider's attribute mapping and the SA's <code>workloadIdentityUser</code> principalSet — not in GitLab settings.</div>
+<div><b>Prove it:</b> a feature-branch job asking for <code>pipeline-p</code> must fail at STS; for <code>pipeline-p-ro</code> it works.</div>
+</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="d2">
+<h2><span>2</span>Terraform stacks, state and shared modules</h2>
+<p class="sub">Component: Tier-1 modules reused by Tier-1 stacks and Tier-3 domain infra. One state prefix per stack in the np bucket.</p>
+<svg class="d" viewBox="0 0 1000 450">
+<rect class="bl" x="20" y="10" width="960" height="84" rx="10"/>
+<text class="h" x="34" y="32">platform/terraform-modules  (git tags: v0.1.0, v0.2.0 …)</text>
+<g>
+<rect class="bx" x="34" y="44" width="170" height="36" rx="6"/><text class="m" x="44" y="66">app-identity (GSA+WI)</text>
+<rect class="bx" x="214" y="44" width="150" height="36" rx="6"/><text class="m" x="224" y="66">gcs-bucket</text>
+<rect class="bx" x="374" y="44" width="150" height="36" rx="6"/><text class="m" x="384" y="66">subnet</text>
+<rect class="bx" x="534" y="44" width="170" height="36" rx="6"/><text class="m" x="544" y="66">wif-sa (pipelines)</text>
+<rect class="gy" x="714" y="44" width="250" height="36" rx="6"/><text class="s" x="724" y="66">later: pubsub · cloudsql · firebase</text>
+</g>
+
+<rect class="or" x="20" y="150" width="215" height="118" rx="8"/>
+<text class="t" x="30" y="170">bootstrap</text>
+<text class="s" x="30" y="188">projects · APIs · state buckets</text>
+<text class="s" x="30" y="203">WIF pool/provider · pipeline SAs</text>
+<text class="s" x="30" y="218">run LOCAL first (chicken-and-egg)</text>
+<text class="m" x="30" y="248">prefix platform/bootstrap</text>
+<rect class="nv" x="260" y="150" width="215" height="118" rx="8"/>
+<text class="t" x="270" y="170">network</text>
+<text class="s" x="270" y="188">VPC · subnets · routes · NAT</text>
+<text class="s" x="270" y="203">DNS zones · firewall · (PSA)</text>
+<text class="s" x="270" y="218">outputs: network_self_link, subnet</text>
+<text class="m" x="270" y="248">prefix platform/network</text>
+<rect class="nv" x="500" y="150" width="215" height="118" rx="8"/>
+<text class="t" x="510" y="170">gke-platform</text>
+<text class="s" x="510" y="188">cluster · node pool · node SA</text>
+<text class="s" x="510" y="203">Artifact Registry (apps, mirror)</text>
+<text class="s" x="510" y="218">reads network via remote_state</text>
+<text class="m" x="510" y="248">prefix platform/gke-platform</text>
+<rect class="nv" x="740" y="150" width="240" height="118" rx="8"/>
+<text class="t" x="750" y="170">observability</text>
+<text class="s" x="750" y="188">log bucket · sink · metrics</text>
+<text class="s" x="750" y="203">project-level only (no deps)</text>
+<text class="m" x="750" y="248">prefix platform/observability</text>
+
+<path class="lb dsh" d="M110 94 L110 150"/><path class="lb dsh" d="M367 94 L367 150"/><path class="lb dsh" d="M607 94 L607 150"/>
+<text class="s" x="118" y="124">source = git::…//modules/x?ref=v0.1.0</text>
+<path class="lg" d="M235 200 L260 200"/><path class="lg" d="M475 200 L500 200"/><path class="lg" d="M715 200 L740 200"/>
+<text class="s" x="22" y="287">bootstrap creates what later stacks need · network → gke via terraform_remote_state · observability needs only the project id</text>
+
+<path class="ln dsh" d="M607 268 L607 300"/>
+<path class="ln dsh" d="M175 300 L715 300" stroke-width="1" marker-end="none"/>
+<text class="s" x="725" y="304">names only — deterministic,</text><text class="s" x="725" y="318">no lookup service</text>
+<g>
+<rect class="or" x="60" y="318" width="230" height="64" rx="8"/><text class="t" x="70" y="338">orders-infra</text><text class="s" x="70" y="355">module app-identity → orders-app + WI</text><text class="m" x="70" y="372">prefix apps/orders/infra</text>
+<rect class="or" x="330" y="318" width="230" height="64" rx="8"/><text class="t" x="340" y="338">payments-infra</text><text class="s" x="340" y="355">module app-identity → payments-app</text><text class="m" x="340" y="372">prefix apps/payments/infra</text>
+<rect class="or" x="600" y="318" width="230" height="64" rx="8"/><text class="t" x="610" y="338">inventory-infra</text><text class="s" x="610" y="355">module app-identity → inventory-app</text><text class="m" x="610" y="372">prefix apps/inventory/infra</text>
+<rect class="gy" x="860" y="318" width="125" height="64" rx="8"/><text class="s" x="868" y="344">shared-services</text><text class="s" x="868" y="360">(later: SQL…)</text>
+</g>
+<path class="ln" d="M175 300 L175 318"/><path class="ln" d="M445 300 L445 318"/><path class="ln" d="M715 300 L715 318"/>
+<rect class="gr" x="20" y="402" width="960" height="38" rx="8"/>
+<text class="t" x="32" y="426">GCS &lt;np-project&gt;-tfstate-np (versioned, UBLA, public-access-prevention) · prefixes = one per stack (apps/* = applications/&lt;domain&gt;/infra) · CI auth via WIF</text>
+</svg>
+<div class="read">
+<div><b>Blast radius:</b> each stack has its own state prefix; domain infra can never destroy the network.</div>
+<div><b>No copy-paste:</b> the three domain repos differ by 3 lines because logic lives in <code>app-identity</code> at a pinned tag.</div>
+<div><b>Handoffs:</b> remote_state for platform outputs; deterministic names between Terraform and Flux.</div>
+</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="d3">
+<h2><span>3</span>VPC, subnets and IPAM</h2>
+<p class="sub">Component: <code>platform/network</code> (part 1). Every CIDR is a decision you have to defend.</p>
+<svg class="d" viewBox="0 0 1000 500">
+<rect class="nv" x="10" y="10" width="700" height="480" rx="12" fill-opacity=".45"/>
+<text class="h" x="24" y="32">VPC acme-main · custom mode · routing GLOBAL · default route deleted at creation</text>
+<rect class="bl" x="30" y="50" width="420" height="205" rx="8"/>
+<text class="t" x="42" y="70">subnet gke-main 10.10.0.0/24 · PGA on · flow logs 10 %</text>
+<g>
+<rect class="bx" x="45" y="84" width="120" height="62" rx="6"/><text class="m" x="53" y="104">node-1 10.10.0.x</text><text class="s" x="53" y="121">pods 10.20.0.0/25</text><text class="s" x="53" y="136">(64 pods max)</text>
+<rect class="bx" x="175" y="84" width="120" height="62" rx="6"/><text class="m" x="183" y="104">node-2 10.10.0.y</text><text class="s" x="183" y="121">pods 10.20.0.128/25</text><text class="s" x="183" y="136">(64 pods max)</text>
+<rect class="bx" x="305" y="84" width="130" height="62" rx="6"/><text class="m" x="313" y="104">node-3 (autoscale)</text><text class="s" x="313" y="121">pods 10.20.1.0/25</text><text class="s" x="313" y="136">(spot, may vanish)</text>
+</g>
+<rect class="or" x="45" y="160" width="250" height="26" rx="5"/><text class="m" x="53" y="177">secondary gke-pods 10.20.0.0/20</text>
+<rect class="gr" x="305" y="160" width="130" height="26" rx="5"/><text class="m" x="311" y="177">svcs 10.30.0.0/24</text>
+<text class="s" x="45" y="210">4096 pod IPs ÷ 128 per node (/25 for 64 pods) = 32 nodes max</text>
+<text class="s" x="45" y="226">secondary ranges are fixed at cluster creation — size them first</text>
+<text class="s" x="45" y="242">node range /24 = 252 usable → plenty; pods are the scarce one</text>
+<rect class="bx" x="470" y="50" width="225" height="92" rx="8"/>
+<text class="t" x="482" y="70">subnet ops 10.10.1.0/28</text>
+<text class="s" x="482" y="88">probe VM · no external IP</text>
+<text class="s" x="482" y="104">tags: iap-ssh (+ allowed-open-nat to test)</text>
+<text class="s" x="482" y="120">reach via IAP tunnel only</text>
+<rect class="or" x="470" y="158" width="225" height="97" rx="8"/>
+<text class="t" x="482" y="178">proxy-only-subnet</text>
+<text class="m" x="482" y="195">10.10.254.0/23</text>
+<text class="s" x="482" y="212">purpose REGIONAL_MANAGED_PROXY</text>
+<text class="s" x="482" y="228">Google Envoy pool for internal L7 LB</text>
+<text class="s" x="482" y="244">no VM/pod ever gets an IP here</text>
+<rect class="or" x="30" y="275" width="320" height="92" rx="8"/>
+<text class="t" x="42" y="295">Cloud Router acme-router + Cloud NAT acme-nat</text>
+<text class="s" x="42" y="313">nat-external-0 / -1 (static, MANUAL_ONLY)</text>
+<text class="s" x="42" y="329">applies to gke-main, ALL_IP_RANGES (nodes+pods)</text>
+<text class="s" x="42" y="345">only serves routes whose next hop is the IGW</text>
+<rect class="gr" x="370" y="275" width="325" height="92" rx="8"/>
+<text class="t" x="382" y="295">Cloud DNS private zones (attached to VPC)</text>
+<text class="s" x="382" y="313">googleapis.com · gcr.io · pkg.dev</text>
+<text class="s" x="382" y="329">*.zone CNAME → private.googleapis.com</text>
+<text class="s" x="382" y="345">A 199.36.153.8 – .11   (see diagram 5)</text>
+<rect class="bx" x="30" y="385" width="665" height="92" rx="8"/>
+<text class="t" x="42" y="405">Custom routes (detail in diagram 4)</text>
+<text class="m" x="42" y="424">p900 199.36.153.8/30 → IGW      p900 inet-&lt;name&gt; /32 → IGW (allow-list)</text>
+<text class="m" x="42" y="441">p999 0.0.0.0/0 tag allowed-open-nat → IGW      p1000 tw-default-internet (P3 only)</text>
+<text class="s" x="42" y="462">+ implicit subnet routes. Firewall rules in diagram 6.</text>
+
+<rect class="nv" x="745" y="50" width="245" height="120" rx="8"/>
+<text class="t" x="757" y="70">GKE control plane</text>
+<text class="s" x="757" y="88">Google tenant project (peered)</text>
+<text class="m" x="757" y="106">10.10.250.0/28 (mandatory /28)</text>
+<text class="s" x="757" y="124">public endpoint ← admin /32 only</text>
+<text class="s" x="757" y="140">private endpoint ← nodes</text>
+<rect class="gr" x="745" y="190" width="245" height="72" rx="8"/>
+<text class="t" x="757" y="210">Google APIs</text>
+<text class="s" x="757" y="228">Logging · GCS · Artifact Registry</text>
+<text class="s" x="757" y="244">via private.googleapis.com VIP</text>
+<rect class="or" x="745" y="282" width="245" height="64" rx="8"/>
+<text class="t" x="757" y="302">Internet / partners</text>
+<text class="s" x="757" y="320">see two static NAT IPs only</text>
+<rect class="or" x="745" y="366" width="245" height="64" rx="8"/>
+<text class="t" x="757" y="386">gitlab.com</text>
+<text class="s" x="757" y="404">Flux source + CI (via Door 3)</text>
+<path class="lb" d="M710 110 L745 110"/><text class="s" x="712" y="104">peer</text>
+<path class="lg" d="M710 226 L745 226"/><text class="s" x="712" y="220">D1</text>
+<path class="lo" d="M710 314 L745 314"/><text class="s" x="712" y="308">D3</text>
+<path class="lo" d="M710 398 L745 398"/><text class="s" x="712" y="392">D3</text>
+</svg>
+<div class="read">
+<div><b>Why decide first:</b> pod/service secondary ranges are baked into the cluster; changing them means rebuilding.</div>
+<div><b>Capacity math:</b> <code>max_pods_per_node=64</code> gives each node a /25; a /20 pod range therefore caps you at 32 nodes.</div>
+<div><b>Hidden:</b> the proxy-only subnet is consumed by Google's Envoys, not your workloads — but your firewall must still allow it.</div>
+</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="d4">
+<h2><span>4</span>Routes and the four outbound doors</h2>
+<p class="sub">Component: <code>platform/network</code> (part 2). Longest prefix wins; priority breaks ties; tags scope who a route applies to.</p>
+<svg class="d" viewBox="0 0 1000 560">
+<rect class="nv" x="10" y="20" width="240" height="100" rx="8"/>
+<text class="t" x="22" y="40">GKE node + its pods</text>
+<text class="m" x="22" y="58">tags: gke-node</text>
+<text class="m" x="22" y="74">      allowed-open-nat</text>
+<text class="s" x="22" y="96">pods SNAT'd to node IP — they</text>
+<text class="s" x="22" y="110">inherit the node's route tags</text>
+<rect class="bx" x="10" y="140" width="240" height="80" rx="8"/>
+<text class="t" x="22" y="160">probe VM (ops subnet)</text>
+<text class="m" x="22" y="178">tag: iap-ssh only</text>
+<text class="s" x="22" y="198">no external IP — the control case</text>
+<rect class="bx" x="290" y="20" width="340" height="290" rx="8"/>
+<text class="h" x="302" y="42">VPC route table (longest prefix → priority)</text>
+<g>
+<rect class="bl" x="300" y="52" width="320" height="38" rx="5"/><text class="m" x="308" y="68">subnets 10.10.x · 10.20/30.x</text><text class="s" x="308" y="83">→ local (system routes)</text>
+<rect class="gr" x="300" y="96" width="320" height="38" rx="5"/><text class="m" x="308" y="112">199.36.153.8/30 · p900</text><text class="s" x="308" y="127">private-googleapis-vip → IGW   (Door 1)</text>
+<rect class="nv" x="300" y="140" width="320" height="38" rx="5"/><text class="m" x="308" y="156">&lt;ip&gt;/32 · p900 · inet-&lt;name&gt;</text><text class="s" x="308" y="171">→ IGW   (Door 2, vip_allowlist map)</text>
+<rect class="or" x="300" y="184" width="320" height="38" rx="5"/><text class="m" x="308" y="200">0.0.0.0/0 · p999 · tag allowed-open-nat</text><text class="s" x="308" y="215">→ IGW   (Door 3)</text>
+<rect class="rd" x="300" y="228" width="320" height="38" rx="5"/><text class="m" x="308" y="244">0.0.0.0/0 · p1000 · tw-default-internet</text><text class="s" x="308" y="259">→ IGW   ✂ training wheels — removed in P8</text>
+<rect class="gy" x="300" y="272" width="320" height="30" rx="5"/><text class="s" x="308" y="291">no matching route → packet dropped (blackhole)</text>
+</g>
+<rect class="bl" x="655" y="20" width="110" height="100" rx="8"/>
+<text class="t" x="663" y="42">next hop</text><text class="m" x="663" y="60">default-</text><text class="m" x="663" y="74">internet-</text><text class="m" x="663" y="88">gateway</text>
+<rect class="or" x="655" y="140" width="110" height="170" rx="8"/>
+<text class="t" x="663" y="162">Cloud NAT</text><text class="s" x="663" y="180">rewrites src</text><text class="s" x="663" y="195">to static IPs</text><text class="m" x="663" y="215">nat-external-0</text><text class="m" x="663" y="231">nat-external-1</text><text class="s" x="663" y="256">only for traffic</text><text class="s" x="663" y="271">whose next hop</text><text class="s" x="663" y="286">is the IGW</text>
+<rect class="gr" x="795" y="20" width="195" height="56" rx="8"/><text class="t" x="805" y="40">Door 1 · Google APIs</text><text class="s" x="805" y="58">PGA + private VIP (no NAT)</text>
+<rect class="nv" x="795" y="88" width="195" height="56" rx="8"/><text class="t" x="805" y="108">Door 2 · /32 allow-list</text><text class="s" x="805" y="126">exact external IPs only</text>
+<rect class="or" x="795" y="156" width="195" height="56" rx="8"/><text class="t" x="805" y="176">Door 3 · Internet via NAT</text><text class="s" x="805" y="194">tagged nodes, 2 static IPs</text>
+<rect class="bl" x="795" y="224" width="195" height="86" rx="8"/><text class="t" x="805" y="244">Door 4 · Hybrid (S2)</text><text class="s" x="805" y="262">HA VPN + Cloud Router BGP</text><text class="s" x="805" y="278">routes learned dynamically,</text><text class="s" x="805" y="294">not via the IGW</text>
+<path class="ln" d="M250 70 L290 70"/><path class="ln dsh" d="M250 180 L290 180"/>
+<path class="ln" d="M630 90 L655 70"/>
+<path class="ln" d="M710 120 L710 140"/>
+<path class="lg" d="M765 48 L795 48"/>
+<path class="ln" d="M765 80 L795 112"/>
+<path class="lo" d="M765 190 L795 184"/>
+<rect class="bx" x="10" y="330" width="980" height="220" rx="8"/>
+<text class="h" x="24" y="352">Packet walkthroughs — predict first, then verify with flow logs / connectivity tests</text>
+<circle cx="28" cy="376" r="6" class="dg"/><text class="s" x="42" y="380">node → storage.googleapis.com : DNS → 199.36.153.9 → route p900 → Google APIs ✔ (never leaves Google; no NAT)</text>
+<circle cx="28" cy="408" r="6" class="do"/><text class="s" x="42" y="412">tagged node → gitlab.com : matches 0.0.0.0/0 p999 (tag) → IGW → Cloud NAT → src nat-external-0/1 ✔</text>
+<circle cx="28" cy="440" r="6" class="dk"/><text class="s" x="42" y="444">node → 203.0.113.10 (allow-listed) : /32 p900 beats /0 → IGW → NAT ✔ (works even for an untagged node)</text>
+<circle cx="28" cy="472" r="6" class="dr"/><text class="s" x="42" y="476">probe VM (untagged) → example.com : P3 ✔ via p1000 · after P8 ✘ no route → dropped (this is the lab)</text>
+<circle cx="28" cy="504" r="6" class="db"/><text class="s" x="42" y="508">pod → internet : SNAT to node IP, then the NODE's tag decides — pod identity is invisible to VPC routes/firewall</text>
+<text class="re" x="42" y="534">Trap: deleting the default route also breaks image pulls, Flux→GitLab and chart downloads until each flow has a door.</text>
+</svg>
+<div class="read">
+<div><b>Key nuance:</b> Cloud NAT is not a route — it only acts on packets already routed to the internet gateway.</div>
+<div><b>Why two static IPs:</b> partners allow-list <code>nat-external-0/1</code>; ephemeral IPs would break them.</div>
+<div><b>Per-pod egress:</b> impossible at VPC level; use NetworkPolicy / Istio <code>REGISTRY_ONLY</code> (S5).</div>
+</div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="d5">
+<h2><span>5</span>DNS path for Private Google Access</h2>
+<p class="sub">Component: Cloud DNS private zones + VIP routes. Without both, Door 1 silently fails after the default route is gone.</p>
+<svg class="d" viewBox="0 0 1000 400">
+<g>
+<rect class="or" x="10" y="30" width="170" height="86" rx="8"/><text class="t" x="20" y="50">① app (pod)</text><text class="s" x="20" y="68">resolve</text><text class="m" x="20" y="84">storage.googleapis.com</text>
+<rect class="bl" x="205" y="30" width="180" height="86" rx="8"/><text class="t" x="215" y="50">② kube-dns</text><text class="s" x="215" y="68">ClusterIP 10.30.0.10</text><text class="s" x="215" y="84">cluster.local → in-cluster</text><text class="s" x="215" y="100">others → forward upstream</text>
+<rect class="bx" x="410" y="30" width="180" height="86" rx="8"/><text class="t" x="420" y="50">③ VPC resolver</text><text class="m" x="420" y="68">169.254.169.254</text><text class="s" x="420" y="84">checks private zones first</text><text class="s" x="420" y="100">attached to acme-main</text>
+<rect class="gr" x="615" y="30" width="190" height="86" rx="8"/><text class="t" x="625" y="50">④ private zone</text><text class="m" x="625" y="68">googleapis.com.</text><text class="s" x="625" y="84">*.googleapis.com CNAME</text><text class="m" x="625" y="100">→ private.googleapis.com.</text>
+<rect class="gr" x="830" y="30" width="160" height="86" rx="8"/><text class="t" x="840" y="50">⑤ A records</text><text class="m" x="840" y="68">199.36.153.8</text><text class="m" x="840" y="82">.9  .10  .11</text><text class="s" x="840" y="102">(private VIP /30)</text>
+</g>
+<path class="ln" d="M180 73 L205 73"/><path class="ln" d="M385 73 L410 73"/><path class="ln" d="M590 73 L615 73"/><path class="ln" d="M805 73 L830 73"/>
+<rect class="bx" x="10" y="150" width="250" height="70" rx="8"/><text class="t" x="20" y="170">⑥ TCP 443 → 199.36.153.9</text><text class="s" x="20" y="188">app opens the connection</text><text class="s" x="20" y="204">to the VIP, not a public IP</text>
+<rect class="gr" x="300" y="150" width="270" height="70" rx="8"/><text class="t" x="310" y="170">⑦ route p900 199.36.153.8/30 → IGW</text><text class="s" x="310" y="188">private-googleapis-vip route</text><text class="s" x="310" y="204">(needed because no default route)</text>
+<rect class="gr" x="610" y="150" width="380" height="70" rx="8"/><text class="t" x="620" y="170">⑧ Google front end serves the API</text><text class="s" x="620" y="188">PGA lets VMs/nodes without external IPs reach it;</text><text class="s" x="620" y="204">traffic stays on Google's network</text>
+<path class="ln" d="M260 185 L300 185"/><path class="ln" d="M570 185 L610 185"/>
+<rect class="rd" x="10" y="250" width="480" height="130" rx="8"/>
+<text class="h" x="22" y="272" style="fill:#c0392b">If the zones are missing</text>
+<text class="s" x="22" y="294">storage.googleapis.com → public 142.250.x.x</text>
+<text class="s" x="22" y="310">needs 0.0.0.0/0 → IGW → (deleted in P8)</text>
+<text class="s" x="22" y="326">→ timeouts although PGA is "enabled" on the subnet</text>
+<text class="s" x="22" y="348">PGA flag alone ≠ working Door 1: DNS + route both required.</text>
+<rect class="gr" x="510" y="250" width="480" height="130" rx="8"/>
+<text class="h" x="522" y="272" style="fill:#1f7a4d">Three zones, same pattern</text>
+<text class="m" x="522" y="294">googleapis.com.  *  CNAME private.googleapis.com.</text>
+<text class="m" x="522" y="310">gcr.io.          *  CNAME private.googleapis.com.</text>
+<text class="m" x="522" y="326">pkg.dev.         *  CNAME private.googleapis.com.</text>
+<text class="s" x="522" y="350">pkg.dev = Artifact Registry; gcr.io = legacy / GKE system images</text>
+<text class="s" x="522" y="366">Use restricted.googleapis.com (199.36.153.4/30) if you add VPC-SC.</text>
+</svg>
+<div class="read">
+<div><b>Verify:</b> from the probe VM, <code>dig storage.googleapis.com</code> must return 199.36.153.x; <code>curl -I https://storage.googleapis.com</code> must connect.</div>
+<div><b>Nuance:</b> the Istio chart repo host <code>istio-release.storage.googleapis.com</code> also resolves through the wildcard — Flux may use Door 1 for it.</div>
+</div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="d6">
+<h2><span>6</span>Firewall rules and what each one unblocks</h2>
+<p class="sub">Component: <code>platform/network</code> firewall. VPC defaults: deny all ingress, allow all egress — add only justified ingress.</p>
+<svg class="d" viewBox="0 0 1000 440">
+<rect class="bx" x="10" y="20" width="330" height="62" rx="8"/><text class="t" x="20" y="40">IAP range 35.235.240.0/20</text><text class="s" x="20" y="58">allow-iap-ssh · tcp/22</text><text class="s" x="20" y="73">target tag iap-ssh → probe VM only</text>
+<rect class="bx" x="10" y="100" width="330" height="62" rx="8"/><text class="t" x="20" y="120">LB health 130.211.0.0/22 + 35.191.0.0/16</text><text class="s" x="20" y="138">allow-lb-health · tcp (all ports)</text><text class="s" x="20" y="153">target tag gke-node</text>
+<rect class="or" x="10" y="180" width="330" height="62" rx="8"/><text class="t" x="20" y="200">proxy-only 10.10.254.0/23</text><text class="s" x="20" y="218">allow-proxy-only-to-nodes · 8080, 8443, 15021</text><text class="s" x="20" y="233">needed for gke-l7-rilb → backends</text>
+<rect class="nv" x="10" y="260" width="330" height="76" rx="8"/><text class="t" x="20" y="280">GKE master 10.10.250.0/28</text><text class="s" x="20" y="298">allow-gke-master-webhooks · 15017, 8443, 9443, 10250</text><text class="s" x="20" y="313">istiod injection webhook — classic private-cluster trap</text><text class="s" x="20" y="328">(admission webhooks are called BY the master)</text>
+<rect class="gr" x="10" y="354" width="330" height="70" rx="8"/><text class="t" x="20" y="374">GKE-created rules (gke-acme-np-*)</text><text class="s" x="20" y="392">node↔node, pod CIDR → node, master → kubelet 10250</text><text class="s" x="20" y="408">auto-created; read them, don't delete them</text>
+
+<rect class="nv" x="430" y="120" width="250" height="170" rx="10"/>
+<text class="h" x="442" y="144">GKE nodes</text><text class="m" x="442" y="162">tag: gke-node</text><text class="m" x="442" y="178">tag: allowed-open-nat</text>
+<text class="s" x="442" y="202">pods behind them see only</text><text class="s" x="442" y="218">what the node rules allow +</text><text class="s" x="442" y="234">NetworkPolicy (diagram 11)</text>
+<rect class="bx" x="430" y="20" width="250" height="62" rx="8"/><text class="t" x="442" y="40">probe VM  (ops subnet)</text><text class="m" x="442" y="58">tag: iap-ssh</text><text class="s" x="442" y="74">test bench for every door</text>
+<path class="ln" d="M340 51 L430 51"/>
+<path class="lg" d="M340 131 L430 160"/><path class="lo" d="M340 211 L430 200"/><path class="lb" d="M340 298 L430 250"/><path class="ln" d="M340 389 L460 290"/>
+<rect class="bx" x="730" y="20" width="260" height="130" rx="8"/>
+<text class="h" x="742" y="42">Implicit VPC rules</text>
+<text class="s" x="742" y="64">ingress: deny all (priority 65535)</text><text class="s" x="742" y="80">egress: allow all (priority 65535)</text>
+<text class="s" x="742" y="104">→ nodes can talk out; routes decide</text><text class="s" x="742" y="120">where "out" can go (diagram 4)</text>
+<rect class="or" x="730" y="170" width="260" height="120" rx="8"/>
+<text class="h" x="742" y="192">Hardening stretch</text>
+<text class="s" x="742" y="214">add egress deny (p65000) + explicit allows</text><text class="s" x="742" y="230">for Google VIP, NAT tags, DNS, master</text><text class="s" x="742" y="246">→ firewall becomes a 2nd layer behind routes</text><text class="s" x="742" y="266">(routes = where, firewall = whether)</text>
+<rect class="rd" x="430" y="320" width="560" height="100" rx="8"/>
+<text class="h" x="442" y="342" style="fill:#c0392b">Failure signatures worth memorizing</text>
+<text class="s" x="442" y="364">sidecar not injected / webhook timeout → master→node 15017 blocked</text>
+<text class="s" x="442" y="380">LB 502 / unhealthy backends → proxy-only or health-check range blocked</text>
+<text class="s" x="442" y="396">nodes NotReady, no image pulls → egress path (NAT/PGA), not firewall</text>
+</svg>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="d7">
+<h2><span>7</span>GKE cluster internals + Workload Identity path</h2>
+<p class="sub">Component: <code>platform/gke-platform</code>. Private zonal Standard cluster, Dataplane V2, spot nodes.</p>
+<svg class="d" viewBox="0 0 1000 540">
+<rect class="bl" x="10" y="20" width="250" height="270" rx="10"/>
+<text class="h" x="22" y="44">Control plane (Google-managed)</text>
+<text class="s" x="22" y="66">kube-apiserver · etcd · scheduler</text><text class="s" x="22" y="82">controller-manager</text>
+<text class="m" x="22" y="106">10.10.250.0/28 (VPC peering)</text>
+<text class="s" x="22" y="130">private endpoint ← nodes</text><text class="s" x="22" y="146">public endpoint (enable_private_endpoint=false)</text>
+<text class="s" x="22" y="162">  authorized networks: admin /32 only</text>
+<text class="s" x="22" y="186">calls OUT to nodes for:</text><text class="m" x="22" y="202">kubelet 10250 · webhooks 15017/9443</text>
+<text class="s" x="22" y="228">release channel REGULAR · Gateway API</text><text class="s" x="22" y="244">channel STANDARD enabled</text>
+<text class="s" x="22" y="268">Flux runs inside → CI needs no kube access</text>
+<rect class="bx" x="10" y="312" width="250" height="84" rx="8"/><text class="t" x="22" y="334">Admin workstation</text><text class="s" x="22" y="352">kubectl · flux · istioctl</text><text class="s" x="22" y="368">egress IP must equal authorized /32</text>
+<path class="ln" d="M135 312 L135 290"/>
+<rect class="nv" x="300" y="20" width="500" height="500" rx="10" fill-opacity=".5"/>
+<text class="h" x="314" y="44">Node pool "main" · e2-standard-2 spot · 2–3 nodes · 30 GB pd-standard</text>
+<rect class="bx" x="316" y="60" width="468" height="440" rx="8"/>
+<text class="t" x="328" y="82">one node (VM) · tags gke-node, allowed-open-nat · SA gke-nodes</text>
+<g>
+<rect class="gr" x="328" y="96" width="140" height="48" rx="6"/><text class="t" x="336" y="116">kubelet</text><text class="s" x="336" y="133">↔ control plane</text>
+<rect class="bl" x="476" y="96" width="150" height="48" rx="6"/><text class="t" x="484" y="116">anetd (Cilium eBPF)</text><text class="s" x="484" y="133">Dataplane V2 · policy</text>
+<rect class="or" x="634" y="96" width="140" height="48" rx="6"/><text class="t" x="642" y="116">metadata server</text><text class="m" x="642" y="133">169.254.169.252:988</text>
+<rect class="bx" x="328" y="152" width="140" height="44" rx="6"/><text class="t" x="336" y="172">containerd</text><text class="s" x="336" y="188">pulls via PGA / NAT</text>
+<rect class="bx" x="476" y="152" width="150" height="44" rx="6"/><text class="t" x="484" y="172">fluentbit-gke</text><text class="s" x="484" y="188">node log agent → Logging</text>
+<rect class="bx" x="634" y="152" width="140" height="44" rx="6"/><text class="t" x="642" y="172">ip-masq / SNAT</text><text class="s" x="642" y="188">pod → node IP</text>
+</g>
+<rect class="or" x="328" y="220" width="446" height="150" rx="8"/>
+<text class="t" x="340" y="240">Pods (IPs from 10.20.0.0/20 slice, e.g. /25 per node)</text>
+<rect class="bx" x="340" y="252" width="130" height="104" rx="6"/><text class="s" x="348" y="270">dom-orders pod</text><text class="s" x="348" y="286">KSA orders</text><text class="s" x="348" y="302">→ GSA orders-app</text><text class="s" x="348" y="318">sidecars ×3 + app</text>
+<rect class="bx" x="480" y="252" width="130" height="104" rx="6"/><text class="s" x="488" y="270">dom-payments pod</text><text class="s" x="488" y="286">KSA payments</text><text class="s" x="488" y="302">→ GSA payments-app</text><text class="s" x="488" y="318">sidecars ×3 + app</text>
+<rect class="bx" x="620" y="252" width="144" height="104" rx="6"/><text class="s" x="628" y="270">dom-inventory pod</text><text class="s" x="628" y="286">KSA inventory</text><text class="s" x="628" y="302">→ GSA inventory-app</text><text class="s" x="628" y="318">sidecars ×3 + app</text>
+<rect class="gy" x="328" y="386" width="446" height="100" rx="8"/>
+<text class="t" x="340" y="406">platform pods on the same nodes</text>
+<text class="s" x="340" y="426">flux-system (4 controllers) · istio-system (istiod)</text>
+<text class="s" x="340" y="442">kube-system (kube-dns, anetd, metrics, konnectivity)</text>
+<text class="s" x="340" y="458">Budget: 3 × e2-standard-2 ≈ 5.5 CPU allocatable → 1 replica per service first</text>
+<path class="ln" d="M260 130 L300 130" stroke-width="2"/>
+<path class="lb" d="M700 252 L700 144"/>
+
+<rect class="gr" x="820" y="20" width="170" height="150" rx="8"/>
+<text class="t" x="830" y="40">Node SA gke-nodes</text>
+<text class="s" x="830" y="58">logging.logWriter</text><text class="s" x="830" y="73">monitoring.metricWriter</text><text class="s" x="830" y="88">monitoring.viewer</text><text class="s" x="830" y="103">resourceMetadata.writer</text><text class="s" x="830" y="118">artifactregistry.reader</text><text class="s" x="830" y="140">node-level only: pods use</text><text class="s" x="830" y="155">Workload Identity instead</text>
+<rect class="bl" x="820" y="190" width="170" height="330" rx="8"/>
+<text class="t" x="830" y="210">Workload Identity path</text>
+<text class="s" x="830" y="232">① app asks metadata</text><text class="s" x="830" y="248">   server for a token</text>
+<text class="s" x="830" y="272">② node's metadata server</text><text class="s" x="830" y="288">   identifies pod's KSA</text>
+<text class="s" x="830" y="312">③ KSA annotated with</text><text class="m" x="830" y="328">iam.gke.io/gcp-</text><text class="m" x="830" y="342">service-account</text>
+<text class="s" x="830" y="366">④ STS exchange via pool</text><text class="m" x="830" y="382">&lt;proj&gt;.svc.id.goog</text>
+<text class="s" x="830" y="406">⑤ GSA needs</text><text class="m" x="830" y="422">workloadIdentityUser</text><text class="s" x="830" y="438">   for [ns/ksa]</text>
+<text class="s" x="830" y="462">⑥ short-lived GSA token</text><text class="s" x="830" y="478">   → Logging / Trace API</text>
+<text class="re" x="830" y="506">deny-egress blocks ①!</text>
+</svg>
+<div class="read">
+<div><b>Two identities:</b> node SA (for the VM, image pulls, node agent) vs per-pod GSA (Workload Identity) — never give app roles to the node SA.</div>
+<div><b>Control-plane access:</b> admin via public endpoint with /32; nodes via peering; Terraform and CI never need the Kubernetes API.</div>
+</div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="d8">
+<h2><span>8</span>Anatomy of one application pod</h2>
+<p class="sub">Component: Helm chart <code>acme-microservice</code> + Istio injection. Every domain pod has this shape.</p>
+<svg class="d" viewBox="0 0 1000 540">
+<rect class="bx" x="10" y="10" width="640" height="520" rx="10" style="stroke-dasharray:6 4"/>
+<text class="h" x="24" y="34">Pod  (namespace dom-&lt;domain&gt; · serviceAccountName = KSA · injected by istiod webhook)</text>
+<rect class="gy" x="26" y="48" width="608" height="48" rx="6"/>
+<text class="t" x="38" y="68">init: istio-init (NET_ADMIN)</text>
+<text class="s" x="38" y="86">writes iptables: inbound → 15006, outbound → 15001 (or istio-cni on hardened clusters)</text>
+<rect class="or" x="26" y="114" width="190" height="110" rx="8"/>
+<text class="t" x="38" y="134">app  (Go / Py / Node)</text><text class="m" x="38" y="152">:8080 /healthz /work</text><text class="s" x="38" y="170">JSON logs → stdout</text><text class="s" x="38" y="186">+ file /var/log/app/*.log</text><text class="s" x="38" y="202">OTLP → 127.0.0.1:4317</text>
+<rect class="nv" x="232" y="114" width="190" height="110" rx="8"/>
+<text class="t" x="244" y="134" >istio-proxy (Envoy)</text><text class="m" x="244" y="152">15006 in · 15001 out</text><text class="m" x="244" y="168">15021 ready · 15090 prom</text><text class="s" x="244" y="186">mTLS · authz · JSON access log</text><text class="s" x="244" y="202">xDS/SDS from istiod :15012</text>
+<rect class="bl" x="438" y="114" width="190" height="110" rx="8"/>
+<text class="t" x="450" y="134">otel-collector</text><text class="m" x="450" y="152">OTLP 4317 grpc / 4318 http</text><text class="s" x="450" y="170">resourcedetection (gcp)</text><text class="s" x="450" y="186">exporter googlecloud</text><text class="s" x="450" y="202">logs + traces + metrics</text>
+<rect class="gr" x="26" y="240" width="190" height="96" rx="8"/>
+<text class="t" x="38" y="260">fluent-bit</text><text class="s" x="38" y="278">tail /var/log/app/*.log (RO)</text><text class="s" x="38" y="294">filter: add domain label</text><text class="s" x="38" y="310">output: stackdriver</text><text class="s" x="38" y="326">k8s_container resource</text>
+<rect class="bx" x="232" y="240" width="190" height="96" rx="8"/>
+<text class="t" x="244" y="260">volumes</text><text class="m" x="244" y="278">emptyDir applogs</text><text class="m" x="244" y="294">cm otel-config</text><text class="m" x="244" y="310">cm fluentbit-config</text><text class="m" x="244" y="326">istio-token (projected)</text>
+<rect class="bx" x="438" y="240" width="190" height="96" rx="8"/>
+<text class="t" x="450" y="260">identity</text><text class="s" x="450" y="278">KSA = release name</text><text class="s" x="450" y="294">annotation → GSA email</text><text class="s" x="450" y="310">SPIFFE id:</text><text class="m" x="450" y="326">…/ns/dom-x/sa/x</text>
+<rect class="bx" x="26" y="354" width="602" height="160" rx="8"/>
+<text class="h" x="38" y="376">Traffic inside the pod</text>
+<text class="s" x="38" y="398">inbound : caller → pod:8080 → [iptables REDIRECT] → Envoy 15006 → terminates mTLS → 127.0.0.1:8080 (app)</text>
+<text class="s" x="38" y="418">outbound: app → payments.dom-payments:80 → [REDIRECT] → Envoy 15001 → endpoint via xDS → mTLS</text>
+<text class="s" x="38" y="438">logs    : stdout → node agent · file → fluent-bit · OTLP → otel · Envoy access log → stdout (all → Cloud Logging)</text>
+<text class="s" x="38" y="458">auth    : fluent-bit &amp; otel call Google APIs with the pod's GSA via Workload Identity (no keys)</text>
+<text class="s" x="38" y="478">probes  : Istio rewrites kubelet probes to 15021 so STRICT mTLS doesn't kill readiness</text>
+<text class="re" x="38" y="500">NetworkPolicy sees the ORIGINAL dest port (8080) — redirect happens inside the pod, after policy.</text>
+<rect class="nv" x="670" y="10" width="320" height="250" rx="8"/>
+<text class="h" x="684" y="34">Resource budget per pod</text>
+<text class="m" x="684" y="58">app          100m / 128Mi</text>
+<text class="m" x="684" y="76">istio-proxy   50m /  96Mi</text>
+<text class="m" x="684" y="94">otel-coll     50m /  64Mi</text>
+<text class="m" x="684" y="112">fluent-bit    25m /  32Mi</text>
+<text class="m" x="684" y="136">≈ 225m / ~320Mi per pod</text>
+<text class="s" x="684" y="164">3 pods ≈ 0.7 CPU  +  istiod 0.2</text>
+<text class="s" x="684" y="180">+ Flux ≈ 0.2  +  system per node ≈ 0.6</text>
+<text class="s" x="684" y="204">fits 2–3 × e2-standard-2 at 1 replica</text>
+<text class="s" x="684" y="220">each — go to 2 replicas only after P9</text>
+<text class="s" x="684" y="244">sidecar limits set in the chart values</text>
+<rect class="or" x="670" y="280" width="320" height="250" rx="8"/>
+<text class="h" x="684" y="304">Toggles in the shared chart</text>
+<text class="m" x="684" y="328">sidecars.otel.enabled</text>
+<text class="m" x="684" y="346">sidecars.fluentbit.enabled</text>
+<text class="m" x="684" y="364">serviceAccount.gsaEmail</text>
+<text class="m" x="684" y="382">domain / port / env / image</text>
+<text class="s" x="684" y="412">Why 3 log patterns?</text>
+<text class="s" x="684" y="430">A stdout: default, zero config</text>
+<text class="s" x="684" y="446">B file-tail: legacy apps, enrichment</text>
+<text class="s" x="684" y="462">C OTLP: traces+metrics+logs correlated</text>
+<text class="s" x="684" y="486">Future 5th sidecar: Cloud SQL Auth</text>
+<text class="s" x="684" y="502">Proxy (stretch S1).</text>
+</svg>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="d9">
+<h2><span>9</span>Central logging pipeline</h2>
+<p class="sub">Component: <code>platform/observability</code>. From every source to one central bucket, with metrics and SQL on top.</p>
+<svg class="d" viewBox="0 0 1000 500">
+<g>
+<rect class="or" x="10" y="20" width="190" height="42" rx="6"/><text class="t" x="20" y="40">app stdout (JSON)</text><text class="s" x="20" y="55">severity / message</text>
+<rect class="nv" x="10" y="74" width="190" height="42" rx="6"/><text class="t" x="20" y="94">Envoy access log</text><text class="s" x="20" y="109">JSON → stdout</text>
+<rect class="gr" x="10" y="128" width="190" height="42" rx="6"/><text class="t" x="20" y="148">app log file</text><text class="s" x="20" y="163">/var/log/app/*.log</text>
+<rect class="bl" x="10" y="182" width="190" height="42" rx="6"/><text class="t" x="20" y="202">OTLP signals</text><text class="s" x="20" y="217">logs · traces · metrics</text>
+<rect class="bx" x="10" y="236" width="190" height="42" rx="6"/><text class="t" x="20" y="256">VPC flow logs</text><text class="s" x="20" y="271">gke-main, 10 % sample</text>
+<rect class="bx" x="10" y="290" width="190" height="42" rx="6"/><text class="t" x="20" y="310">Cloud NAT logs</text><text class="s" x="20" y="325">errors only</text>
+<rect class="bx" x="10" y="344" width="190" height="42" rx="6"/><text class="t" x="20" y="364">Cloud Audit logs</text><text class="s" x="20" y="379">admin activity</text>
+</g>
+<g>
+<rect class="bx" x="250" y="20" width="190" height="96" rx="8"/><text class="t" x="260" y="40">GKE node agent</text><text class="s" x="260" y="58">fluentbit-gke reads</text><text class="s" x="260" y="74">container stdout, adds</text><text class="s" x="260" y="90">k8s_container labels</text>
+<rect class="gr" x="250" y="128" width="190" height="42" rx="8"/><text class="t" x="260" y="148">fluent-bit sidecar</text><text class="s" x="260" y="163">stackdriver output</text>
+<rect class="bl" x="250" y="182" width="190" height="42" rx="8"/><text class="t" x="260" y="202">otel-collector sidecar</text><text class="s" x="260" y="217">googlecloud exporter</text>
+<rect class="bx" x="250" y="236" width="190" height="150" rx="8"/><text class="t" x="260" y="256">platform → Logging</text><text class="s" x="260" y="274">emitted directly by</text><text class="s" x="260" y="290">Google services; no</text><text class="s" x="260" y="306">agent involved</text>
+</g>
+<path class="ln" d="M200 41 L250 55"/><path class="ln" d="M200 95 L250 80"/><path class="lg" d="M200 149 L250 149"/><path class="lb" d="M200 203 L250 203"/>
+<path class="ln" d="M200 257 L250 290"/><path class="ln" d="M200 311 L250 311"/><path class="ln" d="M200 365 L250 340"/>
+<rect class="nv" x="490" y="20" width="220" height="366" rx="10"/>
+<text class="h" x="502" y="44">Cloud Logging API → Log Router</text>
+<rect class="bx" x="502" y="58" width="196" height="64" rx="6"/><text class="t" x="510" y="78">sink _Required</text><text class="s" x="510" y="94">audit logs · 400 d</text><text class="s" x="510" y="108">cannot be changed</text>
+<rect class="bx" x="502" y="132" width="196" height="94" rx="6"/><text class="t" x="510" y="152">sink _Default</text><text class="s" x="510" y="168">everything else · 30 d</text><text class="s" x="510" y="184">exclusion: namespace =~ ^dom-</text><text class="s" x="510" y="200">(avoid storing twice)</text><text class="re" x="510" y="216">manage via the _Default sink</text>
+<rect class="or" x="502" y="236" width="196" height="136" rx="6"/><text class="t" x="510" y="256">sink domains-to-central</text><text class="m" x="510" y="274">k8s_container</text><text class="m" x="510" y="290">AND namespace =~ ^dom-</text><text class="s" x="510" y="310">unique writer identity gets</text><text class="s" x="510" y="326">logging.bucketWriter on the</text><text class="s" x="510" y="342">destination bucket</text>
+<path class="lg" d="M440 70 L490 90"/><path class="lg" d="M440 149 L490 160"/><path class="lg" d="M440 203 L490 180"/><path class="ln" d="M440 311 L490 311"/>
+<rect class="bx" x="750" y="30" width="240" height="60" rx="8"/><text class="t" x="762" y="52">bucket _Required</text><text class="s" x="762" y="70">audit</text>
+<rect class="bx" x="750" y="110" width="240" height="70" rx="8"/><text class="t" x="762" y="132">bucket _Default</text><text class="s" x="762" y="150">platform + non-domain logs</text><text class="s" x="762" y="166">free-tier allotment applies</text>
+<rect class="or" x="750" y="200" width="240" height="120" rx="8"/><text class="t" x="762" y="222">central-app-logs</text><text class="s" x="762" y="240">region us-central1 · 30 d retention</text><text class="s" x="762" y="256">Log Analytics enabled (SQL)</text><text class="s" x="762" y="272">linked BigQuery dataset (optional)</text><text class="s" x="762" y="290">domain = namespace / label</text>
+<path class="ln" d="M710 90 L750 70"/><path class="ln" d="M710 170 L750 145"/><path class="lo" d="M710 300 L750 262"/>
+<rect class="gr" x="750" y="340" width="240" height="46" rx="8"/><text class="t" x="762" y="360">log metric domain_errors</text><text class="s" x="762" y="376">label domain → alert (Monitoring)</text>
+<path class="lg" d="M870 320 L870 340"/>
+<rect class="bl" x="10" y="410" width="980" height="76" rx="8"/>
+<text class="h" x="24" y="432">Where to look</text>
+<text class="s" x="24" y="452">Logs Explorer: <tspan class="m">resource.type="k8s_container" resource.labels.namespace_name="dom-orders"</tspan></text>
+<text class="s" x="24" y="470">OTel trail: <tspan class="m">logName:"app-otel"</tspan> · Traces → Trace explorer · Envoy: <tspan class="m">jsonPayload.upstream_cluster</tspan></text>
+</svg>
+</section>
+
+<!-- ============ 10 ============ -->
+<section id="d10">
+<h2><span>10</span>Flux GitOps: controllers, sources and ordering</h2>
+<p class="sub">Component: <code>flux-releases</code> + <code>helm-charts</code>. Which controller talks to which network door.</p>
+<svg class="d" viewBox="0 0 1000 540">
+<rect class="or" x="10" y="20" width="250" height="150" rx="8"/>
+<text class="h" x="22" y="42">GitLab: flux-releases</text>
+<text class="m" x="22" y="62">clusters/np/</text><text class="m" x="22" y="78">  10-infra-controllers.yaml</text><text class="m" x="22" y="94">  20-infra-configs.yaml</text><text class="m" x="22" y="110">  30-apps.yaml</text><text class="m" x="22" y="126">infrastructure/{controllers,configs}</text><text class="m" x="22" y="142">apps/np/{orders,payments,inventory}</text>
+<rect class="or" x="10" y="190" width="250" height="90" rx="8"/>
+<text class="h" x="22" y="212">GitLab: helm-charts</text><text class="s" x="22" y="232">acme-microservice chart</text><text class="s" x="22" y="248">CI: helm package + push OCI →</text><text class="s" x="22" y="264">Artifact Registry /apps</text>
+<rect class="bx" x="10" y="300" width="250" height="84" rx="8"/>
+<text class="h" x="22" y="322">App CI (Tier 3)</text><text class="s" x="22" y="342">build → push image → commit</text><text class="s" x="22" y="358">image.tag bump into flux-releases</text><text class="s" x="22" y="374">(stretch: Flux Image Automation)</text>
+<rect class="bl" x="300" y="20" width="430" height="500" rx="10" fill-opacity=".5"/>
+<text class="h" x="314" y="44">namespace flux-system</text>
+<rect class="gr" x="314" y="58" width="196" height="64" rx="6"/><text class="t" x="324" y="78">source-controller</text><text class="s" x="324" y="94">GitRepository · HelmRepository</text><text class="s" x="324" y="108">OCI artifacts · poll/webhook</text>
+<rect class="gr" x="520" y="58" width="196" height="64" rx="6"/><text class="t" x="530" y="78">kustomize-controller</text><text class="s" x="530" y="94">applies Kustomizations</text><text class="s" x="530" y="108">prune · wait · dependsOn</text>
+<rect class="gr" x="314" y="132" width="196" height="64" rx="6"/><text class="t" x="324" y="152">helm-controller</text><text class="s" x="324" y="168">HelmRelease → helm</text><text class="s" x="324" y="182">install / upgrade / rollback</text>
+<rect class="gr" x="520" y="132" width="196" height="64" rx="6"/><text class="t" x="530" y="152">notification-controller</text><text class="s" x="530" y="168">events · alerts · webhooks</text><text class="s" x="530" y="182">(optional Receiver)</text>
+<text class="h" x="314" y="226">Reconcile order (dependsOn + wait:true)</text>
+<rect class="nv" x="314" y="238" width="190" height="52" rx="6"/><text class="t" x="324" y="258">infra-controllers</text><text class="s" x="324" y="276">sources · istio-base · istiod</text>
+<rect class="nv" x="528" y="238" width="190" height="52" rx="6"/><text class="t" x="538" y="258">infra-configs</text><text class="s" x="538" y="276">ns · mTLS · netpol · quotas</text>
+<rect class="nv" x="421" y="308" width="190" height="52" rx="6"/><text class="t" x="431" y="328">apps</text><text class="s" x="431" y="346">3 × HelmRelease (domains)</text>
+<path class="ln" d="M504 264 L528 264"/><path class="ln" d="M623 290 L560 308"/>
+<rect class="bx" x="314" y="384" width="404" height="124" rx="8"/>
+<text class="h" x="326" y="406">Why this order</text>
+<text class="s" x="326" y="426">CRDs (istio-base) before anything that uses them</text><text class="s" x="326" y="442">istiod webhook Ready before the first app pod is created</text><text class="s" x="326" y="458">namespace label istio-injection=enabled before pods</text><text class="s" x="326" y="474">default-deny + mTLS STRICT exist before workloads</text><text class="s" x="326" y="490">istiod HelmRelease dependsOn istio-base</text>
+<rect class="or" x="770" y="20" width="220" height="68" rx="8"/><text class="t" x="780" y="42">gitlab.com</text><text class="s" x="780" y="60">Door 3: tagged node + NAT</text><text class="s" x="780" y="76">(not reachable by VIP/PGA)</text>
+<rect class="gr" x="770" y="108" width="220" height="68" rx="8"/><text class="t" x="780" y="130">istio-release (GCS host)</text><text class="s" x="780" y="150">via googleapis wildcard → Door 1</text><text class="s" x="780" y="166">(verify it works)</text>
+<rect class="gr" x="770" y="196" width="220" height="68" rx="8"/><text class="t" x="780" y="218">Artifact Registry (OCI)</text><text class="s" x="780" y="238">charts + images · Door 1</text><text class="s" x="780" y="254">node SA: artifactregistry.reader</text>
+<rect class="rd" x="770" y="284" width="220" height="86" rx="8"/><text class="t" x="780" y="306" style="fill:#c0392b">Docker Hub</text><text class="s" x="780" y="324">avoid: rate limits + needs Door 3</text><text class="s" x="780" y="340">use the AR remote repo</text><text class="s" x="780" y="356">dockerhub-mirror instead</text>
+<path class="lo" d="M716 90 L770 54"/><path class="lg" d="M716 100 L770 142"/><path class="lg" d="M716 110 L770 230"/>
+<path class="ln" d="M260 95 L314 90"/><path class="ln" d="M260 235 L314 100"/><path class="ln dsh" d="M260 345 L282 345 L282 160 L260 160"/>
+</svg>
+</section>
+
+<!-- ============ 11 ============ -->
+<section id="d11">
+<h2><span>11</span>Service-to-service request: mesh + policy layers</h2>
+<p class="sub">Component: Istio + NetworkPolicy. One call <code>orders → payments</code> shown hop by hop, with where each guard decides.</p>
+<svg class="d" viewBox="0 0 1000 520">
+<rect class="bl" x="330" y="10" width="340" height="90" rx="8"/>
+<text class="h" x="342" y="32">istiod (istio-system)</text>
+<text class="s" x="342" y="52">xDS: endpoints, routes, policies → all Envoys</text><text class="s" x="342" y="68">CA: issues SPIFFE workload certs (SDS)</text><text class="s" x="342" y="84">webhook: sidecar injection (:15017)</text>
+<rect class="or" x="10" y="140" width="320" height="300" rx="10"/>
+<text class="h" x="22" y="164">Pod orders (dom-orders)</text>
+<rect class="bx" x="24" y="180" width="130" height="60" rx="6"/><text class="t" x="32" y="202">app (Go)</text><text class="s" x="32" y="220">GET payments/work</text>
+<rect class="nv" x="170" y="180" width="144" height="60" rx="6"/><text class="t" x="178" y="202">Envoy (client)</text><text class="s" x="178" y="220">15001 outbound</text>
+<text class="s" x="24" y="268">SPIFFE id</text><text class="m" x="24" y="284">spiffe://cluster.local/ns/</text><text class="m" x="24" y="300">dom-orders/sa/orders</text>
+<text class="s" x="24" y="330">cert from istiod, rotated ~24 h</text>
+<text class="s" x="24" y="350">DestinationRule / mesh default:</text><text class="s" x="24" y="366">ISTIO_MUTUAL (auto mTLS)</text>
+<rect class="gr" x="670" y="140" width="320" height="300" rx="10"/>
+<text class="h" x="682" y="164">Pod payments (dom-payments)</text>
+<rect class="nv" x="684" y="180" width="144" height="60" rx="6"/><text class="t" x="692" y="202">Envoy (server)</text><text class="s" x="692" y="220">15006 inbound</text>
+<rect class="bx" x="844" y="180" width="134" height="60" rx="6"/><text class="t" x="852" y="202">app (Py)</text><text class="s" x="852" y="220">:8080 /work</text>
+<text class="s" x="684" y="268">PeerAuthentication STRICT</text><text class="s" x="684" y="284">→ plaintext rejected</text>
+<text class="s" x="684" y="312">AuthorizationPolicy only-orders:</text><text class="m" x="684" y="328">principals:</text><text class="m" x="684" y="344">cluster.local/ns/dom-orders/sa/orders</text>
+<text class="s" x="684" y="372">anything else → 403 RBAC: access denied</text>
+<rect class="rd" x="350" y="230" width="300" height="140" rx="8"/>
+<text class="h" x="362" y="252" style="fill:#c0392b">Cilium / anetd (Dataplane V2)</text>
+<text class="s" x="362" y="272">NetworkPolicy, L3/L4, matches pod identity</text>
+<text class="s" x="362" y="290">default-deny + allow-from-orders :8080</text>
+<text class="s" x="362" y="308">denied → connection timeout (no response)</text>
+<text class="s" x="362" y="332">sees ORIGINAL dest port 8080</text>
+<text class="s" x="362" y="350">+ egress allows: DNS, istiod 15012, metadata</text>
+<path class="ln" d="M154 210 L170 210"/>
+<path class="lb" d="M314 210 L350 280"/>
+<path class="lb" d="M650 300 L684 215"/>
+<path class="lg" d="M828 210 L844 210"/>
+<path class="lg dsh" d="M500 100 L240 140"/><path class="lg dsh" d="M500 100 L750 140"/>
+<rect class="bx" x="10" y="460" width="980" height="54" rx="8"/>
+<text class="s" x="22" y="480"><tspan class="t">Hop order:</tspan> ① app → ② Envoy picks endpoint via xDS → ③ mTLS with SPIFFE cert → ④ Cilium allows pod→pod:8080 → ⑤ server Envoy verifies cert</text>
+<text class="s" x="22" y="498">→ ⑥ AuthorizationPolicy checks principal → ⑦ app. payments → inventory: blocked at ④ (timeout); with netpol removed: blocked at ⑥ (403).</text>
+</svg>
+</section>
+
+<!-- ============ 12 ============ -->
+<section id="d12">
+<h2><span>12</span>Internal ingress path (Gateway API + proxy-only subnet)</h2>
+<p class="sub">Component: Gateway <code>gke-l7-rilb</code>. Where each hop lives and which rule lets it through.</p>
+<svg class="d" viewBox="0 0 1000 480">
+<rect class="bx" x="10" y="30" width="170" height="80" rx="8"/><text class="t" x="20" y="52">client</text><text class="s" x="20" y="70">probe VM (ops subnet)</text><text class="s" x="20" y="86">curl http://&lt;gw-ip&gt;/work</text>
+<rect class="nv" x="215" y="30" width="170" height="80" rx="8"/><text class="t" x="225" y="52">forwarding rule</text><text class="s" x="225" y="70">internal IP (regional)</text><text class="s" x="225" y="86">created by GKE Gateway ctrl</text>
+<rect class="or" x="420" y="30" width="200" height="80" rx="8"/><text class="t" x="430" y="52">Google-managed Envoy</text><text class="m" x="430" y="70">10.10.254.0/23</text><text class="s" x="430" y="86">proxy-only subnet · URL map</text>
+<rect class="bl" x="655" y="30" width="170" height="80" rx="8"/><text class="t" x="665" y="52">backend service</text><text class="s" x="665" y="70">NEG = pod IP:8080</text><text class="s" x="665" y="86">health check :8080</text>
+<rect class="gr" x="860" y="30" width="130" height="80" rx="8"/><text class="t" x="870" y="52">pod</text><text class="s" x="870" y="70">istio-proxy 15006</text><text class="s" x="870" y="86">→ app :8080</text>
+<path class="ln" d="M180 70 L215 70"/><path class="ln" d="M385 70 L420 70"/><path class="lo" d="M620 70 L655 70"/><path class="lo" d="M825 70 L860 70"/>
+<rect class="nv" x="10" y="140" width="480" height="150" rx="8"/>
+<text class="h" x="22" y="162">Kubernetes objects (Flux-managed, ns dom-orders)</text>
+<text class="m" x="22" y="184">Gateway internal-gw   class gke-l7-rilb   listener :80</text><text class="m" x="22" y="202">HTTPRoute orders      parentRefs internal-gw</text><text class="m" x="22" y="220">                      backendRef Service orders:8080</text>
+<text class="s" x="22" y="244">controller programs: forwarding rule, target proxy, URL map,</text><text class="s" x="22" y="260">backend service, NEG, health check (GCP objects it owns)</text><text class="s" x="22" y="276">needs the regional proxy-only subnet or the Gateway stays Pending</text>
+<rect class="bx" x="510" y="140" width="480" height="150" rx="8"/>
+<text class="h" x="522" y="162">Rules that must allow each hop</text>
+<text class="s" x="522" y="184">client → LB IP:80 : VPC firewall + ILB allows same-VPC</text><text class="s" x="522" y="200">proxy-only → pods : allow-proxy-only-to-nodes (8080, 8443, 15021)</text><text class="s" x="522" y="216">health checks 130.211.0.0/22, 35.191.0.0/16 : allow-lb-health</text><text class="s" x="522" y="232">NetworkPolicy: ingress from proxy-only CIDR to :8080</text><text class="s" x="522" y="248">Istio: PeerAuthentication portLevelMtls 8080 PERMISSIVE</text><text class="s" x="522" y="264">(LB speaks plaintext; STRICT would reset it)</text>
+<rect class="rd" x="10" y="310" width="980" height="150" rx="8"/>
+<text class="h" x="22" y="332" style="fill:#c0392b">Three expected breaks — diagnose each from symptoms</text>
+<text class="s" x="22" y="356">1 · Gateway Pending / no address → no proxy-only subnet in the region or wrong subnet purpose/role</text>
+<text class="s" x="22" y="376">2 · 502 / backends UNHEALTHY → health-check ranges blocked by firewall or by default-deny NetworkPolicy</text>
+<text class="s" x="22" y="396">3 · 503 "connection reset" after healthy → STRICT mTLS rejecting the LB's plaintext → port-level PERMISSIVE or Istio ingress gateway</text>
+<text class="s" x="22" y="426">Alternative: put an Istio ingress gateway behind the L4 internal LB and keep STRICT everywhere (cleaner, but more moving parts).</text>
+<text class="s" x="22" y="446">Why internal-only: no public LB cost or exposure in the learning phase; external gke-l7-global-external-managed is a later swap.</text>
+</svg>
+</section>
+
+<!-- ============ 13 ============ -->
+<section id="d13">
+<h2><span>13</span>Delivery: infra pipeline vs application pipeline</h2>
+<p class="sub">Component: GitLab CI (Tier 3) + Artifact Registry + Flux. Two separate paths — GCP objects vs Kubernetes objects.</p>
+<svg class="d" viewBox="0 0 1000 520">
+<text class="h" x="14" y="24">Path A · Terraform (GCP objects) — orders-infra</text>
+<g>
+<rect class="bx" x="10" y="36" width="130" height="64" rx="6"/><text class="t" x="18" y="56">push / MR</text><text class="s" x="18" y="74">feature branch</text>
+<rect class="nv" x="165" y="36" width="130" height="64" rx="6"/><text class="t" x="173" y="56">validate</text><text class="s" x="173" y="74">fmt -check · validate</text>
+<rect class="nv" x="320" y="36" width="130" height="64" rx="6"/><text class="t" x="328" y="56">plan</text><text class="s" x="328" y="74">SA via WIF (np)</text>
+<rect class="or" x="475" y="36" width="130" height="64" rx="6"/><text class="t" x="483" y="56">merge to main</text><text class="s" x="483" y="74">protected branch</text>
+<rect class="or" x="630" y="36" width="130" height="64" rx="6"/><text class="t" x="638" y="56">apply (manual)</text><text class="s" x="638" y="74">plan artifact reused</text>
+<rect class="gr" x="785" y="36" width="205" height="64" rx="6"/><text class="t" x="793" y="56">GCP: GSA orders-app</text><text class="s" x="793" y="74">+ WI binding dom-orders/orders</text>
+</g>
+<path class="ln" d="M140 68 L165 68"/><path class="ln" d="M295 68 L320 68"/><path class="ln" d="M450 68 L475 68"/><path class="ln" d="M605 68 L630 68"/><path class="lg" d="M760 68 L785 68"/>
+
+<text class="h" x="14" y="140">Path B · Application (Kubernetes objects) — orders-svc</text>
+<g>
+<rect class="bx" x="10" y="152" width="120" height="70" rx="6"/><text class="t" x="18" y="172">git push</text><text class="s" x="18" y="190">applications/orders</text><text class="s" x="18" y="205">/orders-svc</text>
+<rect class="nv" x="150" y="152" width="120" height="70" rx="6"/><text class="t" x="158" y="172">test + build</text><text class="s" x="158" y="190">docker-in-docker</text><text class="s" x="158" y="205">shared runner</text>
+<rect class="bl" x="290" y="152" width="140" height="70" rx="6"/><text class="t" x="298" y="172">push image</text><text class="s" x="298" y="190">WIF → AR push SA</text><text class="s" x="298" y="205">AR_REPO (apps/ only)</text>
+<rect class="or" x="450" y="152" width="140" height="70" rx="6"/><text class="t" x="458" y="172">bump tag</text><text class="s" x="458" y="190">commit image.tag in</text><text class="s" x="458" y="205">flux-releases</text>
+<rect class="gr" x="610" y="152" width="130" height="70" rx="6"/><text class="t" x="618" y="172">Flux reconcile</text><text class="s" x="618" y="190">source-controller</text><text class="s" x="618" y="205">poll ~1 min</text>
+<rect class="gr" x="760" y="152" width="230" height="70" rx="6"/><text class="t" x="768" y="172">helm-controller upgrade</text><text class="s" x="768" y="190">rolling update of the pod</text><text class="s" x="768" y="205">(app + 3 sidecars)</text>
+</g>
+<path class="ln" d="M130 187 L150 187"/><path class="ln" d="M270 187 L290 187"/><path class="ln" d="M430 187 L450 187"/><path class="ln" d="M590 187 L610 187"/><path class="lg" d="M740 187 L760 187"/>
+
+<rect class="gr" x="10" y="250" width="480" height="140" rx="8"/>
+<text class="h" x="22" y="272">Image pull path at runtime</text>
+<text class="s" x="22" y="294">containerd on node → *.pkg.dev (DNS → private VIP)</text><text class="s" x="22" y="310">→ route p900 → Google → Artifact Registry /apps</text><text class="s" x="22" y="326">auth = node SA gke-nodes (artifactregistry.reader)</text><text class="s" x="22" y="342">third-party images (otel, fluent-bit, istio):</text><text class="s" x="22" y="358">pulled through the dockerhub-mirror remote repo,</text><text class="s" x="22" y="374">so nodes never need Docker Hub / Door 3</text>
+<rect class="or" x="510" y="250" width="480" height="140" rx="8"/>
+<text class="h" x="522" y="272">Variable scoping — folder path = permission</text>
+<text class="s" x="522" y="294">root group : WIF_PROVIDER, SA_NP, SA_P_RO, state buckets</text><text class="s" x="522" y="310">root group (protected only): SA_P, STATE_P</text><text class="s" x="522" y="326">applications/ : AR_REPO, AR_PUSH_SA</text><text class="s" x="522" y="346">→ repo created OUTSIDE applications/:</text><text class="re" x="522" y="362">image push fails (variable missing) — try it once</text>
+<rect class="bx" x="10" y="410" width="980" height="100" rx="8"/>
+<text class="h" x="22" y="432">Why two paths</text>
+<text class="s" x="22" y="452">Terraform changes rarely and needs cloud-level authority (WIF, state locking, manual apply on protected main).</text><text class="s" x="22" y="468">The app path changes constantly and needs only image-push authority; the cluster pulls changes, so CI holds no cluster credentials.</text><text class="s" x="22" y="486">The only coupling is names: orders-app, dom-orders, KSA orders — agreed once, never looked up at runtime.</text>
+</svg>
+</section>
+
+<!-- ============ 14 ============ -->
+<section id="d14">
+<h2><span>14</span>Stretch: Private Services Access + hybrid site</h2>
+<p class="sub">Components S1 (Cloud SQL via PSA) and S2 (Door 4: HA VPN to a simulated on-prem VPC). Run for hours, not days — VPN and Cloud SQL cost real money.</p>
+<svg class="d" viewBox="0 0 1000 520">
+<rect class="nv" x="10" y="20" width="430" height="360" rx="12" fill-opacity=".45"/>
+<text class="h" x="24" y="44">VPC acme-main  (10.10.0.0/16-ish, ASN 64512)</text>
+<rect class="bl" x="26" y="58" width="398" height="132" rx="8"/>
+<text class="t" x="38" y="78">GKE pod (orders) + 5th sidecar</text>
+<rect class="or" x="38" y="90" width="110" height="40" rx="5"/><text class="s" x="46" y="114">app</text>
+<rect class="bx" x="156" y="90" width="130" height="40" rx="5"/><text class="s" x="164" y="108">cloud-sql-proxy</text><text class="s" x="164" y="122">127.0.0.1:5432</text>
+<text class="s" x="38" y="156">WI GSA needs roles/cloudsql.client</text><text class="s" x="38" y="172">pod IPs masqueraded when leaving VPC (ip-masq-agent)</text>
+<rect class="gr" x="26" y="206" width="398" height="62" rx="8"/>
+<text class="t" x="38" y="226">PSA allocated range 100.64.0.0/20</text><text class="s" x="38" y="244">google_compute_global_address (VPC_PEERING)</text><text class="s" x="38" y="258">+ google_service_networking_connection</text>
+<rect class="bx" x="26" y="284" width="398" height="82" rx="8"/>
+<text class="t" x="38" y="304">Cloud Router (BGP) + HA VPN gateway</text><text class="s" x="38" y="322">2 interfaces · 2 tunnels · IKEv2 · shared secret</text><text class="s" x="38" y="338">learned routes: 192.168.100.0/24</text><text class="s" x="38" y="354">advertises: 10.10.0.0/24, 10.20/30 (custom)</text>
+<rect class="gr" x="30" y="396" width="410" height="110" rx="8"/>
+<text class="h" x="42" y="418">Cloud SQL side (Google-managed VPC)</text>
+<text class="s" x="42" y="438">servicenetworking VPC peered to acme-main</text><text class="s" x="42" y="454">instance private IP in 100.64.0.0/20</text><text class="s" x="42" y="470">peering is NON-transitive: on-prem cannot</text><text class="s" x="42" y="486">reach SQL unless custom routes are exported</text>
+<path class="lg" d="M424 237 L436 237 L436 396"/><text class="s" x="380" y="392">peering ↓</text>
+<path class="lg" d="M225 190 L225 206"/>
+<rect class="nv" x="560" y="20" width="430" height="260" rx="12" fill-opacity=".45"/>
+<text class="h" x="574" y="44">VPC onprem-sim  (192.168.100.0/24, ASN 64513)</text>
+<rect class="bx" x="576" y="58" width="398" height="62" rx="8"/><text class="t" x="588" y="78">VM "ldap-sim" 192.168.100.10</text><text class="s" x="588" y="96">stands in for AD / data-center host</text><text class="s" x="588" y="110">firewall allows 10.10.0.0/24, 10.20.0.0/20</text>
+<rect class="bx" x="576" y="136" width="398" height="82" rx="8"/><text class="t" x="588" y="156">Cloud Router + HA VPN gateway</text><text class="s" x="588" y="174">BGP session ↔ acme-main router (169.254.x.x /30)</text><text class="s" x="588" y="190">advertises 192.168.100.0/24</text>
+<rect class="bl" x="576" y="230" width="398" height="40" rx="8"/><text class="s" x="588" y="254">DNS: peering/forwarding zone corp.example.internal</text>
+<path class="lb" d="M440 330 L576 177" stroke-width="2.5"/>
+<path class="lb" d="M440 345 L576 190" stroke-width="2.5"/>
+<text class="s" x="448" y="300" style="fill:#2c6aa3">2 tunnels</text><text class="s" x="448" y="314" style="fill:#2c6aa3">(HA) · BGP</text>
+<rect class="or" x="560" y="300" width="430" height="206" rx="8"/>
+<text class="h" x="574" y="322">What you learn here</text>
+<text class="s" x="574" y="344">· why pod IPs are unknown to "on-prem" → masquerade</text><text class="s" x="574" y="362">· overlapping CIDRs break everything (IPAM table!)</text><text class="s" x="574" y="380">· BGP learned routes live outside the IGW doors</text><text class="s" x="574" y="398">· export custom routes over PSA for transitive access</text><text class="s" x="574" y="416">· DNS peering vs forwarding (roles/dns.peer)</text><text class="s" x="574" y="434">· HA VPN needs 2 tunnels for the 99.99 % SLA</text><text class="re" x="574" y="460">Cost: tunnels + Cloud SQL bill hourly — destroy same day.</text>
+<text class="s" x="574" y="482">Also: S3 node pool per domain / S6 Shared VPC / S4 Consul.</text>
+</svg>
+</section>
+
+</main>
+</body>
+</html>

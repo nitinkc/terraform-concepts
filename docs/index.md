@@ -49,7 +49,7 @@ Read in order; each page assumes only the one before it.
 | # | Topic | Code |
 |---|---|---|
 | 1 | [Resources and state](basics/01-resources-and-state.md) | `01-basics/1-create-local-file/` |
-| 2 | [Variables](basics/02-variables.md) | `01-basics/2-variable-use/` |
+| 2 | [Variables](basics/02-variables.md) | `../01-basics/2-variable-locals` |
 | 3 | [Locals](basics/03-locals.md) | — |
 | 4 | [References and dependencies](basics/04-references-and-dependencies.md) | `01-basics/3-…`, `01-basics/4-dependencies/` |
 | 5 | [Outputs](basics/05-outputs.md) | `01-basics/4-dependencies/explicit/` |

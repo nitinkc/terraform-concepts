@@ -39,7 +39,7 @@ breaks and you need to find where the concept was explained. `§N` refers to the
 
 | Concept | Theory | Stage 2 | Stage 3 | Code | Quiz |
 |---|---|---|---|---|---|
-| Variables & precedence | [§7](07-variables-and-locals.md#variable-precedence) | [Variables](../basics/02-variables.md#precedence-the-gotcha-that-costs-real-time) | [Lab 15](../gcp/02-lab-notes.md#lab-15-terraformtfvars-variable-precedence) | `01-basics/2-variable-use/`, `02-gcp-terraform/01-core-gcp-resources/terraform.tfvars` | [Variables](../quiz/03-variables-expressions-and-guards.md) |
+| Variables & precedence | [§7](07-variables-and-locals.md#variable-precedence) | [Variables](../basics/02-variables.md#precedence-the-gotcha-that-costs-real-time) | [Lab 15](../gcp/02-lab-notes.md#lab-15-terraformtfvars-variable-precedence) | `../../01-basics/2-variable-locals`, `02-gcp-terraform/01-core-gcp-resources/terraform.tfvars` | [Variables](../quiz/03-variables-expressions-and-guards.md) |
 | Variable validation | [§7](07-variables-and-locals.md) | [Validation](../basics/10-validation-and-sensitive-values.md#validation-reject-bad-input-early) | — | — | — |
 | `locals` | [§7](07-variables-and-locals.md) | [Locals](../basics/03-locals.md) | [Lab 8](../gcp/02-lab-notes.md#lab-8-locals-computedderived-values) | `02-gcp-terraform/01-core-gcp-resources/locals.tf` | — |
 | `for` expressions, `try`, `one`, splat | [§8](08-expressions-and-conditionals.md) | — | [Lab 13](../gcp/02-lab-notes.md#lab-13-for_each-over-modules) | `sample-program/infra/main.tf` | [Variables](../quiz/03-variables-expressions-and-guards.md) |

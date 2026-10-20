@@ -5,6 +5,7 @@ resource "local_file" "pet" {
   content  = "Here is the Random Pet ${random_pet.my_pet.id}"
 }
 
+# For Random Pet - https://registry.terraform.io/providers/hashicorp/random/3.9.0/docs/resources/pet
 resource "random_pet" "my_pet" {
   prefix    = var.prefix
   separator = var.separator
