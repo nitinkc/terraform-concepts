@@ -1,10 +1,9 @@
-# Stage 4 — The acme-sampleapp sandbox
+# The acme-sampleapp sandbox
 
-This is where the isolated exercises stop and the real thing starts. Everything in
-[Stage 2](../basics/index.md) and [Stage 3](../gcp/index.md) teaches one mechanic at a time
-in a directory you can delete without consequence. The sandbox is five independent
-Terraform roots that depend on each other through a Consul contract, deploy Helm charts
-onto a real GKE cluster, and cost real money while they're up.
+This is where the isolated exercises stop and the real thing starts. Everything in the
+[Architect's Reference](../reference/index.md) teaches core mechanics and patterns cleanly.
+The sandbox is five independent Terraform roots that depend on each other through a Consul
+contract, deploy Helm charts onto a real GKE cluster, and cost real money while they're up.
 
 The single most important difference: **no root here can be understood in isolation.**
 `backend/infra` reads values that `cloudsql/infra`, `infrastructure/infra`, and
@@ -25,8 +24,7 @@ source is [`service-dependency-architecture.drawio`](https://github.com/nitinkc/
 |---|---|
 | Source of truth for layout | [`acme-sampleapp-multirepo-sandbox-elaborate/README.md`](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo-sandbox-elaborate/README.md) |
 | Source of truth for running it | [`RUNBOOK.md`](runbook.md) — apply order, Consul dev agent, teardown |
-| Session-by-session history | [Session log](../sessions/index.md) |
-| Concept → file lookup | [Concept index](../theory/concept-index.md) |
+| Concept → file lookup | [Architect's Reference](../reference/index.md) |
 
 !!! warning "This one bills"
     Stages 1–3 are free or nearly so. The sandbox stands up a GKE cluster, Secret Manager
@@ -74,9 +72,8 @@ Two things worth sitting with before moving on:
 
 1. **Zero is a legal outcome.** If both enable flags are false, `local.gke_clusters_enabled`
    is an empty map and `module.gke` produces nothing at all — no error, no partial cluster.
-   Everything downstream then has to cope with an empty map, which is exactly the
-   guard-propagation bug that cost a real session's debugging time. See
-   [Session 2](../sessions/session-02.md).
+   Everything downstream then has to cope with an empty map, which is the
+   [guard-propagation rule](../reference/06-expressions-conditionals-and-guards.md).
 2. **The filtering happens in `locals`, not in the module.** The module doesn't know it's
    conditional. That separation is why the same module is reusable, and why the guard has
    to be re-applied by every *consumer* of the filtered map rather than once at the source.

@@ -6,18 +6,16 @@ This repository is a hands-on Terraform learning workspace. Optimize changes for
 
 ## Start Here
 
-1. Read `PROGRESS.md` for current status, verified achievements, and next milestones.
-2. Read `README.md` for the learning path.
-3. For Acme work, read `acme-sampleapp-multirepo-sandbox-elaborate/README.md` and `RUNBOOK.md` before changing or applying infrastructure.
-4. Use `docs/theory/concept-index.md` to connect code changes to theory, labs, and quizzes.
-5. Use `docs/sessions/learner-state.md` for detailed competency evidence; session files are historical narratives.
+1. Read `README.md` for the learning path.
+2. For Acme work, read `acme-sampleapp-multirepo-sandbox-elaborate/README.md` and `RUNBOOK.md` before changing or applying infrastructure.
+3. Use `docs/reference/index.md` to connect code changes to architectural reference articles, local/GCP labs, and quizzes.
 
 ## Repository Areas
 
 - `01-basics/`: isolated local-provider exercises; no cloud cost.
 - `02-gcp-terraform/`: focused GCP root module and reusable VM module.
 - `acme-sampleapp-multirepo-sandbox-elaborate/`: main production-style exercise with five independent Terraform roots.
-- `docs/`: theory, labs, quizzes, runbooks, and learning-session evidence.
+- `docs/`: architectural reference, sandbox docs, and quizzes.
 
 ## Acme Architecture Rules
 
@@ -45,8 +43,6 @@ This repository is a hands-on Terraform learning workspace. Optimize changes for
 3. Make the smallest idiomatic change, preserving existing provider and module patterns.
 4. Run formatting checks and targeted validation. Do not silently rewrite unrelated learning exercises.
 5. For live infrastructure, inspect the plan before apply and independently verify results with GCP, `kubectl`, Helm, or Consul tools.
-6. Update `PROGRESS.md` when a milestone, gap, incident, validation result, or next step changes.
-7. Add a session note when work includes a substantive hands-on learning session; update `docs/sessions/learner-state.md` only from demonstrated evidence.
 
 ## Verification Commands
 
@@ -71,7 +67,7 @@ mkdocs build --strict
 
 ## Current Quality Notes
 
-- `terraform fmt -check -recursive` currently reports pre-existing formatting drift; see `PROGRESS.md`.
+- `terraform fmt -check -recursive` currently reports pre-existing formatting drift on several `.tf` files.
 - The shell scripts pass syntax checks as of 2026-09-14.
 - `restore-session.sh` currently restores `sample-program`, `infrastructure`, and backend/dev; Cloud SQL and frontend remain manual milestones.
 - Documentation may lag recent implementation changes. Verify claims against source and update both when behavior changes.

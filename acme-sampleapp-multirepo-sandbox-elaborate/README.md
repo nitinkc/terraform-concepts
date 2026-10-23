@@ -68,9 +68,7 @@ script also verifies that the GKE cluster has a `Ready` node before waiting on
 Helm, and supports `--repair-failed-helm` for a failed Helm release left outside
 Terraform state.
 
-The learning history is kept separately in the repository-level `docs/sessions/`
-directory. Session notes explain why the current code and run order look the way they
-do; they are not Terraform configuration and should not be mixed into an Acme root.
+The architectural patterns and debugging incidents from this sandbox are documented in the repository-level `docs/reference/` directory.
 
 ## Why 5 separate Terraform repos instead of one
 

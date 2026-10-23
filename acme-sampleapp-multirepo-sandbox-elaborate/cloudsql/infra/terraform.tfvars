@@ -3,7 +3,7 @@
 # `terraform.tfvars.example` is the annotated reference copy — edit this file
 # in place. Real secrets never belong here; pass them via TF_VAR_* instead.
 #
-# All three variables have defaults in variables.tf; these override them for
+# All three variables have defaults in variable.tf; these override them for
 # lab use.
 
 database_name = "sampleapp"

@@ -4,26 +4,24 @@ A working notebook for learning Terraform properly — theory, isolated exercise
 labs, and a five-repo GKE/Helm sandbox that actually applies.
 
 **Docs site:** <https://nitinkc.github.io/terraform-concepts/> ·
-**Start here:** [`docs/theory/concept-index.md`](docs/theory/concept-index.md) maps every concept to the
-theory that defines it, the lab that isolates it, the code that uses it for real, and the
-quiz that tests it.
+**Start here:** [`docs/reference/index.md`](docs/reference/index.md) — a unified 11-part architectural reference combining theory, local basics (`01-basics/`), and GCP implementations (`02-gcp-terraform/`).
 
 ## Layout
 
 ```
-docs/                  The site. Theory, labs, quiz, session notes.
+docs/reference/        Unified 11-article architectural reference + cheatsheets.
+docs/sandbox/          Multi-repo GKE/Helm/Consul sandbox documentation & runbook.
+docs/quiz/             66 scenario-based quiz questions across 6 topics.
 01-basics/             8 local Terraform roots in 7 folders. No cloud, no auth, no cost.
-02-gcp-terraform/      The same concepts against a real GCP project.
+02-gcp-terraform/      The same concepts against a real GCP project (VPC, peering, IAP, modules).
 acme-sampleapp-.../    The sandbox: 5 interdependent roots, Consul, GKE, Cloud SQL, Helm.
 ```
 
 The repository is deliberately two layers:
 
 - **`01-basics/` and `02-gcp-terraform/`** are small, isolated demonstrations. One concept
-  per directory, safe to break, safe to delete. These directories contain `.tf` files,
-  plus a checked-in `graph.svg` where the graph is the point — every explanation lives in
-  the docs, so there is one place to read and one place to run. Start at
-  [`docs/basics/`](docs/basics/index.md).
+  per directory, safe to break, safe to delete. Every explanation and code snippet is consolidated in
+  [`docs/reference/`](docs/reference/index.md).
 - **`acme-sampleapp-multirepo-sandbox-elaborate/`** is the main project. Its five
   independent Terraform roots model organisation-style repository boundaries, state
   ownership, Consul contracts, GKE, Cloud SQL, Helm and Workload Identity. It bills real
@@ -35,16 +33,13 @@ between roots.
 
 ## The path
 
-| Stage | Where | Costs |
+| Area | Where | Costs |
 |---|---|---|
-| 1 — Theory | [`docs/theory/`](docs/theory/index.md) — 19 pages in dependency order | nothing |
-| 2 — Basics | [`docs/basics/`](docs/basics/index.md) + [`01-basics/`](01-basics/) | nothing |
-| 3 — GCP | [`docs/gcp/`](docs/gcp/index.md) + [`02-gcp-terraform/`](02-gcp-terraform/) | cents |
-| 4 — Sandbox | [`docs/sandbox/`](docs/sandbox/index.md) + `acme-sampleapp-.../` | real money |
+| 1 — Reference (Theory + Local + GCP) | [`docs/reference/`](docs/reference/index.md) + `01-basics/` + `02-gcp-terraform/` | nothing / cents |
+| 2 — Sandbox | [`docs/sandbox/`](docs/sandbox/index.md) + `acme-sampleapp-.../` | real money |
 
-Check yourself with the [quiz](docs/quiz/index.md) — 33 questions across 6 topics, all
-drawn from things that actually happened. The [session log](docs/sessions/index.md) is the
-narrative version.
+Check yourself with the [quiz](docs/quiz/index.md) — 66 questions across 6 topics, covering
+every architectural reference topic and real debugging incidents.
 
 ## Local tooling
 
@@ -68,4 +63,10 @@ Kill the Consul dev agent when done: `kill %1` (or find it with `jobs`).
 `-dev` mode is in-memory anyway — nothing persists once it's killed.
 ```shell
 kill $(pgrep consul)
+```
+
+Clean all tffile
+
+```shell
+find . \( -name ".terraform*" -o -name "*tfstate*" -o -name "*.tfplan" \) -exec rm -rf {} +
 ```

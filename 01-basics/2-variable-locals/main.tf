@@ -10,7 +10,6 @@ resource "random_pet" "my_pet" {
   length    = var.name_length
 }
 
-
 resource "local_file" "computed" {
   filename = "${local.base_dir}/greeting-${local.timestamp_suffix}.txt"
   content  = local.full_greeting

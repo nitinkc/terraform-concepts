@@ -1,7 +1,7 @@
 variable "fileName" {
   description = "The path where the file will be created"
   type        = string
-  default     = "/tmp/helloFruits.txt"
+  default     = formatdate("YYYYMMDD", timestamp())
 }
 
 variable "content" {

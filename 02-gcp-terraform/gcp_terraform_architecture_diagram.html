@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="glean-artifact-type" content="visual_content">
+  <title>GCP Terraform Architecture Diagram</title>
+  <style>
+    :root {
+      --artifact-background: var(--theme-background, #ffffff);
+      --artifact-background-light: var(--theme-background-light, #f8f9fa);
+      --artifact-border: var(--theme-border-light, #dadce0);
+      --artifact-border-light: var(--theme-border-light, #e8eaed);
+      --artifact-text-primary: var(--theme-text-primary, #202124);
+      --artifact-text-secondary: var(--theme-text-secondary, #5f6368);
+      --artifact-primary-brand: var(--theme-primary-brand, #1a73e8);
+      --artifact-selected: var(--theme-selected, #e8f0fe);
+      
+      /* GCP Palette */
+      --gcp-blue: #1a73e8;
+      --gcp-blue-bg: #e8f0fe;
+      --gcp-green: #1e8e3e;
+      --gcp-green-bg: #e6f4ea;
+      --gcp-yellow: #f9ab00;
+      --gcp-yellow-bg: #fef7e0;
+      --gcp-purple: #9334e6;
+      --gcp-purple-bg: #f3e8fd;
+      --gcp-card-bg: var(--theme-background, #ffffff);
+      --card-shadow: 0 1px 3px rgba(60,64,67, 0.12), 0 1px 2px rgba(60,64,67, 0.24);
+      --card-shadow-hover: 0 4px 8px rgba(60,64,67, 0.15), 0 1px 3px rgba(60,64,67, 0.3);
+    }
+
+    html[data-theme='dark'] {
+      --artifact-background: #1e1f20;
+      --artifact-background-light: #282a2d;
+      --artifact-border: #3c4043;
+      --artifact-border-light: #2d3134;
+      --artifact-text-primary: #e8eaed;
+      --artifact-text-secondary: #9aa0a6;
+      --artifact-selected: #172b4d;
+      
+      --gcp-blue-bg: #172b4d;
+      --gcp-green-bg: #133422;
+      --gcp-yellow-bg: #382c0e;
+      --gcp-purple-bg: #2c1a40;
+      --gcp-card-bg: #282a2c;
+      --card-shadow: 0 1px 3px rgba(0,0,0, 0.3);
+      --card-shadow-hover: 0 4px 12px rgba(0,0,0, 0.45);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      box-sizing: border-box;
+      line-height: 1.5;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header Section */
+    .header-card {
+      background: var(--gcp-card-bg);
+      border: 1px solid var(--artifact-border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .project-meta h1 {
+      margin: 0 0 6px 0;
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--artifact-text-primary);
+    }
+
+    .project-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--gcp-blue-bg);
+      color: var(--gcp-blue);
+      border: 1px solid var(--gcp-blue);
+    }
+
+    .project-subtitle {
+      font-size: 13px;
+      color: var(--artifact-text-secondary);
+      margin: 0;
+    }
+
+    /* Stats Grid */
+    .stats-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .stat-pill {
+      background: var(--artifact-background-light);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 8px;
+      padding: 8px 16px;
+      text-align: center;
+      min-width: 80px;
+    }
+
+    .stat-pill .num {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .stat-pill.add .num { color: var(--gcp-green); }
+    .stat-pill.change .num { color: var(--gcp-yellow); }
+    .stat-pill.destroy .num { color: #d93025; }
+
+    .stat-pill .lbl {
+      font-size: 11px;
+      color: var(--artifact-text-secondary);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Controls & Filter Bar */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--artifact-background-light);
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--artifact-border-light);
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: var(--artifact-background);
+      border: 1px solid var(--artifact-border);
+      color: var(--artifact-text-secondary);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--artifact-primary-brand);
+      color: var(--artifact-text-primary);
+    }
+
+    .filter-btn.active {
+      background: var(--artifact-primary-brand);
+      color: #ffffff;
+      border-color: var(--artifact-primary-brand);
+    }
+
+    .hint-text {
+      font-size: 12px;
+      color: var(--artifact-text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Main Content Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 992px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Diagram Canvas Card */
+    .diagram-panel {
+      background: var(--gcp-card-bg);
+      border: 1px solid var(--artifact-border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+    }
+
+    .svg-container {
+      width: 100%;
+      height: auto;
+    }
+
+    /* SVG Interactive Node Styling */
+    .interactive-node {
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+    }
+
+    .interactive-node:hover {
+      filter: drop-shadow(0 4px 8px rgba(26,115,232,0.3));
+    }
+
+    .interactive-node.selected rect.node-box {
+      stroke: var(--gcp-blue) !important;
+      stroke-width: 2.5px !important;
+    }
+
+    .dimmed {
+      opacity: 0.25 !important;
+    }
+
+    /* Inspector Side Panel */
+    .inspector-panel {
+      background: var(--gcp-card-bg);
+      border: 1px solid var(--artifact-border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+
+    .inspector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--artifact-border-light);
+    }
+
+    .inspector-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inspector-type-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .details-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    .details-table th, .details-table td {
+      padding: 8px 6px;
+      text-align: left;
+      border-bottom: 1px solid var(--artifact-border-light);
+    }
+
+    .details-table th {
+      color: var(--artifact-text-secondary);
+      font-weight: 600;
+      width: 38%;
+    }
+
+    .details-table td {
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    .code-snippet {
+      background: var(--artifact-background-light);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      overflow-x: auto;
+      color: var(--artifact-text-primary);
+    }
+
+    /* Print Styles */
+    @media print {
+      @page { size: auto !important; }
+      body {
+        padding: 0.2in;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .toolbar, .filter-btn, .inspector-panel {
+        display: none !important;
+      }
+      .main-layout {
+        grid-template-columns: 1fr !important;
+      }
+      .diagram-panel {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container" data-glean-id="app-root">
+    
+    <!-- Top Header -->
+    <header class="header-card" data-glean-id="project-header">
+      <div class="project-meta">
+        <h1>
+          <span>Google Cloud Platform Architecture</span>
+          <span class="project-badge">Terraform Plan Execution</span>
+        </h1>
+        <p class="project-subtitle">
+          Target Project: <strong>my-devops-journey-502420</strong> (ID: 999543194632)
+        </p>
+      </div>
+      <div class="stats-row" data-glean-id="plan-summary-stats">
+        <div class="stat-pill add">
+          <div class="num">+9</div>
+          <div class="lbl">To Add</div>
+        </div>
+        <div class="stat-pill change">
+          <div class="num">0</div>
+          <div class="lbl">To Change</div>
+        </div>
+        <div class="stat-pill destroy">
+          <div class="num">0</div>
+          <div class="lbl">To Destroy</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Interactive Filter Toolbar -->
+    <div class="toolbar" data-glean-id="filter-toolbar">
+      <div class="filter-group">
+        <button type="button" class="filter-btn active" data-filter="all">All Components</button>
+        <button type="button" class="filter-btn" data-filter="compute">Compute &amp; Network</button>
+        <button type="button" class="filter-btn" data-filter="iam">IAM &amp; Security</button>
+        <button type="button" class="filter-btn" data-filter="storage">Cloud Storage</button>
+      </div>
+      <div class="hint-text">
+        <span>💡 Click any component node to inspect details</span>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="main-layout" data-glean-id="workspace-layout">
+      
+      <!-- Interactive SVG Diagram -->
+      <section class="diagram-panel" data-glean-id="diagram-canvas">
+        <div class="svg-container" id="svg-host">
+          <svg viewBox="0 0 880 620" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+            </defs>
+
+            <!-- Outer Project Boundary -->
+            <rect x="10" y="10" width="860" height="600" rx="14" fill="var(--artifact-background-light)" stroke="var(--artifact-border)" stroke-width="1.5"/>
+            <text x="30" y="34" font-size="13" font-weight="700" fill="var(--artifact-text-primary)">GCP Project: my-devops-journey-502420</text>
+            <text x="30" y="48" font-size="10.5" fill="var(--artifact-text-secondary)">Region: us-central1 • Multi-Region: US</text>
+
+            <!-- ================= LEFT: NETWORKING & COMPUTE ================= -->
+            <!-- VPC Group -->
+            <g class="interactive-node" data-category="compute" data-resource-id="vpc" transform="translate(30, 65)">
+              <rect class="node-box" x="0" y="0" width="380" height="525" rx="10" fill="var(--artifact-background)" stroke="var(--gcp-blue)" stroke-width="1.5"/>
+              <text x="14" y="24" font-size="12.5" font-weight="700" fill="var(--gcp-blue)">VPC: fde-training-vpc</text>
+              <text x="14" y="38" font-size="10" fill="var(--artifact-text-secondary)">auto_create_subnetworks = false</text>
+
+              <!-- Subnet Group -->
+              <g class="interactive-node" data-category="compute" data-resource-id="subnet" transform="translate(14, 50)">
+                <rect class="node-box" x="0" y="0" width="352" height="455" rx="8" fill="var(--gcp-blue-bg)" stroke="var(--gcp-blue)" stroke-width="1" stroke-dasharray="4 3"/>
+                <text x="12" y="22" font-size="11.5" font-weight="700" fill="var(--artifact-text-primary)">Subnet: fde-training-subnet</text>
+                <text x="12" y="36" font-size="9.5" fill="var(--artifact-text-secondary)">10.0.1.0/24 • us-central1</text>
+
+                <!-- Zone Group & VM -->
+                <g class="interactive-node" data-category="compute" data-resource-id="vm" transform="translate(12, 48)">
+                  <rect class="node-box" x="0" y="0" width="328" height="388" rx="8" fill="var(--gcp-card-bg)" stroke="var(--artifact-border)" stroke-width="1"/>
+                  <rect x="0" y="0" width="328" height="38" rx="8" fill="var(--gcp-blue)"/>
+                  <rect x="0" y="30" width="328" height="8" fill="var(--gcp-blue)"/>
+                  <text x="14" y="20" font-size="12" font-weight="700" fill="#ffffff">Compute Engine: fde-app-server</text>
+                  <text x="14" y="32" font-size="9.5" fill="#e8f0fe">Zone: us-central1-a • e2-medium</text>
+
+                  <!-- VM Internal Specs -->
+                  <g transform="translate(12, 50)">
+                    <!-- OS -->
+                    <rect x="0" y="0" width="304" height="42" rx="6" fill="var(--artifact-background-light)" stroke="var(--artifact-border-light)" stroke-width="1"/>
+                    <text x="10" y="16" font-size="8.5" fill="var(--artifact-text-secondary)">IMAGE / OS</text>
+                    <text x="10" y="31" font-size="11" font-weight="600" fill="var(--artifact-text-primary)">debian-cloud / debian-11</text>
+
+                    <!-- Network Interface -->
+                    <g transform="translate(0, 52)">
+                      <rect x="0" y="0" width="304" height="52" rx="6" fill="var(--artifact-background-light)" stroke="var(--artifact-border-light)" stroke-width="1"/>
+                      <text x="10" y="16" font-size="8.5" fill="var(--artifact-text-secondary)">NETWORK INTERFACE (nic0)</text>
+                      <text x="10" y="32" font-size="10.5" font-weight="600" fill="var(--artifact-text-primary)">Internal IP: (known after apply)</text>
+                      <rect x="210" y="10" width="82" height="18" rx="4" fill="var(--gcp-green-bg)" stroke="var(--gcp-green)" stroke-width="0.5"/>
+                      <text x="251" y="22" font-size="9" font-weight="600" text-anchor="middle" fill="var(--gcp-green)">Public NAT IP</text>
+                    </g>
+
+                    <!-- Boot Disk -->
+                    <g transform="translate(0, 114)">
+                      <rect x="0" y="0" width="304" height="44" rx="6" fill="var(--artifact-background-light)" stroke="var(--artifact-border-light)" stroke-width="1"/>
+                      <text x="10" y="16" font-size="8.5" fill="var(--artifact-text-secondary)">BOOT DISK</text>
+                      <text x="10" y="31" font-size="10.5" font-weight="600" fill="var(--artifact-text-primary)">Auto-Delete: true • Mode: READ_WRITE</text>
+                    </g>
+
+                    <!-- Status -->
+                    <g transform="translate(0, 168)">
+                      <rect x="0" y="0" width="304" height="36" rx="6" fill="var(--gcp-blue-bg)" stroke="var(--gcp-blue)" stroke-width="0.5"/>
+                      <text x="12" y="22" font-size="10" font-weight="600" fill="var(--gcp-blue)">+ 1 Instance Scheduled to Provision</text>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+
+            <!-- ================= RIGHT TOP: IAM ================= -->
+            <g class="interactive-node" data-category="iam" data-resource-id="iam-section" transform="translate(435, 65)">
+              <rect class="node-box" x="0" y="0" width="415" height="195" rx="10" fill="var(--artifact-background)" stroke="var(--gcp-yellow)" stroke-width="1.5"/>
+              <text x="14" y="24" font-size="12.5" font-weight="700" fill="var(--artifact-text-primary)">IAM &amp; Service Accounts</text>
+              <text x="14" y="38" font-size="10" fill="var(--artifact-text-secondary)">3 Service Accounts • 1 IAM Role Binding</text>
+
+              <!-- App SA -->
+              <g class="interactive-node" data-category="iam" data-resource-id="sa-app" transform="translate(12, 48)">
+                <rect class="node-box" x="0" y="0" width="391" height="58" rx="6" fill="var(--gcp-yellow-bg)" stroke="var(--gcp-yellow)" stroke-width="1"/>
+                <text x="12" y="18" font-size="11" font-weight="700" fill="var(--artifact-text-primary)">acme-web-app (App GSA)</text>
+                <text x="12" y="31" font-size="8.5" fill="var(--artifact-text-secondary)">acme-web-app@my-devops-journey-502420.iam...</text>
+                <rect x="12" y="37" width="220" height="16" rx="3" fill="var(--artifact-background)" stroke="var(--gcp-yellow)" stroke-width="0.5"/>
+                <text x="18" y="48" font-size="8.5" font-weight="600" fill="var(--artifact-text-primary)">Role: <tspan fill="var(--gcp-purple)">roles/cloudsql.client</tspan></text>
+              </g>
+
+              <!-- Dev / Staging SAs -->
+              <g transform="translate(12, 114)">
+                <!-- Dev SA -->
+                <g class="interactive-node" data-category="iam" data-resource-id="sa-dev" transform="translate(0, 0)">
+                  <rect class="node-box" x="0" y="0" width="190" height="68" rx="6" fill="var(--artifact-background-light)" stroke="var(--artifact-border-light)" stroke-width="1"/>
+                  <text x="10" y="18" font-size="10" font-weight="700" fill="var(--artifact-text-primary)">acme-dev</text>
+                  <text x="10" y="31" font-size="8.5" fill="var(--artifact-text-secondary)">SA for dev env</text>
+                  <rect x="10" y="44" width="60" height="14" rx="3" fill="var(--gcp-blue-bg)"/>
+                  <text x="40" y="54" font-size="7.5" font-weight="600" text-anchor="middle" fill="var(--gcp-blue)">DEV ENV</text>
+                </g>
+
+                <!-- Staging SA -->
+                <g class="interactive-node" data-category="iam" data-resource-id="sa-staging" transform="translate(201, 0)">
+                  <rect class="node-box" x="0" y="0" width="190" height="68" rx="6" fill="var(--artifact-background-light)" stroke="var(--artifact-border-light)" stroke-width="1"/>
+                  <text x="10" y="18" font-size="10" font-weight="700" fill="var(--artifact-text-primary)">acme-staging</text>
+                  <text x="10" y="31" font-size="8.5" fill="var(--artifact-text-secondary)">SA for staging env</text>
+                  <rect x="10" y="44" width="70" height="14" rx="3" fill="var(--gcp-green-bg)"/>
+                  <text x="45" y="54" font-size="7.5" font-weight="600" text-anchor="middle" fill="var(--gcp-green)">STAGING ENV</text>
+                </g>
+              </g>
+            </g>
+
+            <!-- ================= RIGHT BOTTOM: STORAGE ================= -->
+            <g class="interactive-node" data-category="storage" data-resource-id="gcs-section" transform="translate(435, 275)">
+              <rect class="node-box" x="0" y="0" width="415" height="315" rx="10" fill="var(--artifact-background)" stroke="var(--gcp-green)" stroke-width="1.5"/>
+              <text x="14" y="24" font-size="12.5" font-weight="700" fill="var(--artifact-text-primary)">Cloud Storage Buckets (GCS)</text>
+              <text x="14" y="38" font-size="10" fill="var(--artifact-text-secondary)">Multi-region: US • Uniform Bucket-Level Access</text>
+
+              <!-- Bucket 1: Demo -->
+              <g class="interactive-node" data-category="storage" data-resource-id="bucket-demo" transform="translate(12, 48)">
+                <rect class="node-box" x="0" y="0" width="391" height="75" rx="6" fill="var(--artifact-background-light)" stroke="var(--artifact-border-light)" stroke-width="1"/>
+                <text x="10" y="18" font-size="10.5" font-weight="700" fill="var(--artifact-text-primary)">acme-demo-my-devops-journey-502420</text>
+                <text x="10" y="31" font-size="9" fill="var(--artifact-text-secondary)">Class: STANDARD • Location: US</text>
+                <rect x="10" y="44" width="95" height="18" rx="4" fill="var(--gcp-purple-bg)" stroke="var(--gcp-purple)" stroke-width="0.5"/>
+                <text x="57" y="56" font-size="8" font-weight="600" text-anchor="middle" fill="var(--gcp-purple)">env: sandbox</text>
+                <rect x="112" y="44" width="118" height="18" rx="4" fill="var(--gcp-blue-bg)" stroke="var(--gcp-blue)" stroke-width="0.5"/>
+                <text x="171" y="56" font-size="8" font-weight="600" text-anchor="middle" fill="var(--gcp-blue)">managed_by: terraform</text>
+              </g>
+
+              <!-- Bucket 2: Lifecycle Demo -->
+              <g class="interactive-node" data-category="storage" data-resource-id="bucket-lifecycle" transform="translate(12, 134)">
+                <rect class="node-box" x="0" y="0" width="391" height="168" rx="6" fill="var(--gcp-green-bg)" stroke="var(--gcp-green)" stroke-width="1"/>
+                <text x="10" y="18" font-size="10.5" font-weight="700" fill="var(--artifact-text-primary)">acme-lifecycle-my-devops-journey-502420</text>
+                <text x="10" y="31" font-size="9" fill="var(--artifact-text-secondary)">Storage Lifecycle Transitions:</text>
+
+                <!-- Lifecycle Flow Steps -->
+                <g transform="translate(8, 42)">
+                  <!-- Standard -->
+                  <rect x="0" y="0" width="80" height="48" rx="5" fill="var(--artifact-background)" stroke="var(--gcp-green)" stroke-width="1"/>
+                  <text x="40" y="15" font-size="8.5" font-weight="700" text-anchor="middle" fill="var(--gcp-green)">STANDARD</text>
+                  <text x="40" y="27" font-size="7.5" text-anchor="middle" fill="var(--artifact-text-secondary)">0 days</text>
+                  <text x="40" y="39" font-size="7.5" font-weight="600" text-anchor="middle" fill="var(--artifact-text-primary)">Hot</text>
+
+                  <line x1="82" y1="24" x2="94" y2="24" stroke="var(--gcp-green)" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+                  <!-- Nearline -->
+                  <rect x="96" y="0" width="80" height="48" rx="5" fill="var(--artifact-background)" stroke="var(--gcp-blue)" stroke-width="1"/>
+                  <text x="136" y="15" font-size="8.5" font-weight="700" text-anchor="middle" fill="var(--gcp-blue)">NEARLINE</text>
+                  <text x="136" y="27" font-size="7.5" text-anchor="middle" fill="var(--artifact-text-secondary)">&gt; 30 days</text>
+                  <text x="136" y="39" font-size="7.5" font-weight="600" text-anchor="middle" fill="var(--artifact-text-primary)">Monthly</text>
+
+                  <line x1="178" y1="24" x2="190" y2="24" stroke="var(--gcp-blue)" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+                  <!-- Coldline -->
+                  <rect x="192" y="0" width="80" height="48" rx="5" fill="var(--artifact-background)" stroke="var(--gcp-yellow)" stroke-width="1"/>
+                  <text x="232" y="15" font-size="8.5" font-weight="700" text-anchor="middle" fill="var(--gcp-yellow)">COLDLINE</text>
+                  <text x="232" y="27" font-size="7.5" text-anchor="middle" fill="var(--artifact-text-secondary)">&gt; 90 days</text>
+                  <text x="232" y="39" font-size="7.5" font-weight="600" text-anchor="middle" fill="var(--artifact-text-primary)">Quarterly</text>
+
+                  <line x1="274" y1="24" x2="286" y2="24" stroke="var(--gcp-yellow)" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+                  <!-- Archive -->
+                  <rect x="288" y="0" width="80" height="48" rx="5" fill="var(--artifact-background)" stroke="var(--gcp-purple)" stroke-width="1"/>
+                  <text x="328" y="15" font-size="8.5" font-weight="700" text-anchor="middle" fill="var(--gcp-purple)">ARCHIVE</text>
+                  <text x="328" y="27" font-size="7.5" text-anchor="middle" fill="var(--artifact-text-secondary)">&gt; 365 days</text>
+                  <text x="328" y="39" font-size="7.5" font-weight="600" text-anchor="middle" fill="var(--artifact-text-primary)">Cold Archive</text>
+                </g>
+
+                <rect x="8" y="102" width="375" height="22" rx="4" fill="var(--artifact-background)" stroke="var(--artifact-border-light)" stroke-width="0.5"/>
+                <text x="195" y="116" font-size="8.5" text-anchor="middle" fill="var(--artifact-text-secondary)">3 Transition Rules: 30d (Nearline) → 90d (Coldline) → 365d (Archive)</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Component Inspector Drawer -->
+      <aside class="inspector-panel" id="inspector-card" data-glean-id="component-inspector">
+        <div class="inspector-header">
+          <h2 class="inspector-title" id="inspector-name">Select Component</h2>
+          <span class="inspector-type-badge project-badge" id="inspector-badge">OVERVIEW</span>
+        </div>
+        
+        <p id="inspector-desc" style="font-size: 13px; color: var(--artifact-text-secondary); margin-bottom: 16px;">
+          Click on any cloud resource, VPC network, service account, or storage bucket in the architecture diagram to inspect its Terraform plan configuration.
+        </p>
+
+        <div id="inspector-details-container">
+          <table class="details-table" id="details-table">
+            <tbody>
+              <tr><th>Project</th><td>my-devops-journey-502420</td></tr>
+              <tr><th>Resources</th><td>9 to create, 0 change, 0 destroy</td></tr>
+              <tr><th>Region</th><td>us-central1 (Zone a)</td></tr>
+              <tr><th>Status</th><td>Ready to Apply</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-snippet" id="inspector-code">
+terraform apply
+# Plan: 9 to add, 0 to change, 0 to destroy.
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <script>
+    // Component Registry for Interactive Drill-down
+    const resourceData = {
+      'vm': {
+        title: 'fde-app-server',
+        badge: 'COMPUTE ENGINE',
+        badgeColor: 'var(--gcp-blue)',
+        desc: 'Compute Engine instance provisioned via Terraform module with public internet NAT access.',
+        table: [
+          ['Resource Type', 'google_compute_instance.vm'],
+          ['Machine Type', 'e2-medium'],
+          ['Zone', 'us-central1-a'],
+          ['OS Image', 'debian-cloud/debian-11'],
+          ['Subnetwork', 'fde-training-subnet'],
+          ['Network IP', 'Auto-assigned (DHCP)'],
+          ['Public NAT IP', 'Enabled (access_config)'],
+          ['Boot Disk', 'Auto-delete: true, READ_WRITE']
+        ],
+        code: `resource "google_compute_instance" "vm" {
+  name         = "fde-app-server"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnet.id
+    access_config {} // External NAT IP
+  }
+}`
+      },
+      'vpc': {
+        title: 'fde-training-vpc',
+        badge: 'VPC NETWORK',
+        badgeColor: 'var(--gcp-blue)',
+        desc: 'Custom Virtual Private Cloud network serving as the isolated networking boundary.',
+        table: [
+          ['Resource Type', 'google_compute_network.vpc'],
+          ['Mode', 'Custom Subnets (auto_create = false)'],
+          ['Deletion Policy', 'DELETE'],
+          ['Project', 'my-devops-journey-502420']
+        ],
+        code: `resource "google_compute_network" "vpc" {
+  name                    = "fde-training-vpc"
+  auto_create_subnetworks = false
+}`
+      },
+      'subnet': {
+        title: 'fde-training-subnet',
+        badge: 'SUBNET',
+        badgeColor: 'var(--gcp-blue)',
+        desc: 'Regional subnetwork allocated in us-central1 for application compute workloads.',
+        table: [
+          ['Resource Type', 'google_compute_subnetwork.subnet'],
+          ['CIDR Range', '10.0.1.0/24'],
+          ['Region', 'us-central1'],
+          ['VPC Network', 'fde-training-vpc']
+        ],
+        code: `resource "google_compute_subnetwork" "subnet" {
+  name          = "fde-training-subnet"
+  ip_cidr_range = "10.0.1.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.vpc.id
+}`
+      },
+      'sa-app': {
+        title: 'acme-web-app',
+        badge: 'APP SERVICE ACCOUNT',
+        badgeColor: 'var(--gcp-yellow)',
+        desc: 'Primary runtime service account with project-level Cloud SQL client authorization.',
+        table: [
+          ['Account ID', 'acme-web-app'],
+          ['Email', 'acme-web-app@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['Bound Role', 'roles/cloudsql.client']
+        ],
+        code: `resource "google_service_account" "gsa" {
+  account_id   = "acme-web-app"
+  display_name = "My Test App"
+}
+
+resource "google_project_iam_member" "sa_sql_client" {
+  project = "my-devops-journey-502420"
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:\${google_service_account.gsa.email}"
+}`
+      },
+      'sa-dev': {
+        title: 'acme-dev',
+        badge: 'ENV SERVICE ACCOUNT',
+        badgeColor: 'var(--gcp-yellow)',
+        desc: 'Dedicated service account for Development environment deployments.',
+        table: [
+          ['Account ID', 'acme-dev'],
+          ['Email', 'acme-dev@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['Display Name', 'SA for dev env']
+        ],
+        code: `resource "google_service_account" "env_sa" {
+  for_each     = toset(["dev", "staging"])
+  account_id   = "acme-\${each.key}"
+  display_name = "SA for \${each.key} env"
+}`
+      },
+      'sa-staging': {
+        title: 'acme-staging',
+        badge: 'ENV SERVICE ACCOUNT',
+        badgeColor: 'var(--gcp-yellow)',
+        desc: 'Dedicated service account for Staging environment workloads.',
+        table: [
+          ['Account ID', 'acme-staging'],
+          ['Email', 'acme-staging@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['Display Name', 'SA for staging env']
+        ],
+        code: `resource "google_service_account" "env_sa" {
+  account_id   = "acme-staging"
+  display_name = "SA for staging env"
+}`
+      },
+      'bucket-demo': {
+        title: 'acme-demo-my-devops-journey-502420',
+        badge: 'CLOUD STORAGE',
+        badgeColor: 'var(--gcp-green)',
+        desc: 'Standard storage bucket provisioned with environment labels and uniform access.',
+        table: [
+          ['Location', 'US (Multi-Region)'],
+          ['Storage Class', 'STANDARD'],
+          ['Uniform Access', 'true'],
+          ['Labels', 'environment = "sandbox", managed_by = "terraform"']
+        ],
+        code: `resource "google_storage_bucket" "demo" {
+  name                        = "acme-demo-my-devops-journey-502420"
+  location                    = "US"
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+  labels = {
+    environment = "sandbox"
+    managed_by  = "terraform"
+  }
+}`
+      },
+      'bucket-lifecycle': {
+        title: 'acme-lifecycle-my-devops-journey-502420',
+        badge: 'STORAGE WITH LIFECYCLE',
+        badgeColor: 'var(--gcp-green)',
+        desc: 'Automated cost optimization storage bucket with 3 lifecycle transition rules.',
+        table: [
+          ['Location', 'US (Multi-Region)'],
+          ['Default Class', 'STANDARD'],
+          ['Rule 1 (Nearline)', 'Age &gt; 30 days'],
+          ['Rule 2 (Coldline)', 'Age &gt; 90 days'],
+          ['Rule 3 (Archive)', 'Age &gt; 365 days']
+        ],
+        code: `resource "google_storage_bucket" "lifecycle_demo" {
+  name                        = "acme-lifecycle-my-devops-journey-502420"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  lifecycle_rule {
+    action    { type = "SetStorageClass"; storage_class = "NEARLINE" }
+    condition { age  = 30 }
+  }
+  lifecycle_rule {
+    action    { type = "SetStorageClass"; storage_class = "COLDLINE" }
+    condition { age  = 90 }
+  }
+  lifecycle_rule {
+    action    { type = "SetStorageClass"; storage_class = "ARCHIVE" }
+    condition { age  = 365 }
+  }
+}`
+      }
+    };
+
+    // DOM Elements
+    const inspectorName = document.getElementById('inspector-name');
+    const inspectorBadge = document.getElementById('inspector-badge');
+    const inspectorDesc = document.getElementById('inspector-desc');
+    const detailsTableBody = document.querySelector('#details-table tbody');
+    const inspectorCode = document.getElementById('inspector-code');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const nodes = document.querySelectorAll('.interactive-node');
+
+    // Click handler for nodes
+    nodes.forEach(node => {
+      node.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const resId = node.getAttribute('data-resource-id');
+        if (!resId || !resourceData[resId]) return;
+
+        // Update selected state
+        nodes.forEach(n => n.classList.remove('selected'));
+        node.classList.add('selected');
+
+        const data = resourceData[resId];
+        inspectorName.textContent = data.title;
+        inspectorBadge.textContent = data.badge;
+        inspectorBadge.style.color = data.badgeColor || 'var(--gcp-blue)';
+        inspectorBadge.style.borderColor = data.badgeColor || 'var(--gcp-blue)';
+        inspectorDesc.textContent = data.desc;
+
+        // Render table
+        detailsTableBody.innerHTML = data.table.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('');
+        inspectorCode.textContent = data.code;
+      });
+    });
+
+    // Filter Toolbar handler
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.getAttribute('data-filter');
+        nodes.forEach(node => {
+          const category = node.getAttribute('data-category');
+          if (filter === 'all' || category === filter) {
+            node.classList.remove('dimmed');
+          } else {
+            node.classList.add('dimmed');
+          }
+        });
+      });
+    });
+
+    // GleanBridge PDF Export
+    if (window.GleanBridge) {
+      window.GleanBridge.postMessage({
+        actionId: 'export-pdf',
+        type: 'glean-add-menu',
+        metadata: { label: 'Export as PDF', icon: 'export' }
+      });
+      window.GleanBridge.onMessage('action', function(data) {
+        if (data.actionId === 'export-pdf') window.print();
+      });
+    }
+  </script>
+</body>
+</html>

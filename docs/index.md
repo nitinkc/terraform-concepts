@@ -1,110 +1,48 @@
-# Terraform Learning
+# Terraform Learning & Architect's Reference
 
-A working notebook, not a tutorial. Everything here was written while learning Terraform
-against a real GCP project — the labs record what was actually run, the quiz questions come
-out of things that actually broke, and the session notes record the wrong answers as well
-as the right ones.
+A working notebook and architectural reference built against real local roots, a GCP project, and a five-repo GKE/Helm/Consul sandbox.
 
-If you are looking for a specific concept rather than a place to start, go straight to the
-**[concept index](theory/concept-index.md)** — it maps every concept to its theory page, its
-local lab, its GCP lab, the sandbox file that uses it for real, and the quiz that tests it.
+Start at the **[Architect's Reference](reference/index.md)** — 11 sequential, zero-noise articles combining **core theory**, **local cheatsheets (`01-basics/`)**, and **GCP production implementations (`02-gcp-terraform/` & Sandbox)** with a focus on interview-worthy mechanics and architectural trade-offs.
 
-## The path
+---
 
-Four stages, ordered by *what it costs you to be wrong* — which turns out to be the same as
-ordering by complexity.
+## Navigation Overview
 
-| | Stage | What it is | Needs | Costs |
-|---|---|---|---|---|
-| 1 | **[Theory](theory/index.md)** | 19 pages of definitions and mechanics, in dependency order — providers, state, expressions, modules, backends, the execution model | nothing | nothing |
-| 2 | **[Basics](basics/index.md)** | 13 topics using `local`/`random`/`null`/`archive`. Real Terraform lifecycle, files on disk instead of cloud resources | Terraform | nothing |
-| 3 | **[GCP](gcp/index.md)** | A full Terraform root against a real project, plus 18 lab notes — remote state, modules, workspaces, import, drift | a GCP project | cents |
-| 4 | **[Sandbox](sandbox/index.md)** | Five interdependent Terraform roots, a Consul contract, GKE, Cloud SQL, Helm, Workload Identity | GCP + patience | real money |
-
-Test yourself at any point with the **[quiz](quiz/index.md)** (33 questions across 6
-topics), and read the **[session log](sessions/index.md)** for the narrative version —
-what was attempted, what failed, and why.
-
-## Every topic, in order
-
-### Stage 1 — Theory · nothing to install
-
-Read in order; each page assumes only the one before it.
-
-| # | Page | # | Page |
-|---|---|---|---|
-| 1 | [What Terraform is](theory/01-what-terraform-is.md) | 11 | [Data sources](theory/11-data-sources.md) |
-| 2 | [Providers and authentication](theory/02-providers-and-authentication.md) | 12 | [Modules](theory/12-modules.md) |
-| 3 | [`init` and version constraints](theory/03-init-and-version-constraints.md) | 13 | [State lifecycle](theory/13-state-lifecycle.md) |
-| 4 | [Resources and state](theory/04-resources-and-state.md) | 14 | [Backends and state security](theory/14-backends-and-state-security.md) |
-| 5 | [Resource identity and change](theory/05-resource-identity-and-change.md) | 15 | [Cross-config composition](theory/15-cross-config-composition.md) |
-| 6 | [Dependencies and the graph](theory/06-dependencies-and-the-graph.md) | 16 | [GitOps and CI/CD](theory/16-gitops-and-cicd.md) |
-| 7 | [Variables and locals](theory/07-variables-and-locals.md) | 17 | [Project structure](theory/17-project-structure.md) |
-| 8 | [Expressions and conditionals](theory/08-expressions-and-conditionals.md) | 18 | [CLI reference](theory/18-cli-reference.md) |
-| 9 | [`count`, `for_each`, `dynamic`](theory/09-count-for-each-and-dynamic.md) | 19 | [Glossary](theory/19-glossary.md) |
-| 10 | [Outputs](theory/10-outputs.md) | | |
-
-### Stage 2 — Basics · no cloud, no cost
-
-| # | Topic | Code |
+| Section | What It Contains | Code Directories |
 |---|---|---|
-| 1 | [Resources and state](basics/01-resources-and-state.md) | `01-basics/1-create-local-file/` |
-| 2 | [Variables](basics/02-variables.md) | `../01-basics/2-variable-locals` |
-| 3 | [Locals](basics/03-locals.md) | — |
-| 4 | [References and dependencies](basics/04-references-and-dependencies.md) | `01-basics/3-…`, `01-basics/4-dependencies/` |
-| 5 | [Outputs](basics/05-outputs.md) | `01-basics/4-dependencies/explicit/` |
-| 6 | [Data sources](basics/06-data-sources.md) | `01-basics/6-data-sources/` |
-| 7 | [count and for_each](basics/07-count-and-for-each.md) | — |
-| 8 | [Conditionals](basics/08-conditionals.md) | — |
-| 9 | [Lifecycle](basics/09-lifecycle.md) | `01-basics/5-lifecycle/` |
-| 10 | [Validation and sensitive values](basics/10-validation-and-sensitive-values.md) | — |
-| 11 | [Provider versions](basics/11-provider-versions.md) | `01-basics/7-version-constraints/` |
-| 12 | [State surgery](basics/12-state-surgery.md) | — |
-| 13 | [Provisioners and archive_file](basics/13-provisioners-and-archive.md) | — |
+| **[Architect's Reference](reference/index.md)** | 11 sequential articles merging Theory + Local Basics + GCP labs + Cheatsheet | `01-basics/`, `02-gcp-terraform/` |
+| **[Acme Sandbox](sandbox/index.md)** | Five interdependent Terraform roots, Consul contracts, GKE, Cloud SQL, Helm, Workload Identity | `acme-sampleapp-multirepo-sandbox-elaborate/` |
+| **[Quiz](quiz/index.md)** | 66 scenario questions across 6 topics, covering all reference articles and real debugging incidents | — |
 
-### Stage 3 — GCP · cents
+---
 
-| Page | Code |
-|---|---|
-| [Prerequisites and cost](gcp/index.md) | — |
-| [Core GCP root](gcp/01-core-root.md) | `02-gcp-terraform/01-core-gcp-resources/` |
-| [Lab notes 1–18](gcp/02-lab-notes.md) | `acme-sampleapp-…/` |
+## Sequential Reference Articles
 
-### Stage 4 — Sandbox · real money
+| # | Article | Key Topics |
+|---|---|---|
+| 1 | [Execution Model, Providers & Auth](reference/01-execution-model-and-providers.md) | 3-way diff, Core vs Provider, `required_providers` vs `provider {}`, ADC precedence, lock files, aliasing |
+| 2 | [Resources, State Mechanics & Backends](reference/02-resources-state-and-backends.md) | State ledger purpose, non-atomic apply, clobber vs 409, GCS backend chicken-and-egg, `plan` read-access security |
+| 3 | [Resource Identity, Change & Lifecycle](reference/03-identity-lifecycle-and-change.md) | Address identity, `moved` blocks, in-place vs Force-New, `prevent_destroy`, `ignore_changes`, `create_before_destroy` |
+| 4 | [Dependencies & the Execution Graph](reference/04-dependencies-and-graph.md) | Implicit reference edges, when `depends_on` is required vs redundant, reverse destroy order, plan-time unknowns |
+| 5 | [Variables, Precedence, Locals & Sensitive Data](reference/05-variables-locals-and-security.md) | Exact variable precedence order, type constraints, `validation`, why `sensitive = true` is not encryption, volatile functions |
+| 6 | [Expressions, Conditionals & Guard Propagation](reference/06-expressions-conditionals-and-guards.md) | Ternaries, `for` comprehensions, `try`/`one`/`coalesce`, `count = 0` empty-list trap, downstream **guard propagation** |
+| 7 | [Repetition: `count`, `for_each` & `dynamic`](reference/07-repetition-count-for-each-dynamic.md) | Index-shift destruction vs keyed stability, `for_each` over modules, `dynamic` nested blocks, plan-time key rule |
+| 8 | [Data Sources, Outputs & Module Design](reference/08-data-sources-outputs-and-modules.md) | Live `data` reads vs `resource`, `google_client_config` token expiry, `-raw` vs `-json`, module boundaries, `archive_file` vs `local-exec` |
+| 9 | [State Surgery, Drift, Import & Workspaces](reference/09-state-surgery-drift-and-workspaces.md) | `state mv`/`rm`/`import`, import-vs-recreate decision framework, import diff trap, workspace isolation caveats |
+| 10 | [Production Architecture: Multi-Repo, GKE, Networking & CI/CD](reference/10-architecture-multirepo-gke-and-cicd.md) | Root blast radius, Consul KV vs `terraform_remote_state`, VPC/IAP/Peering, GKE transient node pool & Workload Identity, GitOps PR security |
+| 11 | [Master HCL, CLI & Glossary Cheatsheet](reference/11-cli-and-hcl-cheatsheet.md) | Annotated all-in-one HCL template, complete CLI lookup table, and 1-line architectural glossary |
 
-| Page | Code |
-|---|---|
-| [The acme-sampleapp sandbox](sandbox/index.md) | `acme-sampleapp-…/` |
-| [Runbook](sandbox/runbook.md) | apply order, Consul dev agent, teardown |
+---
 
-## Code in this repository
-
-```
-01-basics/             8 local Terraform roots in 7 folders. No cloud, no auth, no cost.
-02-gcp-terraform/      The same concepts against a real GCP project.
-acme-sampleapp-.../    5 interdependent roots, Consul, GKE, Cloud SQL, Helm.
-```
-
-The code directories contain `.tf` files, plus a checked-in `graph.svg` in the two roots
-where the dependency graph is itself the lesson. Every explanation lives here in the docs,
-linked from the tables above, so there is one place to read and one place to run.
-
-## Running these docs locally
+## Running Docs & Graphs Locally
 
 ```bash
 pip install -r requirements.txt
 mkdocs serve
-```
 
-Or without installing anything into your environment:
-
-```bash
+# Or without modifying your local Python environment:
 uvx --with mkdocs-material mkdocs serve
-```
 
-Some pages embed diagrams generated from real Terraform state. To regenerate one
-(needs Graphviz):
-
-```bash
+# Render a Terraform dependency graph (requires Graphviz):
 terraform graph | dot -Tsvg > graph.svg
 ```

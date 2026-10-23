@@ -1,40 +1,16 @@
 # Quiz
 
-Thirty-six questions, split by topic so you can revise one area at a time instead of
-scrolling one long page. Each page scores independently.
+**66 scenario questions** across 6 topics, covering every concept in the [Architect's Reference](../reference/index.md) plus real incidents from the hands-on GCP and multi-repo sandbox sessions. Each page scores independently.
 
-Every question here came out of something that actually happened — a live experiment, a
-failed apply, or a wrong answer that got corrected. None of them are paraphrased from
-documentation, which is why several have a "this happened for real" note in the
-explanation.
+| Topic | Questions | Covers | Reference Articles |
+|---|---:|---|---|
+| [Providers, Auth, Versions & Backends](01-providers-and-auth.md) | 10 | ADC, `required_providers` vs `provider {}`, fallback defaults, `~>` constraints, `.terraform.lock.hcl`, provider aliasing, partial GCS backend, Org Policy 412 | [§1]( ../reference/01-execution-model-and-providers.md), [§2](../reference/02-resources-state-and-backends.md) |
+| [Resources, Data Sources, State, Lifecycle & Surgery](02-resources-state-and-drift.md) | 12 | `data` vs `resource`, non-atomic apply, clobber vs `409`, `import` vs recreate, `import` diff trap, `moved {}`, `prevent_destroy`, `ignore_changes`, `create_before_destroy`, `plan` state-read security | [§2](../reference/02-resources-state-and-backends.md), [§3](../reference/03-identity-lifecycle-and-change.md), [§8](../reference/08-data-sources-outputs-and-modules.md), [§9](../reference/09-state-surgery-drift-and-workspaces.md) |
+| [Variables, Locals, Repetition, Outputs & Guards](03-variables-expressions-and-guards.md) | 13 | 5-level variable precedence, `sensitive = true` plaintext state, volatile `timestamp()`, `validation {}`, `count` index shift vs `for_each`, plan-time unknown keys, `dynamic` blocks, `-raw` vs `-json`, `count = 0`, guard propagation | [§5](../reference/05-variables-locals-and-security.md), [§6](../reference/06-expressions-conditionals-and-guards.md), [§7](../reference/07-repetition-count-for-each-dynamic.md), [§8](../reference/08-data-sources-outputs-and-modules.md) |
+| [Dependencies, Modules, Multi-Repo & CI/CD Security](04-multirepo-and-consul.md) | 12 | Implicit DAG vs `depends_on`, module state prefixing, `archive_file` vs `local-exec`, Consul KV vs `terraform_remote_state`, IAM grant ownership, workspaces vs directories, root blast radius, GitOps PR attack surface | [§4](../reference/04-dependencies-and-graph.md), [§8](../reference/08-data-sources-outputs-and-modules.md), [§9](../reference/09-state-surgery-drift-and-workspaces.md), [§10](../reference/10-architecture-multirepo-gke-and-cicd.md) |
+| [GKE, Workload Identity & GCP Networking](05-gke-and-workload-identity.md) | 13 | Dedicated node SA, `remove_default_node_pool` transient pool, 4-part Workload Identity, IAM vs RBAC, node Capacity vs Allocatable (`e2-small` vs `e2-standard-2`), IAP TCP forwarding (`35.235.240.0/20`), VPC Peering, `linux/amd64` manifests | [§10](../reference/10-architecture-multirepo-gke-and-cicd.md) |
+| [Debugging, Recovery & Verification Methodology](06-debugging-and-verification.md) | 6 | Hypothesis ordering, independent verification (`kubectl`/`gcloud`/`consul`), empty `terraform.tfstate` trap, local dependency readiness checks | [§9](../reference/09-state-surgery-drift-and-workspaces.md), [§10](../reference/10-architecture-multirepo-gke-and-cicd.md) |
 
-| Topic | Questions | Covers |
-|---|---:|---|
-| [Providers, Auth & Initialization](01-providers-and-auth.md) | 5 | ADC, `required_providers` vs `provider`, provider defaults as fallback, `init` |
-| [Resources, Data Sources, State & Drift](02-resources-state-and-drift.md) | 5 | `data` vs `resource`, non-atomic apply, import vs recreate |
-| [Variables, Expressions & Guards](03-variables-expressions-and-guards.md) | 6 | precedence, `count = 0`, `for_each` over modules, guard propagation |
-| [Multi-Repo & Consul Contracts](04-multirepo-and-consul.md) | 6 | Consul KV vs `terraform_remote_state`, publish order, grant ownership |
-| [GKE, Kubernetes & Workload Identity](05-gke-and-workload-identity.md) | 10 | node service accounts, WI annotation linkage, capacity vs allocatable |
-| [Debugging & Verification Methodology](06-debugging-and-verification.md) | 4 | hypothesis ordering, independent verification |
+## Provenance Tags
 
-## Where each question came from
-
-Every question carries a non-rendering `<!-- source: session-NN -->` comment in the
-markdown, so provenance survives future reshuffling. Questions tagged `unfiled` are ones
-whose originating session isn't recorded in the [session notes](../sessions/index.md) —
-mostly the GKE node-sizing and `kubectl` Forbidden series, which came from work done after
-Session 3 was written up. Correct the tags as you reconstruct them.
-
-## Adding questions after a session
-
-1. Pick the topic page the question belongs to. If a question is genuinely about two
-   topics, file it where the *incident* happened, not where the concept lives — you'll
-   remember it that way.
-2. Add `<!-- source: session-NN -->` on the line above the `<quiz>` block.
-3. Bump the count in the table above and in the `**N questions.**` line on the topic page.
-4. If a question introduces a concept not yet in the
-   [concept index](../theory/concept-index.md), add a row there too. That is the one step that
-   keeps the material navigable as it grows.
-
-Create a new topic page only when an existing one passes roughly ten questions — six pages
-of five to eight is the point of this split, and more pages than topics defeats it.
+Every `<quiz>` block carries a non-rendering `<!-- source: ... -->` comment (`session-01` through `session-04` for live incidents, and `reference-01` through `reference-10` for architectural reference concepts).
