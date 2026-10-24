@@ -6,6 +6,13 @@ output "service_account" {
   }
 }
 
+output "backend_sa_email" {
+  value = module.backend_sa.email
+}
+
+output "app_sa_emails" {
+  value = { for k, m in module.app_sa : k => m.email }
+}
 
 # "type": "constraints/iam.disableServiceAccountKeyCreation"
 # output "service_account_private_key" {

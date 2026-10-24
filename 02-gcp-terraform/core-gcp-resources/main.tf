@@ -19,7 +19,28 @@ terraform {
   }
 }
 
+# Step 14 : Provider Aliasing (Multi-Region / Multi-Project)
 provider "google" {
+  alias   = "us_east" # Provider Aliasing
   project = var.project_id
-  region  = "us-central1"
+  region  = var.region
 }
+
+# Step 9 : using modules
+module "backend_sa" {
+  source       = "./modules/service_account"
+  project_id   = var.project_id
+  account_id   = "${local.name_prefix}-web-app-v2"
+  display_name = "My Test App v2 (via module)"
+}
+
+# Step 13 For-each over modules
+module "app_sa" {
+  source       = "./modules/service_account"
+  for_each     = var.service_accounts
+  project_id   = var.project_id
+  account_id   = each.value.account_id
+  display_name = each.value.display_name
+}
+
+

@@ -5,3 +5,6 @@
 # This value wins over the default in variable.tf. Changing only the default
 # and wondering why nothing happened is the classic precedence mistake.
 project_id = "my-devops-journey-502420" # <-- replace with your own GCP project ID
+
+# Step 15 : variable presedence
+environments = ["dev", "staging"]

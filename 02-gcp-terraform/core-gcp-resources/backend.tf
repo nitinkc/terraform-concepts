@@ -13,9 +13,11 @@
 # An empty backend block still selects the gcs backend — that choice is code.
 # Only the values are left to the operator.
 
+# Step 2 : Adding remote state (GCS Bucket)
+# acme-gcp-app-tfstate/acme-sampleapp/state/default.tfstate
 terraform {
   backend "gcs" {
-    bucket = "terraform-learn-tfstate"
+    bucket = "acme-gcp-app-tfstate"
     prefix = "acme-sampleapp/state"
   }
 }

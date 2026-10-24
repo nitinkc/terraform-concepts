@@ -9,6 +9,7 @@ output "project_number" {
 
 data "google_compute_network" "default" {
   name = "default"
+  project = var.project_id
 }
 
 # terraform output default_network_self_link

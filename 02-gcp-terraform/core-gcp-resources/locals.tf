@@ -1,3 +1,6 @@
+# Step 8 : Locals
+# Dynamic blocks
+
 locals {
   name_prefix = "acme"
   common_labels = {

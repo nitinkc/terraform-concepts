@@ -1,8 +1,10 @@
+# One VPC
 resource "google_compute_network" "vpc" {
   name                    = "fde-training-vpc"
   auto_create_subnetworks = false
 }
 
+# One subnet inside that VPC
 resource "google_compute_subnetwork" "subnet" {
   name          = "fde-training-subnet"
   ip_cidr_range = "10.0.1.0/24"
