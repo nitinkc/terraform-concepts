@@ -1,7 +1,22 @@
 
 
-# Embed or dosomething for 2 subnet connectivity with 2subnet-connectivity.html
+# Lab 1 — Same-VPC Two-Subnet Connectivity & IAP SSH
 
+> **Docs Site Version:** [`docs/gcp-labs/01-same-vpc-2-subnets.md`](../../docs/gcp-labs/01-same-vpc-2-subnets.md) · **Interactive HTML:** [`1-2subnet-connectivity.html`](1-2subnet-connectivity.html)
+
+## Architecture Overview
+
+![Same-VPC 2-Subnet Full Architecture Diagram](../../docs/assets/diagrams/gcp-labs/1-2subnet-overview.svg)
+
+### Layer 1: Firewalls & IAP Ingress (`35.235.240.0/20` + Internal ICMP)
+
+![Firewall and IAP Ingress Layer](../../docs/assets/diagrams/gcp-labs/1-2subnet-firewalls-iap.svg)
+
+### Layer 2: Regional Subnets (`10.10.0.0/24` & `10.10.1.0/24`) & Private VMs
+
+![Regional Subnets and VMs Layer](../../docs/assets/diagrams/gcp-labs/1-2subnet-subnets-vms.svg)
+
+---
 
 In Google Cloud (and Terraform), the **network_interface block** represents the Virtual Network Interface Card (**vNIC** / nic0) 
 of your virtual machine.

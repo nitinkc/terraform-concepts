@@ -7,14 +7,14 @@ This repository is a hands-on Terraform learning workspace. Optimize changes for
 ## Start Here
 
 1. Read `README.md` for the learning path.
-2. For Acme work, read `acme-sampleapp-multirepo-sandbox-elaborate/README.md` and `RUNBOOK.md` before changing or applying infrastructure.
+2. For Acme work, read `acme-sampleapp-multirepo` and `RUNBOOK.md` before changing or applying infrastructure.
 3. Use `docs/reference/index.md` to connect code changes to architectural reference articles, local/GCP labs, and quizzes.
 
 ## Repository Areas
 
 - `01-basics/`: isolated local-provider exercises; no cloud cost.
 - `02-gcp-terraform/`: focused GCP root module and reusable VM module.
-- `acme-sampleapp-multirepo-sandbox-elaborate/`: main production-style exercise with five independent Terraform roots.
+- `acme-sampleapp-multirepo`: main production-style exercise with five independent Terraform roots.
 - `docs/`: architectural reference, sandbox docs, and quizzes.
 
 ## Acme Architecture Rules

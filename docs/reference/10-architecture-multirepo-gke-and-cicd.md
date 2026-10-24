@@ -1,6 +1,6 @@
 # 10 — Production Architecture: Multi-Repo, GKE, Networking & CI/CD
 
-**Code:** `02-gcp-terraform/1-2pc-same-network/` · `2-2VPCs/` · `acme-sampleapp-multirepo-sandbox-elaborate/` · **Quiz:** [Multi-Repo & Consul](../quiz/04-multirepo-and-consul.md), [GKE & WI](../quiz/05-gke-and-workload-identity.md), [Debugging](../quiz/06-debugging-and-verification.md)
+**Code:** `02-gcp-terraform/1-2pc-same-network/` · `2-2VPCs/` · `../../acme-sampleapp-multirepo` · **Quiz:** [Multi-Repo & Consul](../quiz/04-multirepo-and-consul.md), [GKE & WI](../quiz/05-gke-and-workload-identity.md), [Debugging](../quiz/06-debugging-and-verification.md)
 
 ---
 

@@ -112,6 +112,12 @@ nav:
       - 9. State Surgery, Drift & Workspaces: reference/09-state-surgery-drift-and-workspaces.md
       - 10. Multi-Repo, GKE, Networking & CI/CD: reference/10-architecture-multirepo-gke-and-cicd.md
       - 11. Master HCL, CLI & Glossary Cheatsheet: reference/11-cli-and-hcl-cheatsheet.md
+  - GCP Visual Labs:
+      - gcp-labs/index.md
+      - 1. Same-VPC 2-Subnet & IAP SSH: gcp-labs/01-same-vpc-2-subnets.md
+      - 2. Cross-VPC Peering: gcp-labs/02-vpc-peering.md
+      - 3. HA VPN & Dynamic eBGP: gcp-labs/03-ha-vpn-bgp.md
+      - 4. Core GCP Resources & Modules: gcp-labs/04-core-gcp-resources.md
   - Sandbox:
       - sandbox/index.md
       - Runbook: sandbox/runbook.md

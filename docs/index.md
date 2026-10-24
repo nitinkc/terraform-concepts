@@ -11,7 +11,8 @@ Start at the **[Architect's Reference](reference/index.md)** — 11 sequential, 
 | Section | What It Contains | Code Directories |
 |---|---|---|
 | **[Architect's Reference](reference/index.md)** | 11 sequential articles merging Theory + Local Basics + GCP labs + Cheatsheet | `01-basics/`, `02-gcp-terraform/` |
-| **[Acme Sandbox](sandbox/index.md)** | Five interdependent Terraform roots, Consul contracts, GKE, Cloud SQL, Helm, Workload Identity | `acme-sampleapp-multirepo-sandbox-elaborate/` |
+| **[GCP Visual Labs](gcp-labs/index.md)** | 4 GCP networking & core-resource labs with sliced SVG diagrams & interactive HTML inspectors | `02-gcp-terraform/` |
+| **[Acme Sandbox](sandbox/index.md)** | Five interdependent Terraform roots, Consul contracts, GKE, Cloud SQL, Helm, Workload Identity | `../acme-sampleapp-multirepo` |
 | **[Quiz](quiz/index.md)** | 66 scenario questions across 6 topics, covering all reference articles and real debugging incidents | — |
 
 ---

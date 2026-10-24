@@ -22,10 +22,10 @@ The repository is deliberately two layers:
 - **`01-basics/` and `02-gcp-terraform/`** are small, isolated demonstrations. One concept
   per directory, safe to break, safe to delete. Every explanation and code snippet is consolidated in
   [`docs/reference/`](docs/reference/index.md).
-- **`acme-sampleapp-multirepo-sandbox-elaborate/`** is the main project. Its five
+- **`acme-sampleapp-multirepo`** is the main project. Its five
   independent Terraform roots model organisation-style repository boundaries, state
   ownership, Consul contracts, GKE, Cloud SQL, Helm and Workload Identity. It bills real
-  money — read its [RUNBOOK](acme-sampleapp-multirepo-sandbox-elaborate/RUNBOOK.md) before
+  money — read its [RUNBOOK](acme-sampleapp-multirepo/RUNBOOK.md) before
   applying anything, and `./destroy-all.sh` when you pause.
 
 Each sandbox `*/infra/` directory owns its own state file. Don't copy or delete state files

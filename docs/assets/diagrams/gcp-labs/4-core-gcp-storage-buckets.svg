@@ -1,0 +1,383 @@
+<svg style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" viewBox="442 45 564 378" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Gradients -->
+              <linearGradient id="grad-vpc" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0284c7" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="#0369a1" stop-opacity="0.04"/>
+              </linearGradient>
+              
+              <linearGradient id="grad-subnet" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0369a1" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#0f172a" stop-opacity="0.4"/>
+              </linearGradient>
+
+              <linearGradient id="grad-vm-header" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0284c7"/>
+                <stop offset="100%" stop-color="#0284c7"/>
+              </linearGradient>
+
+              <linearGradient id="grad-gcs" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#059669" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="#064e3b" stop-opacity="0.04"/>
+              </linearGradient>
+
+              <linearGradient id="grad-iam" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#d97706" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="#78350f" stop-opacity="0.04"/>
+              </linearGradient>
+
+              <linearGradient id="grad-lifecycle" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/>
+                <stop offset="33%" stop-color="#0284c7" stop-opacity="0.2"/>
+                <stop offset="66%" stop-color="#f59e0b" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#a855f7" stop-opacity="0.2"/>
+              </linearGradient>
+
+              <!-- Markers -->
+              <marker id="arrow-cyan" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#00f2fe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+
+              <marker id="arrow-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+
+              <marker id="arrow-amber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+
+              <marker id="arrow-purple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+            </defs>
+
+            <!-- ================= PROJECT OUTER BOUNDARY ================= -->
+            <rect x="8" y="8" width="1004" height="814" rx="16" fill="#0d1322" stroke="#1e2c47" stroke-width="1.5"/>
+            
+            <!-- Project Header Label -->
+            <g transform="translate(24, 28)">
+              <circle cx="8" cy="8" r="5" fill="#38bdf8" />
+              <text x="20" y="12" font-size="13" font-weight="800" fill="#f8fafc" letter-spacing="0.3">GCP Project: my-devops-journey-502420</text>
+              <text x="320" y="12" font-size="11" fill="#64748b">•</text>
+              <text x="332" y="12" font-size="11" font-weight="600" fill="#94a3b8">Project ID: 999543194632</text>
+              <text x="490" y="12" font-size="11" fill="#64748b">•</text>
+              <text x="502" y="12" font-size="11" font-weight="600" fill="#38bdf8">16 Resources to Provision</text>
+            </g>
+
+            <!-- ================= ZONE 1: VPC & COMPUTE (LEFT) ================= -->
+            <!-- VPC Node -->
+            <g class="node-interactive" data-category="compute" data-resource-id="vpc" transform="translate(24, 55)">
+              <rect class="node-box-main" x="0" y="0" width="410" height="745" rx="14" fill="url(#grad-vpc)" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="8 4"/>
+              
+              <rect x="14" y="12" width="22" height="22" rx="6" fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" stroke-width="1"/>
+              <text x="25" y="27" font-size="11" font-weight="800" fill="#38bdf8" text-anchor="middle">V</text>
+              <text x="44" y="24" font-size="13" font-weight="800" fill="#e2e8f0">VPC: fde-training-vpc</text>
+              <text x="44" y="38" font-size="10" fill="#94a3b8">google_compute_network • auto_create_subnetworks: false</text>
+
+              <!-- Data Source Badge -->
+              <g class="node-interactive" data-category="compute" data-resource-id="data-vpc" transform="translate(230, 10)">
+                <rect class="node-box-main" x="0" y="0" width="165" height="28" rx="6" fill="#132038" stroke="#38bdf8" stroke-width="0.8"/>
+                <text x="10" y="18" font-size="9.5" font-weight="700" fill="#38bdf8">data.google_compute_network</text>
+              </g>
+
+              <!-- Subnet Node -->
+              <g class="node-interactive" data-category="compute" data-resource-id="subnet" transform="translate(14, 52)">
+                <rect class="node-box-main" x="0" y="0" width="382" height="670" rx="12" fill="url(#grad-subnet)" stroke="#0369a1" stroke-width="1.2"/>
+                
+                <rect x="12" y="12" width="20" height="20" rx="5" fill="rgba(2, 132, 199, 0.3)" stroke="#38bdf8" stroke-width="0.8"/>
+                <text x="22" y="26" font-size="10" font-weight="800" fill="#38bdf8" text-anchor="middle">S</text>
+                <text x="40" y="22" font-size="12" font-weight="700" fill="#f1f5f9">Subnet: fde-training-subnet</text>
+                <text x="40" y="36" font-size="10" fill="#38bdf8">CIDR: 10.0.1.0/24 • Region: us-central1</text>
+
+                <!-- Compute Engine VM Node -->
+                <g class="node-interactive" data-category="compute" data-resource-id="vm" transform="translate(12, 50)">
+                  <rect class="node-box-main" x="0" y="0" width="358" height="598" rx="12" fill="#111827" stroke="#2563eb" stroke-width="1.5"/>
+                  
+                  <!-- VM Header Bar -->
+                  <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 346 0 C 352.63 0 358 5.37 358 12 L 358 48 L 0 48 Z" fill="url(#grad-vm-header)"/>
+                  <text x="16" y="24" font-size="13" font-weight="800" fill="#ffffff">module.fde_vm</text>
+                  <text x="16" y="40" font-size="10.5" font-weight="600" fill="#bae6fd">fde-app-server • e2-medium (us-central1-a)</text>
+                  <rect x="250" y="12" width="94" height="22" rx="6" fill="#0369a1" stroke="#38bdf8" stroke-width="0.8"/>
+                  <text x="297" y="26" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle">+ TO CREATE</text>
+
+                  <!-- VM Internal Blocks -->
+                  <!-- 1. OS & Image -->
+                  <g transform="translate(14, 60)">
+                    <rect x="0" y="0" width="330" height="60" rx="8" fill="#1a2333" stroke="#2a3952" stroke-width="1"/>
+                    <text x="12" y="18" font-size="9" font-weight="700" fill="#94a3b8" letter-spacing="0.5">OPERATING SYSTEM / IMAGE</text>
+                    <text x="12" y="36" font-size="12" font-weight="700" fill="#f8fafc">debian-cloud / debian-12</text>
+                    <text x="12" y="50" font-size="9.5" fill="#64748b">Architecture: (known) • Snapshot: (none)</text>
+                  </g>
+
+                  <!-- 2. Network Interface (nic0) -->
+                  <g transform="translate(14, 130)">
+                    <rect x="0" y="0" width="330" height="92" rx="8" fill="#1a2333" stroke="#2a3952" stroke-width="1"/>
+                    <text x="12" y="18" font-size="9" font-weight="700" fill="#38bdf8" letter-spacing="0.5">NETWORK INTERFACE (nic0)</text>
+                    <text x="12" y="36" font-size="11" font-weight="600" fill="#e2e8f0">Subnet: fde-training-subnet</text>
+                    <text x="12" y="52" font-size="10" fill="#94a3b8">Internal IP: (known after apply)</text>
+                    
+                    <!-- NAT IP Box -->
+                    <rect x="12" y="62" width="130" height="22" rx="5" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="0.8"/>
+                    <text x="77" y="76" font-size="9.5" font-weight="700" fill="#34d399" text-anchor="middle">⚡ External NAT Access</text>
+                    
+                    <rect x="150" y="62" width="168" height="22" rx="5" fill="rgba(56, 189, 248, 0.12)" stroke="#0284c7" stroke-width="0.8"/>
+                    <text x="234" y="76" font-size="9.5" font-weight="600" fill="#38bdf8" text-anchor="middle">Network Tier: PREMIUM</text>
+                  </g>
+
+                  <!-- 3. Boot Disk -->
+                  <g transform="translate(14, 232)">
+                    <rect x="0" y="0" width="330" height="74" rx="8" fill="#1a2333" stroke="#2a3952" stroke-width="1"/>
+                    <text x="12" y="18" font-size="9" font-weight="700" fill="#f59e0b" letter-spacing="0.5">BOOT DISK &amp; STORAGE</text>
+                    <text x="12" y="36" font-size="11" font-weight="600" fill="#e2e8f0">Auto Delete: true • Mode: READ_WRITE</text>
+                    <text x="12" y="52" font-size="9.5" fill="#94a3b8">Device Name &amp; Key: (known after apply)</text>
+                    <text x="12" y="65" font-size="9" fill="#64748b">KMS: Google-Managed Encryption (SHA-256)</text>
+                  </g>
+
+                  <!-- 4. Lifecycle / Tags -->
+                  <g transform="translate(14, 316)">
+                    <rect x="0" y="0" width="330" height="64" rx="8" fill="#1a2333" stroke="#2a3952" stroke-width="1"/>
+                    <text x="12" y="18" font-size="9" font-weight="700" fill="#a855f7" letter-spacing="0.5">SECURITY &amp; PROVISIONING</text>
+                    <text x="12" y="36" font-size="10.5" font-weight="600" fill="#c084fc">Deletion Policy: DELETE • Protection: false</text>
+                    <text x="12" y="52" font-size="9.5" fill="#94a3b8">Label: goog-terraform-provisioned = true</text>
+                  </g>
+
+                  <!-- 5. Output Card Inside VM -->
+                  <g transform="translate(14, 390)">
+                    <rect x="0" y="0" width="330" height="190" rx="8" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+                    <text x="12" y="18" font-size="9.5" font-weight="700" fill="#38bdf8" letter-spacing="0.5">TERRAFORM OUTPUTS LINKED</text>
+                    
+                    <g transform="translate(10, 28)">
+                      <rect x="0" y="0" width="310" height="34" rx="6" fill="#162032" stroke="#24344d" stroke-width="1"/>
+                      <text x="10" y="15" font-size="9" font-weight="700" fill="#38bdf8">server_internal_ip</text>
+                      <text x="10" y="28" font-size="10" font-family="monospace" fill="#94a3b8">(known after apply)</text>
+                    </g>
+
+                    <g transform="translate(10, 68)">
+                      <rect x="0" y="0" width="310" height="34" rx="6" fill="#162032" stroke="#24344d" stroke-width="1"/>
+                      <text x="10" y="15" font-size="9" font-weight="700" fill="#38bdf8">default_network_self_link</text>
+                      <text x="10" y="28" font-size="10" font-family="monospace" fill="#94a3b8">(known after apply)</text>
+                    </g>
+
+                    <g transform="translate(10, 108)">
+                      <rect x="0" y="0" width="310" height="70" rx="6" fill="#132033" stroke="#1d4ed8" stroke-width="1"/>
+                      <text x="10" y="16" font-size="9" font-weight="700" fill="#60a5fa">RUNTIME CONNECTION</text>
+                      <text x="10" y="32" font-size="10" fill="#cbd5e1">Uses <tspan fill="#fbbf24" font-weight="700">acme-web-app</tspan> SA</text>
+                      <text x="10" y="48" font-size="9.5" fill="#a855f7">Authorized for Cloud SQL Database</text>
+                      <text x="10" y="62" font-size="8.5" fill="#64748b">Roles: roles/cloudsql.client</text>
+                    </g>
+                  </g>
+
+                </g>
+              </g>
+            </g>
+
+            <!-- ================= ZONE 2: CLOUD STORAGE (TOP RIGHT) ================= -->
+            <g class="node-interactive" data-category="storage" data-resource-id="gcs-group" transform="translate(450, 55)">
+              <rect class="node-box-main" x="0" y="0" width="546" height="360" rx="14" fill="url(#grad-gcs)" stroke="#10b981" stroke-width="1.5"/>
+              
+              <rect x="14" y="12" width="22" height="22" rx="6" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="1"/>
+              <text x="25" y="27" font-size="11" font-weight="800" fill="#10b981" text-anchor="middle">G</text>
+              <text x="44" y="24" font-size="13" font-weight="800" fill="#e2e8f0">Cloud Storage (4 Buckets)</text>
+              <text x="44" y="38" font-size="10" fill="#94a3b8">Uniform Bucket-Level Access • Standard / Multi-tier • Soft-Delete Enabled</text>
+
+              <!-- Bucket 1: Demo Sandbox (Top Left) -->
+              <g class="node-interactive" data-category="storage" data-resource-id="bucket-demo" transform="translate(14, 50)">
+                <rect class="node-box-main" x="0" y="0" width="252" height="120" rx="8" fill="#111c2e" stroke="#10b981" stroke-width="1"/>
+                <text x="10" y="18" font-size="10.5" font-weight="800" fill="#f8fafc">acme-demo-my-devops...</text>
+                <text x="10" y="32" font-size="9" fill="#34d399">Location: US (Multi-Region) • STANDARD</text>
+                <text x="10" y="46" font-size="8.5" fill="#94a3b8">google_storage_bucket.demo</text>
+                
+                <!-- Labels -->
+                <g transform="translate(10, 58)">
+                  <rect x="0" y="0" width="105" height="18" rx="4" fill="rgba(168, 85, 247, 0.2)" stroke="#a855f7" stroke-width="0.6"/>
+                  <text x="52" y="12" font-size="8" font-weight="700" fill="#c084fc" text-anchor="middle">env: sandbox</text>
+                  
+                  <rect x="112" y="0" width="114" height="18" rx="4" fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" stroke-width="0.6"/>
+                  <text x="169" y="12" font-size="8" font-weight="700" fill="#38bdf8" text-anchor="middle">by: terraform</text>
+                </g>
+
+                <g transform="translate(10, 84)">
+                  <rect x="0" y="0" width="226" height="24" rx="4" fill="#0f172a" stroke="#1e293b" stroke-width="0.8"/>
+                  <text x="8" y="16" font-size="8.5" font-weight="600" fill="#94a3b8">Uniform Access: <tspan fill="#34d399">true</tspan> • Force Destroy: <tspan fill="#f87171">false</tspan></text>
+                </g>
+              </g>
+
+              <!-- Bucket 2: Workspace Demo (Top Right) -->
+              <g class="node-interactive" data-category="storage" data-resource-id="bucket-workspace" transform="translate(280, 50)">
+                <rect class="node-box-main" x="0" y="0" width="252" height="120" rx="8" fill="#111c2e" stroke="#10b981" stroke-width="1"/>
+                <text x="10" y="18" font-size="10.5" font-weight="800" fill="#f8fafc">acme-default-demo-my...</text>
+                <text x="10" y="32" font-size="9" fill="#34d399">Location: US (Multi-Region) • STANDARD</text>
+                <text x="10" y="46" font-size="8.5" fill="#94a3b8">google_storage_bucket.workspace_demo</text>
+                
+                <!-- Labels -->
+                <g transform="translate(10, 58)">
+                  <rect x="0" y="0" width="105" height="18" rx="4" fill="rgba(168, 85, 247, 0.2)" stroke="#a855f7" stroke-width="0.6"/>
+                  <text x="52" y="12" font-size="8" font-weight="700" fill="#c084fc" text-anchor="middle">env: sandbox</text>
+                  
+                  <rect x="112" y="0" width="114" height="18" rx="4" fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" stroke-width="0.6"/>
+                  <text x="169" y="12" font-size="8" font-weight="700" fill="#38bdf8" text-anchor="middle">by: terraform</text>
+                </g>
+
+                <g transform="translate(10, 84)">
+                  <rect x="0" y="0" width="226" height="24" rx="4" fill="#0f172a" stroke="#1e293b" stroke-width="0.8"/>
+                  <text x="8" y="16" font-size="8.5" font-weight="600" fill="#94a3b8">Workspace Target Bucket</text>
+                </g>
+              </g>
+
+              <!-- Bucket 3: East Region Demo (Middle Left) -->
+              <g class="node-interactive" data-category="storage" data-resource-id="bucket-east" transform="translate(14, 180)">
+                <rect class="node-box-main" x="0" y="0" width="518" height="52" rx="8" fill="#132338" stroke="#14b8a6" stroke-width="1"/>
+                <text x="12" y="20" font-size="11" font-weight="800" fill="#2dd4bf">acme-east-my-devops-journey-502420</text>
+                <text x="12" y="36" font-size="9" fill="#94a3b8">google_storage_bucket.east_region_demo • STANDARD</text>
+                <rect x="360" y="12" width="144" height="26" rx="6" fill="rgba(20, 184, 166, 0.2)" stroke="#14b8a6" stroke-width="1"/>
+                <text x="432" y="28" font-size="10" font-weight="800" fill="#2dd4bf" text-anchor="middle">📍 Region: US-EAST1</text>
+              </g>
+
+              <!-- Bucket 4: Lifecycle Automated Transitions (Bottom Span) -->
+              <g class="node-interactive" data-category="storage" data-resource-id="bucket-lifecycle" transform="translate(14, 242)">
+                <rect class="node-box-main" x="0" y="0" width="518" height="106" rx="8" fill="url(#grad-lifecycle)" stroke="#34d399" stroke-width="1.2"/>
+                <text x="12" y="18" font-size="11" font-weight="800" fill="#f8fafc">acme-lifecycle-my-devops-journey-502420</text>
+                <text x="12" y="32" font-size="9" fill="#94a3b8">Automated Tier Transition Lifecycle Engine (3 Transition Rules):</text>
+
+                <!-- Flow Stages -->
+                <g transform="translate(10, 42)">
+                  <!-- Tier 1: Standard -->
+                  <rect x="0" y="0" width="105" height="52" rx="6" fill="#0f1c2e" stroke="#10b981" stroke-width="1"/>
+                  <text x="52" y="16" font-size="9" font-weight="800" fill="#34d399" text-anchor="middle">STANDARD</text>
+                  <text x="52" y="30" font-size="8" fill="#94a3b8" text-anchor="middle">Age: 0 Days</text>
+                  <text x="52" y="44" font-size="8.5" font-weight="700" fill="#f1f5f9" text-anchor="middle">Hot Storage</text>
+
+                  <line x1="108" y1="26" x2="124" y2="26" stroke="#00f2fe" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+
+                  <!-- Tier 2: Nearline -->
+                  <rect x="128" y="0" width="105" height="52" rx="6" fill="#0f1c2e" stroke="#0284c7" stroke-width="1"/>
+                  <text x="180" y="16" font-size="9" font-weight="800" fill="#38bdf8" text-anchor="middle">NEARLINE</text>
+                  <text x="180" y="30" font-size="8" fill="#94a3b8" text-anchor="middle">Age &gt; 30 Days</text>
+                  <text x="180" y="44" font-size="8.5" font-weight="700" fill="#f1f5f9" text-anchor="middle">Monthly Backup</text>
+
+                  <line x1="236" y1="26" x2="252" y2="26" stroke="#00f2fe" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+
+                  <!-- Tier 3: Coldline -->
+                  <rect x="256" y="0" width="105" height="52" rx="6" fill="#0f1c2e" stroke="#f59e0b" stroke-width="1"/>
+                  <text x="308" y="16" font-size="9" font-weight="800" fill="#fbbf24" text-anchor="middle">COLDLINE</text>
+                  <text x="308" y="30" font-size="8" fill="#94a3b8" text-anchor="middle">Age &gt; 90 Days</text>
+                  <text x="308" y="44" font-size="8.5" font-weight="700" fill="#f1f5f9" text-anchor="middle">Quarterly Cold</text>
+
+                  <line x1="364" y1="26" x2="380" y2="26" stroke="#00f2fe" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+
+                  <!-- Tier 4: Archive -->
+                  <rect x="384" y="0" width="105" height="52" rx="6" fill="#0f1c2e" stroke="#a855f7" stroke-width="1"/>
+                  <text x="436" y="16" font-size="9" font-weight="800" fill="#c084fc" text-anchor="middle">ARCHIVE</text>
+                  <text x="436" y="30" font-size="8" fill="#94a3b8" text-anchor="middle">Age &gt; 365 Days</text>
+                  <text x="436" y="44" font-size="8.5" font-weight="700" fill="#f1f5f9" text-anchor="middle">Yearly Long-term</text>
+                </g>
+              </g>
+
+            </g>
+
+            <!-- ================= ZONE 3: IAM & SERVICE ACCOUNTS (BOTTOM RIGHT) ================= -->
+            <g class="node-interactive" data-category="iam" data-resource-id="iam-group" transform="translate(450, 425)">
+              <rect class="node-box-main" x="0" y="0" width="546" height="375" rx="14" fill="url(#grad-iam)" stroke="#f59e0b" stroke-width="1.5"/>
+              
+              <rect x="14" y="12" width="22" height="22" rx="6" fill="rgba(245, 158, 11, 0.2)" stroke="#f59e0b" stroke-width="1"/>
+              <text x="25" y="27" font-size="11" font-weight="800" fill="#f59e0b" text-anchor="middle">I</text>
+              <text x="44" y="24" font-size="13" font-weight="800" fill="#e2e8f0">IAM &amp; Service Accounts (8 SAs + 1 Role Binding)</text>
+              <text x="44" y="38" font-size="10" fill="#94a3b8">Resource Identities • Environment Scopes • Module Instances</text>
+
+              <!-- App Runtime SAs (Top Dual Cards) -->
+              <!-- 1. acme-web-app (With SQL Client Role) -->
+              <g class="node-interactive" data-category="iam" data-resource-id="sa-app" transform="translate(14, 50)">
+                <rect class="node-box-main" x="0" y="0" width="252" height="96" rx="8" fill="#1e1828" stroke="#f59e0b" stroke-width="1.2"/>
+                <text x="10" y="18" font-size="11" font-weight="800" fill="#fcd34d">acme-web-app</text>
+                <text x="10" y="32" font-size="8.5" fill="#94a3b8">google_service_account.gsa</text>
+                <text x="10" y="45" font-size="8.5" fill="#cbd5e1">Display: "My Test App"</text>
+                
+                <!-- Bound Role -->
+                <rect x="10" y="55" width="232" height="30" rx="5" fill="#2d1a3c" stroke="#a855f7" stroke-width="0.8"/>
+                <text x="16" y="70" font-size="8.5" font-weight="700" fill="#c084fc">ROLE BINDING:</text>
+                <text x="16" y="81" font-size="8.5" font-weight="600" fill="#e9d5ff">roles/cloudsql.client</text>
+              </g>
+
+              <!-- 2. acme-web-app-v2 (Backend SA via module) -->
+              <g class="node-interactive" data-category="iam" data-resource-id="sa-backend" transform="translate(280, 50)">
+                <rect class="node-box-main" x="0" y="0" width="252" height="96" rx="8" fill="#1e1828" stroke="#a855f7" stroke-width="1.2"/>
+                <text x="10" y="18" font-size="11" font-weight="800" fill="#c084fc">acme-web-app-v2</text>
+                <text x="10" y="32" font-size="8.5" fill="#94a3b8">module.backend_sa.google_service_account.this</text>
+                <text x="10" y="45" font-size="8.5" fill="#cbd5e1">Display: "My Test App v2 (via module)"</text>
+                
+                <rect x="10" y="55" width="232" height="30" rx="5" fill="#18233c" stroke="#38bdf8" stroke-width="0.8"/>
+                <text x="16" y="70" font-size="8.5" font-weight="700" fill="#38bdf8">MODULE OUTPUT EXPORT:</text>
+                <text x="16" y="81" font-size="8" font-family="monospace" fill="#93c5fd">backend_sa_email</text>
+              </g>
+
+              <!-- Module App SAs [dev, stg] -->
+              <g transform="translate(14, 156)">
+                <!-- Dev App SA -->
+                <g class="node-interactive" data-category="iam" data-resource-id="sa-module-dev" transform="translate(0, 0)">
+                  <rect class="node-box-main" x="0" y="0" width="252" height="66" rx="8" fill="#161f30" stroke="#0284c7" stroke-width="1"/>
+                  <text x="10" y="18" font-size="10.5" font-weight="800" fill="#38bdf8">module.app_sa["dev"]</text>
+                  <text x="10" y="32" font-size="8.5" fill="#cbd5e1">ID: acme-dev-app • "Dev App SA"</text>
+                  <rect x="10" y="42" width="70" height="16" rx="3" fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" stroke-width="0.5"/>
+                  <text x="45" y="53" font-size="8" font-weight="700" fill="#38bdf8" text-anchor="middle">DEV APP</text>
+                </g>
+
+                <!-- Staging App SA -->
+                <g class="node-interactive" data-category="iam" data-resource-id="sa-module-stg" transform="translate(266, 0)">
+                  <rect class="node-box-main" x="0" y="0" width="252" height="66" rx="8" fill="#161f30" stroke="#f97316" stroke-width="1"/>
+                  <text x="10" y="18" font-size="10.5" font-weight="800" fill="#fb923c">module.app_sa["stg"]</text>
+                  <text x="10" y="32" font-size="8.5" fill="#cbd5e1">ID: acme-stg-app • "Staging App SA"</text>
+                  <rect x="10" y="42" width="80" height="16" rx="3" fill="rgba(249, 115, 22, 0.2)" stroke="#f97316" stroke-width="0.5"/>
+                  <text x="50" y="53" font-size="8" font-weight="700" fill="#fb923c" text-anchor="middle">STG APP</text>
+                </g>
+              </g>
+
+              <!-- Direct Environment SAs (List vs Set) -->
+              <g transform="translate(14, 232)">
+                <text x="4" y="12" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ENVIRONMENT TARGET SERVICE ACCOUNTS (COUNT / SET ITERATORS):</text>
+                
+                <g transform="translate(0, 20)">
+                  <!-- List 0: dev -->
+                  <g class="node-interactive" data-category="iam" data-resource-id="sa-list-dev" transform="translate(0, 0)">
+                    <rect class="node-box-main" x="0" y="0" width="122" height="88" rx="6" fill="#111827" stroke="#38bdf8" stroke-width="0.8"/>
+                    <text x="8" y="16" font-size="9" font-weight="700" fill="#38bdf8">env_sa_list[0]</text>
+                    <text x="8" y="30" font-size="10" font-weight="800" fill="#f8fafc">acme-dev</text>
+                    <text x="8" y="44" font-size="8" fill="#94a3b8">SA for dev env</text>
+                    <rect x="8" y="58" width="55" height="18" rx="3" fill="rgba(56, 189, 248, 0.15)"/>
+                    <text x="35" y="70" font-size="7.5" font-weight="700" fill="#38bdf8" text-anchor="middle">LIST[0]</text>
+                  </g>
+
+                  <!-- List 1: staging -->
+                  <g class="node-interactive" data-category="iam" data-resource-id="sa-list-staging" transform="translate(132, 0)">
+                    <rect class="node-box-main" x="0" y="0" width="122" height="88" rx="6" fill="#111827" stroke="#38bdf8" stroke-width="0.8"/>
+                    <text x="8" y="16" font-size="9" font-weight="700" fill="#38bdf8">env_sa_list[1]</text>
+                    <text x="8" y="30" font-size="10" font-weight="800" fill="#f8fafc">acme-staging</text>
+                    <text x="8" y="44" font-size="8" fill="#94a3b8">SA for staging env</text>
+                    <rect x="8" y="58" width="55" height="18" rx="3" fill="rgba(56, 189, 248, 0.15)"/>
+                    <text x="35" y="70" font-size="7.5" font-weight="700" fill="#38bdf8" text-anchor="middle">LIST[1]</text>
+                  </g>
+
+                  <!-- Set: int -->
+                  <g class="node-interactive" data-category="iam" data-resource-id="sa-set-int" transform="translate(264, 0)">
+                    <rect class="node-box-main" x="0" y="0" width="122" height="88" rx="6" fill="#111827" stroke="#ec4899" stroke-width="0.8"/>
+                    <text x="8" y="16" font-size="9" font-weight="700" fill="#f472b6">env_sa_set["int"]</text>
+                    <text x="8" y="30" font-size="10" font-weight="800" fill="#f8fafc">acme-int</text>
+                    <text x="8" y="44" font-size="8" fill="#94a3b8">SA for int env</text>
+                    <rect x="8" y="58" width="55" height="18" rx="3" fill="rgba(236, 72, 153, 0.15)"/>
+                    <text x="35" y="70" font-size="7.5" font-weight="700" fill="#f472b6" text-anchor="middle">SET["int"]</text>
+                  </g>
+
+                  <!-- Set: stg -->
+                  <g class="node-interactive" data-category="iam" data-resource-id="sa-set-stg" transform="translate(396, 0)">
+                    <rect class="node-box-main" x="0" y="0" width="122" height="88" rx="6" fill="#111827" stroke="#ec4899" stroke-width="0.8"/>
+                    <text x="8" y="16" font-size="9" font-weight="700" fill="#f472b6">env_sa_set["stg"]</text>
+                    <text x="8" y="30" font-size="10" font-weight="800" fill="#f8fafc">acme-stg</text>
+                    <text x="8" y="44" font-size="8" fill="#94a3b8">SA for stg env</text>
+                    <rect x="8" y="58" width="55" height="18" rx="3" fill="rgba(236, 72, 153, 0.15)"/>
+                    <text x="35" y="70" font-size="7.5" font-weight="700" fill="#f472b6" text-anchor="middle">SET["stg"]</text>
+                  </g>
+                </g>
+              </g>
+
+            </g>
+
+          </svg>

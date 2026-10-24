@@ -1,0 +1,386 @@
+<svg style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" viewBox="16 45 1108 425" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Gradients -->
+              <linearGradient id="grad-vpc-a" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0284c7" stop-opacity="0.14"/>
+                <stop offset="100%" stop-color="#0369a1" stop-opacity="0.04"/>
+              </linearGradient>
+
+              <linearGradient id="grad-vpc-b" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#059669" stop-opacity="0.14"/>
+                <stop offset="100%" stop-color="#064e3b" stop-opacity="0.04"/>
+              </linearGradient>
+
+              <linearGradient id="grad-tunnel-channel" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0284c7" stop-opacity="0.15"/>
+                <stop offset="50%" stop-color="#7c3aed" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#059669" stop-opacity="0.15"/>
+              </linearGradient>
+
+              <linearGradient id="grad-vm-a-hdr" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0284c7"/>
+                <stop offset="100%" stop-color="#0369a1"/>
+              </linearGradient>
+
+              <linearGradient id="grad-vm-b-hdr" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#059669"/>
+                <stop offset="100%" stop-color="#047857"/>
+              </linearGradient>
+
+              <!-- Markers -->
+              <marker id="arr-cyan" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#00f2fe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+              <marker id="arr-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+              <marker id="arr-purple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+            </defs>
+
+            <!-- Outer Project Boundary -->
+            <rect x="8" y="8" width="1124" height="864" rx="16" fill="#0c111e" stroke="#1c2842" stroke-width="1.5"/>
+
+            <!-- Top Project Header Line -->
+            <g transform="translate(24, 28)">
+              <circle cx="8" cy="8" r="5" fill="#38bdf8" />
+              <text x="20" y="12" font-size="13" font-weight="800" fill="#f8fafc">Google Cloud Project: my-devops-journey-502420</text>
+              <text x="360" y="12" font-size="11" fill="#64748b">•</text>
+              <text x="372" y="12" font-size="11" font-weight="600" fill="#94a3b8">Region: us-central1 (Zone us-central1-a)</text>
+              <text x="640" y="12" font-size="11" fill="#64748b">•</text>
+              <text x="652" y="12" font-size="11" font-weight="700" fill="#34d399">25 Terraform Resources Managed</text>
+            </g>
+
+            <!-- ================= LEFT: VPC A (10.10.0.0/24) ================= -->
+            <g class="node-interactive" data-category="vpc-a" data-resource-id="network-a" transform="translate(24, 52)">
+              <rect class="node-box-main" x="0" y="0" width="370" height="798" rx="14" fill="url(#grad-vpc-a)" stroke="#0284c7" stroke-width="1.5"/>
+              
+              <!-- VPC A Header -->
+              <rect x="14" y="12" width="22" height="22" rx="5" fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" stroke-width="1"/>
+              <text x="25" y="27" font-size="11" font-weight="800" fill="#38bdf8" text-anchor="middle">A</text>
+              <text x="44" y="24" font-size="13.5" font-weight="800" fill="#f8fafc">VPC Network: vpn-vpc-a</text>
+              <text x="44" y="38" font-size="10" fill="#94a3b8">routing_mode = GLOBAL • auto_subnets = false</text>
+
+              <!-- Subnet A -->
+              <g class="node-interactive" data-category="vpc-a" data-resource-id="subnet-a" transform="translate(14, 50)">
+                <rect class="node-box-main" x="0" y="0" width="342" height="236" rx="10" fill="#111a2c" stroke="#0369a1" stroke-width="1.2"/>
+                <text x="12" y="20" font-size="12" font-weight="700" fill="#38bdf8">Subnet: vpn-subnet-a</text>
+                <text x="12" y="34" font-size="10" font-weight="600" fill="#94a3b8">CIDR: 10.10.0.0/24 • us-central1</text>
+
+                <!-- VM A -->
+                <g class="node-interactive" data-category="vpc-a" data-resource-id="vm-a" transform="translate(10, 44)">
+                  <rect class="node-box-main" x="0" y="0" width="322" height="178" rx="8" fill="#141f33" stroke="#2563eb" stroke-width="1.2"/>
+                  <path d="M 0 8 C 0 3.58 3.58 0 8 0 L 314 0 C 318.42 0 322 3.58 322 8 L 322 34 L 0 34 Z" fill="url(#grad-vm-a-hdr)"/>
+                  <text x="12" y="18" font-size="11.5" font-weight="800" fill="#ffffff">Compute Instance: vpn-vm-a</text>
+                  <text x="12" y="28" font-size="8.5" fill="#bae6fd">e2-micro • debian-12 • us-central1-a</text>
+                  
+                  <g transform="translate(10, 42)">
+                    <rect x="0" y="0" width="302" height="36" rx="4" fill="#0d1422" stroke="#1e2c44" stroke-width="0.8"/>
+                    <text x="8" y="14" font-size="8" font-weight="700" fill="#94a3b8">INTERNAL IP (DHCP)</text>
+                    <text x="8" y="28" font-size="10" font-weight="700" fill="#38bdf8">10.10.0.X (known after apply)</text>
+                  </g>
+
+                  <g transform="translate(10, 84)">
+                    <rect x="0" y="0" width="302" height="38" rx="4" fill="#0d1422" stroke="#1e2c44" stroke-width="0.8"/>
+                    <text x="8" y="14" font-size="8" font-weight="700" fill="#94a3b8">BOOT DISK &amp; PROTECTION</text>
+                    <text x="8" y="28" font-size="9.5" fill="#cbd5e1">Auto-Delete: true • Deletion: DELETE</text>
+                  </g>
+
+                  <g transform="translate(10, 128)">
+                    <rect x="0" y="0" width="302" height="40" rx="4" fill="rgba(56, 189, 248, 0.12)" stroke="#0284c7" stroke-width="0.8"/>
+                    <text x="8" y="16" font-size="8.5" font-weight="700" fill="#38bdf8">TARGET WORKLOAD IN VPC A</text>
+                    <text x="8" y="30" font-size="9" fill="#e2e8f0">Pingable from VPC B via HA VPN Tunnel</text>
+                  </g>
+                </g>
+              </g>
+
+              <!-- Firewall Rule A -->
+              <g class="node-interactive" data-category="firewall" data-resource-id="fw-a" transform="translate(14, 296)">
+                <rect class="node-box-main" x="0" y="0" width="342" height="110" rx="10" fill="#1e1822" stroke="#f97316" stroke-width="1.2"/>
+                <text x="12" y="18" font-size="11" font-weight="800" fill="#fb923c">Firewall: vpn-vpc-a-allow</text>
+                <text x="12" y="32" font-size="8.5" fill="#94a3b8">Priority: 1000 • Ingress • Target: vpn-vpc-a</text>
+                
+                <rect x="12" y="40" width="150" height="24" rx="4" fill="rgba(249, 115, 22, 0.2)" stroke="#f97316" stroke-width="0.8"/>
+                <text x="18" y="55" font-size="8.5" font-weight="700" fill="#fdba74">ALLOW: TCP 22 (SSH)</text>
+
+                <rect x="170" y="40" width="160" height="24" rx="4" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="0.8"/>
+                <text x="176" y="55" font-size="8.5" font-weight="700" fill="#6ee7b7">ALLOW: ICMP (Ping)</text>
+
+                <g transform="translate(12, 70)">
+                  <rect x="0" y="0" width="318" height="32" rx="4" fill="#111118" stroke="#33241b" stroke-width="0.8"/>
+                  <text x="8" y="13" font-size="7.5" font-weight="700" fill="#94a3b8">AUTHORIZED SOURCE RANGES:</text>
+                  <text x="8" y="26" font-size="8.5" font-weight="600" fill="#fed7aa">10.20.0.0/24 (VPC B) + 35.235.240.0/20 (IAP)</text>
+                </g>
+              </g>
+
+              <!-- Cloud Router A -->
+              <g class="node-interactive" data-category="vpn-bgp" data-resource-id="router-a" transform="translate(14, 416)">
+                <rect class="node-box-main" x="0" y="0" width="342" height="182" rx="10" fill="#141c2e" stroke="#38bdf8" stroke-width="1.2"/>
+                <text x="12" y="18" font-size="11.5" font-weight="800" fill="#38bdf8">Cloud Router: ha-vpn-router-a</text>
+                <text x="12" y="32" font-size="9" fill="#94a3b8">BGP ASN: <tspan fill="#00f2fe" font-weight="700">65001</tspan> • Keepalive: 20s • us-central1</text>
+
+                <!-- Router A Interface 0 -->
+                <g class="node-interactive" data-category="vpn-bgp" data-resource-id="if-a0" transform="translate(10, 42)">
+                  <rect class="node-box-main" x="0" y="0" width="322" height="60" rx="6" fill="#0d1422" stroke="#0284c7" stroke-width="0.8"/>
+                  <text x="10" y="16" font-size="9.5" font-weight="700" fill="#38bdf8">router-a-if0 (BGP Peer 0)</text>
+                  <text x="10" y="30" font-size="8.5" fill="#94a3b8">IP Range: <tspan fill="#34d399" font-weight="700">169.254.0.1/30</tspan></text>
+                  <text x="10" y="44" font-size="8" fill="#64748b">Peer: bgp-a-to-b-if0 (ASN 65002 @ 169.254.0.2)</text>
+                  <text x="10" y="54" font-size="7.5" fill="#38bdf8">Bound Tunnel: tunnel-a-to-b-if0</text>
+                </g>
+
+                <!-- Router A Interface 1 -->
+                <g class="node-interactive" data-category="vpn-bgp" data-resource-id="if-a1" transform="translate(10, 110)">
+                  <rect class="node-box-main" x="0" y="0" width="322" height="60" rx="6" fill="#0d1422" stroke="#0284c7" stroke-width="0.8"/>
+                  <text x="10" y="16" font-size="9.5" font-weight="700" fill="#38bdf8">router-a-if1 (BGP Peer 1)</text>
+                  <text x="10" y="30" font-size="8.5" fill="#94a3b8">IP Range: <tspan fill="#34d399" font-weight="700">169.254.1.1/30</tspan></text>
+                  <text x="10" y="44" font-size="8" fill="#64748b">Peer: bgp-a-to-b-if1 (ASN 65002 @ 169.254.1.2)</text>
+                  <text x="10" y="54" font-size="7.5" fill="#38bdf8">Bound Tunnel: tunnel-a-to-b-if1</text>
+                </g>
+              </g>
+
+              <!-- HA VPN Gateway A -->
+              <g class="node-interactive" data-category="vpn-bgp" data-resource-id="gw-a" transform="translate(14, 608)">
+                <rect class="node-box-main" x="0" y="0" width="342" height="178" rx="10" fill="#1b152b" stroke="#a855f7" stroke-width="1.4"/>
+                <text x="12" y="20" font-size="12" font-weight="800" fill="#c084fc">HA VPN Gateway: ha-vpn-gw-a</text>
+                <text x="12" y="34" font-size="9" fill="#94a3b8">Stack: IPV4_ONLY • 2 High-Availability Interfaces</text>
+
+                <!-- GW A Interface 0 -->
+                <g transform="translate(10, 44)">
+                  <rect x="0" y="0" width="322" height="56" rx="6" fill="#110d1c" stroke="#7c3aed" stroke-width="0.8"/>
+                  <rect x="8" y="8" width="68" height="18" rx="4" fill="rgba(168, 85, 247, 0.25)"/>
+                  <text x="42" y="20" font-size="8" font-weight="800" fill="#c084fc" text-anchor="middle">GW IF 0</text>
+                  <text x="84" y="20" font-size="9" font-weight="700" fill="#f8fafc">Public Interface IP: (known)</text>
+                  <text x="8" y="42" font-size="8" fill="#94a3b8">Connects to Tunnel: <tspan fill="#38bdf8" font-weight="700">tunnel-a-to-b-if0</tspan></text>
+                </g>
+
+                <!-- GW A Interface 1 -->
+                <g transform="translate(10, 108)">
+                  <rect x="0" y="0" width="322" height="56" rx="6" fill="#110d1c" stroke="#7c3aed" stroke-width="0.8"/>
+                  <rect x="8" y="8" width="68" height="18" rx="4" fill="rgba(168, 85, 247, 0.25)"/>
+                  <text x="42" y="20" font-size="8" font-weight="800" fill="#c084fc" text-anchor="middle">GW IF 1</text>
+                  <text x="84" y="20" font-size="9" font-weight="700" fill="#f8fafc">Public Interface IP: (known)</text>
+                  <text x="8" y="42" font-size="8" fill="#94a3b8">Connects to Tunnel: <tspan fill="#38bdf8" font-weight="700">tunnel-a-to-b-if1</tspan></text>
+                </g>
+              </g>
+
+            </g>
+
+            <!-- ================= CENTER: HA VPN INTERCONNECT CHANNEL ================= -->
+            <g transform="translate(412, 52)">
+              <rect x="0" y="0" width="316" height="798" rx="14" fill="url(#grad-tunnel-channel)" stroke="#2d224d" stroke-width="1.2"/>
+              
+              <text x="158" y="24" font-size="12" font-weight="800" fill="#c084fc" text-anchor="middle">DUAL IPsec VPN TUNNELS &amp; BGP MESH</text>
+              <text x="158" y="38" font-size="9" fill="#94a3b8" text-anchor="middle">IKEv2 • 32-Byte Secret • Active / Active Routing</text>
+
+              <!-- Shared Secret Pill -->
+              <g class="node-interactive" data-category="vpn-bgp" data-resource-id="secret" transform="translate(18, 50)">
+                <rect class="node-box-main" x="0" y="0" width="280" height="42" rx="8" fill="#161226" stroke="#ec4899" stroke-width="1"/>
+                <text x="12" y="16" font-size="8.5" font-weight="700" fill="#f472b6">random_password.vpn_shared_secret</text>
+                <text x="12" y="30" font-size="8.5" fill="#fbcfe8">Length: 32 • Special: false • (sensitive)</text>
+              </g>
+
+              <!-- TUNNEL 0 INTERCONNECT BLOCK -->
+              <g class="node-interactive" data-category="vpn-bgp" data-resource-id="tunnel-0" transform="translate(12, 110)">
+                <rect class="node-box-main" x="0" y="0" width="292" height="280" rx="10" fill="#101524" stroke="#00f2fe" stroke-width="1.2"/>
+                <rect x="0" y="0" width="292" height="28" rx="10" fill="#0369a1"/>
+                <rect x="0" y="20" width="292" height="8" fill="#0369a1"/>
+                <text x="146" y="18" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">PRIMARY TUNNEL 0 (if0 ↔ if0)</text>
+
+                <g transform="translate(10, 36)">
+                  <rect x="0" y="0" width="272" height="44" rx="6" fill="#0c111c" stroke="#1e2c44" stroke-width="0.8"/>
+                  <text x="8" y="14" font-size="8" font-weight="700" fill="#38bdf8">A → B: tunnel-a-to-b-if0</text>
+                  <text x="8" y="28" font-size="8" fill="#94a3b8">GW Interface: 0 • IKEv2 • Sensitive Secret</text>
+                  <text x="8" y="38" font-size="8" fill="#34d399">BGP: 169.254.0.1 (65001)</text>
+                </g>
+
+                <!-- Flow Visual Line Tunnel 0 -->
+                <g transform="translate(10, 88)">
+                  <line x1="10" y1="12" x2="262" y2="12" stroke="#00f2fe" stroke-width="2.5" class="animated-tunnel-line"/>
+                  <circle cx="136" cy="12" r="14" fill="#0284c7" stroke="#00f2fe" stroke-width="1.5"/>
+                  <text x="136" y="16" font-size="9" font-weight="800" fill="#ffffff" text-anchor="middle">BGP 0</text>
+                </g>
+
+                <g transform="translate(10, 120)">
+                  <rect x="0" y="0" width="272" height="44" rx="6" fill="#0c111c" stroke="#1e2c44" stroke-width="0.8"/>
+                  <text x="8" y="14" font-size="8" font-weight="700" fill="#34d399">B → A: tunnel-b-to-a-if0</text>
+                  <text x="8" y="28" font-size="8" fill="#94a3b8">GW Interface: 0 • IKEv2 • Sensitive Secret</text>
+                  <text x="8" y="38" font-size="8" fill="#38bdf8">BGP: 169.254.0.2 (65002)</text>
+                </g>
+
+                <g transform="translate(10, 172)">
+                  <rect x="0" y="0" width="272" height="96" rx="6" fill="#080c14" stroke="#1c2840" stroke-width="0.8"/>
+                  <text x="8" y="14" font-size="8.5" font-weight="700" fill="#fbbf24">BGP SESSION SUMMARY (TUNNEL 0):</text>
+                  <text x="8" y="30" font-size="8" font-family="monospace" fill="#94a3b8">Router A (ASN 65001): <tspan fill="#38bdf8">169.254.0.1/30</tspan></text>
+                  <text x="8" y="44" font-size="8" font-family="monospace" fill="#94a3b8">Router B (ASN 65002): <tspan fill="#34d399">169.254.0.2/30</tspan></text>
+                  <text x="8" y="60" font-size="8" font-family="monospace" fill="#c084fc">Priority: 100 • Metric: Equal Cost</text>
+                  <text x="8" y="74" font-size="8" font-family="monospace" fill="#38bdf8">State: Active / Redundant Mesh</text>
+                  <text x="8" y="88" font-size="7.5" fill="#64748b">Auto-learns 10.10.0.0/24 &amp; 10.20.0.0/24</text>
+                </g>
+              </g>
+
+              <!-- TUNNEL 1 INTERCONNECT BLOCK -->
+              <g class="node-interactive" data-category="vpn-bgp" data-resource-id="tunnel-1" transform="translate(12, 404)">
+                <rect class="node-box-main" x="0" y="0" width="292" height="280" rx="10" fill="#101524" stroke="#a855f7" stroke-width="1.2"/>
+                <rect x="0" y="0" width="292" height="28" rx="10" fill="#7c3aed"/>
+                <rect x="0" y="20" width="292" height="8" fill="#7c3aed"/>
+                <text x="146" y="18" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">SECONDARY TUNNEL 1 (if1 ↔ if1)</text>
+
+                <g transform="translate(10, 36)">
+                  <rect x="0" y="0" width="272" height="44" rx="6" fill="#0c111c" stroke="#1e2c44" stroke-width="0.8"/>
+                  <text x="8" y="14" font-size="8" font-weight="700" fill="#38bdf8">A → B: tunnel-a-to-b-if1</text>
+                  <text x="8" y="28" font-size="8" fill="#94a3b8">GW Interface: 1 • IKEv2 • Sensitive Secret</text>
+                  <text x="8" y="38" font-size="8" fill="#34d399">BGP: 169.254.1.1 (65001)</text>
+                </g>
+
+                <!-- Flow Visual Line Tunnel 1 -->
+                <g transform="translate(10, 88)">
+                  <line x1="10" y1="12" x2="262" y2="12" stroke="#c084fc" stroke-width="2.5" class="animated-tunnel-line"/>
+                  <circle cx="136" cy="12" r="14" fill="#6d28d9" stroke="#c084fc" stroke-width="1.5"/>
+                  <text x="136" y="16" font-size="9" font-weight="800" fill="#ffffff" text-anchor="middle">BGP 1</text>
+                </g>
+
+                <g transform="translate(10, 120)">
+                  <rect x="0" y="0" width="272" height="44" rx="6" fill="#0c111c" stroke="#1e2c44" stroke-width="0.8"/>
+                  <text x="8" y="14" font-size="8" font-weight="700" fill="#34d399">B → A: tunnel-b-to-a-if1</text>
+                  <text x="8" y="28" font-size="8" fill="#94a3b8">GW Interface: 1 • IKEv2 • Sensitive Secret</text>
+                  <text x="8" y="38" font-size="8" fill="#38bdf8">BGP: 169.254.1.2 (65002)</text>
+                </g>
+
+                <g transform="translate(10, 172)">
+                  <rect x="0" y="0" width="272" height="96" rx="6" fill="#080c14" stroke="#1c2840" stroke-width="0.8"/>
+                  <text x="8" y="14" font-size="8.5" font-weight="700" fill="#fbbf24">BGP SESSION SUMMARY (TUNNEL 1):</text>
+                  <text x="8" y="30" font-size="8" font-family="monospace" fill="#94a3b8">Router A (ASN 65001): <tspan fill="#38bdf8">169.254.1.1/30</tspan></text>
+                  <text x="8" y="44" font-size="8" font-family="monospace" fill="#94a3b8">Router B (ASN 65002): <tspan fill="#34d399">169.254.1.2/30</tspan></text>
+                  <text x="8" y="60" font-size="8" font-family="monospace" fill="#c084fc">Priority: 100 • Metric: Equal Cost</text>
+                  <text x="8" y="74" font-size="8" font-family="monospace" fill="#38bdf8">State: Active / Redundant Mesh</text>
+                  <text x="8" y="88" font-size="7.5" fill="#64748b">Provides Instant Failover (99.99% SLA)</text>
+                </g>
+              </g>
+
+              <!-- Central SLA & Failover Badge -->
+              <g transform="translate(12, 696)">
+                <rect x="0" y="0" width="292" height="90" rx="8" fill="#140f24" stroke="#ec4899" stroke-width="0.8"/>
+                <text x="146" y="20" font-size="10" font-weight="800" fill="#f472b6" text-anchor="middle">ACTIVE-ACTIVE HIGH AVAILABILITY</text>
+                <text x="146" y="38" font-size="8.5" fill="#cbd5e1" text-anchor="middle">Dual 99.99% SLA Compliant Architecture</text>
+                <text x="146" y="54" font-size="8" fill="#94a3b8" text-anchor="middle">Dynamic BGP route advertisement &amp; withdrawal</text>
+                <text x="146" y="72" font-size="8" font-weight="700" fill="#34d399" text-anchor="middle">Seamless Zero-Downtime Failover</text>
+              </g>
+
+            </g>
+
+            <!-- ================= RIGHT: VPC B (10.20.0.0/24) ================= -->
+            <g class="node-interactive" data-category="vpc-b" data-resource-id="network-b" transform="translate(746, 52)">
+              <rect class="node-box-main" x="0" y="0" width="370" height="798" rx="14" fill="url(#grad-vpc-b)" stroke="#10b981" stroke-width="1.5"/>
+              
+              <!-- VPC B Header -->
+              <rect x="14" y="12" width="22" height="22" rx="5" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="1"/>
+              <text x="25" y="27" font-size="11" font-weight="800" fill="#10b981" text-anchor="middle">B</text>
+              <text x="44" y="24" font-size="13.5" font-weight="800" fill="#f8fafc">VPC Network: vpn-vpc-b</text>
+              <text x="44" y="38" font-size="10" fill="#94a3b8">routing_mode = GLOBAL • auto_subnets = false</text>
+
+              <!-- Subnet B -->
+              <g class="node-interactive" data-category="vpc-b" data-resource-id="subnet-b" transform="translate(14, 50)">
+                <rect class="node-box-main" x="0" y="0" width="342" height="236" rx="10" fill="#111f22" stroke="#059669" stroke-width="1.2"/>
+                <text x="12" y="20" font-size="12" font-weight="700" fill="#34d399">Subnet: vpn-subnet-b</text>
+                <text x="12" y="34" font-size="10" font-weight="600" fill="#94a3b8">CIDR: 10.20.0.0/24 • us-central1</text>
+
+                <!-- VM B -->
+                <g class="node-interactive" data-category="vpc-b" data-resource-id="vm-b" transform="translate(10, 44)">
+                  <rect class="node-box-main" x="0" y="0" width="322" height="178" rx="8" fill="#122424" stroke="#059669" stroke-width="1.2"/>
+                  <path d="M 0 8 C 0 3.58 3.58 0 8 0 L 314 0 C 318.42 0 322 3.58 322 8 L 322 34 L 0 34 Z" fill="url(#grad-vm-b-hdr)"/>
+                  <text x="12" y="18" font-size="11.5" font-weight="800" fill="#ffffff">Compute Instance: vpn-vm-b</text>
+                  <text x="12" y="28" font-size="8.5" fill="#a7f3d0">e2-micro • debian-12 • us-central1-a</text>
+                  
+                  <g transform="translate(10, 42)">
+                    <rect x="0" y="0" width="302" height="36" rx="4" fill="#0a1818" stroke="#163832" stroke-width="0.8"/>
+                    <text x="8" y="14" font-size="8" font-weight="700" fill="#94a3b8">INTERNAL IP (DHCP)</text>
+                    <text x="8" y="28" font-size="10" font-weight="700" fill="#34d399">10.20.0.X (known after apply)</text>
+                  </g>
+
+                  <g transform="translate(10, 84)">
+                    <rect x="0" y="0" width="302" height="38" rx="4" fill="#0a1818" stroke="#163832" stroke-width="0.8"/>
+                    <text x="8" y="14" font-size="8" font-weight="700" fill="#94a3b8">BOOT DISK &amp; PROTECTION</text>
+                    <text x="8" y="28" font-size="9.5" fill="#cbd5e1">Auto-Delete: true • Deletion: DELETE</text>
+                  </g>
+
+                  <g transform="translate(10, 128)">
+                    <rect x="0" y="0" width="302" height="40" rx="4" fill="rgba(16, 185, 129, 0.12)" stroke="#059669" stroke-width="0.8"/>
+                    <text x="8" y="16" font-size="8.5" font-weight="700" fill="#34d399">TARGET WORKLOAD IN VPC B</text>
+                    <text x="8" y="30" font-size="9" fill="#e2e8f0">Pingable from VPC A via HA VPN Tunnel</text>
+                  </g>
+                </g>
+              </g>
+
+              <!-- Firewall Rule B -->
+              <g class="node-interactive" data-category="firewall" data-resource-id="fw-b" transform="translate(14, 296)">
+                <rect class="node-box-main" x="0" y="0" width="342" height="110" rx="10" fill="#1e1822" stroke="#f97316" stroke-width="1.2"/>
+                <text x="12" y="18" font-size="11" font-weight="800" fill="#fb923c">Firewall: vpn-vpc-b-allow</text>
+                <text x="12" y="32" font-size="8.5" fill="#94a3b8">Priority: 1000 • Ingress • Target: vpn-vpc-b</text>
+                
+                <rect x="12" y="40" width="150" height="24" rx="4" fill="rgba(249, 115, 22, 0.2)" stroke="#f97316" stroke-width="0.8"/>
+                <text x="18" y="55" font-size="8.5" font-weight="700" fill="#fdba74">ALLOW: TCP 22 (SSH)</text>
+
+                <rect x="170" y="40" width="160" height="24" rx="4" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="0.8"/>
+                <text x="176" y="55" font-size="8.5" font-weight="700" fill="#6ee7b7">ALLOW: ICMP (Ping)</text>
+
+                <g transform="translate(12, 70)">
+                  <rect x="0" y="0" width="318" height="32" rx="4" fill="#111118" stroke="#33241b" stroke-width="0.8"/>
+                  <text x="8" y="13" font-size="7.5" font-weight="700" fill="#94a3b8">AUTHORIZED SOURCE RANGES:</text>
+                  <text x="8" y="26" font-size="8.5" font-weight="600" fill="#fed7aa">10.10.0.0/24 (VPC A) + 35.235.240.0/20 (IAP)</text>
+                </g>
+              </g>
+
+              <!-- Cloud Router B -->
+              <g class="node-interactive" data-category="vpn-bgp" data-resource-id="router-b" transform="translate(14, 416)">
+                <rect class="node-box-main" x="0" y="0" width="342" height="182" rx="10" fill="#11221f" stroke="#10b981" stroke-width="1.2"/>
+                <text x="12" y="18" font-size="11.5" font-weight="800" fill="#34d399">Cloud Router: ha-vpn-router-b</text>
+                <text x="12" y="32" font-size="9" fill="#94a3b8">BGP ASN: <tspan fill="#34d399" font-weight="700">65002</tspan> • Keepalive: 20s • us-central1</text>
+
+                <!-- Router B Interface 0 -->
+                <g class="node-interactive" data-category="vpn-bgp" data-resource-id="if-b0" transform="translate(10, 42)">
+                  <rect class="node-box-main" x="0" y="0" width="322" height="60" rx="6" fill="#0c1716" stroke="#059669" stroke-width="0.8"/>
+                  <text x="10" y="16" font-size="9.5" font-weight="700" fill="#34d399">router-b-if0 (BGP Peer 0)</text>
+                  <text x="10" y="30" font-size="8.5" fill="#94a3b8">IP Range: <tspan fill="#38bdf8" font-weight="700">169.254.0.2/30</tspan></text>
+                  <text x="10" y="44" font-size="8" fill="#64748b">Peer: bgp-b-to-a-if0 (ASN 65001 @ 169.254.0.1)</text>
+                  <text x="10" y="54" font-size="7.5" fill="#34d399">Bound Tunnel: tunnel-b-to-a-if0</text>
+                </g>
+
+                <!-- Router B Interface 1 -->
+                <g class="node-interactive" data-category="vpn-bgp" data-resource-id="if-b1" transform="translate(10, 110)">
+                  <rect class="node-box-main" x="0" y="0" width="322" height="60" rx="6" fill="#0c1716" stroke="#059669" stroke-width="0.8"/>
+                  <text x="10" y="16" font-size="9.5" font-weight="700" fill="#34d399">router-b-if1 (BGP Peer 1)</text>
+                  <text x="10" y="30" font-size="8.5" fill="#94a3b8">IP Range: <tspan fill="#38bdf8" font-weight="700">169.254.1.2/30</tspan></text>
+                  <text x="10" y="44" font-size="8" fill="#64748b">Peer: bgp-b-to-a-if1 (ASN 65001 @ 169.254.1.1)</text>
+                  <text x="10" y="54" font-size="7.5" fill="#34d399">Bound Tunnel: tunnel-b-to-a-if1</text>
+                </g>
+              </g>
+
+              <!-- HA VPN Gateway B -->
+              <g class="node-interactive" data-category="vpn-bgp" data-resource-id="gw-b" transform="translate(14, 608)">
+                <rect class="node-box-main" x="0" y="0" width="342" height="178" rx="10" fill="#1b152b" stroke="#a855f7" stroke-width="1.4"/>
+                <text x="12" y="20" font-size="12" font-weight="800" fill="#c084fc">HA VPN Gateway: ha-vpn-gw-b</text>
+                <text x="12" y="34" font-size="9" fill="#94a3b8">Stack: IPV4_ONLY • 2 High-Availability Interfaces</text>
+
+                <!-- GW B Interface 0 -->
+                <g transform="translate(10, 44)">
+                  <rect x="0" y="0" width="322" height="56" rx="6" fill="#110d1c" stroke="#7c3aed" stroke-width="0.8"/>
+                  <rect x="8" y="8" width="68" height="18" rx="4" fill="rgba(168, 85, 247, 0.25)"/>
+                  <text x="42" y="20" font-size="8" font-weight="800" fill="#c084fc" text-anchor="middle">GW IF 0</text>
+                  <text x="84" y="20" font-size="9" font-weight="700" fill="#f8fafc">Public Interface IP: (known)</text>
+                  <text x="8" y="42" font-size="8" fill="#94a3b8">Connects to Tunnel: <tspan fill="#34d399" font-weight="700">tunnel-b-to-a-if0</tspan></text>
+                </g>
+
+                <!-- GW B Interface 1 -->
+                <g transform="translate(10, 108)">
+                  <rect x="0" y="0" width="322" height="56" rx="6" fill="#110d1c" stroke="#7c3aed" stroke-width="0.8"/>
+                  <rect x="8" y="8" width="68" height="18" rx="4" fill="rgba(168, 85, 247, 0.25)"/>
+                  <text x="42" y="20" font-size="8" font-weight="800" fill="#c084fc" text-anchor="middle">GW IF 1</text>
+                  <text x="84" y="20" font-size="9" font-weight="700" fill="#f8fafc">Public Interface IP: (known)</text>
+                  <text x="8" y="42" font-size="8" fill="#94a3b8">Connects to Tunnel: <tspan fill="#34d399" font-weight="700">tunnel-b-to-a-if1</tspan></text>
+                </g>
+              </g>
+
+            </g>
+
+          </svg>

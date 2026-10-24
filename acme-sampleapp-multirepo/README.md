@@ -54,7 +54,7 @@ The repository is intentionally split into two layers:
 
 - `01-basics/` and `02-gcp-terraform/` are small, isolated demonstrations. Use them
   to learn one Terraform concept at a time without the Acme dependency graph.
-- `acme-sampleapp-multirepo-sandbox-elaborate/` is the main project. Its five
+- `` is the main project. Its five
   independent Terraform roots model the organization-style repository boundaries,
   state ownership, Consul contracts, GKE, Cloud SQL, Helm, and Workload Identity.
 

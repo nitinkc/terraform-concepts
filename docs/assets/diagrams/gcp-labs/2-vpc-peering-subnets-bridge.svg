@@ -1,0 +1,218 @@
+<svg style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" viewBox="8 168 704 256" xmlns="http://www.w3.org/2000/svg" id="archSvg">
+          <defs>
+            <!-- Drop Shadow for Nodes -->
+            <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="115%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/>
+            </filter>
+
+            <!-- Arrow Markers -->
+            <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#2563eb"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#7c3aed"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#059669"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="arrow-rose" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#e11d48"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+
+            <!-- Gradients -->
+            <linearGradient id="grad-vpca" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.04"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.02"/>
+            </linearGradient>
+
+            <linearGradient id="grad-vpcb" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.04"/>
+              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.02"/>
+            </linearGradient>
+
+            <linearGradient id="grad-iap" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#e11d48"/>
+              <stop offset="100%" stop-color="#be123c"/>
+            </linearGradient>
+
+            <linearGradient id="grad-peering" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2563eb"/>
+              <stop offset="50%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#2563eb"/>
+            </linearGradient>
+
+            <linearGradient id="grad-fwa" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#eff6ff"/>
+              <stop offset="100%" stop-color="#dbeafe"/>
+            </linearGradient>
+
+            <linearGradient id="grad-fwb" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f5f3ff"/>
+              <stop offset="100%" stop-color="#ede9fe"/>
+            </linearGradient>
+
+            <linearGradient id="grad-vma" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="100%" stop-color="#eff6ff"/>
+            </linearGradient>
+
+            <linearGradient id="grad-vmb" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="100%" stop-color="#f5f3ff"/>
+            </linearGradient>
+          </defs>
+  <rect x=\"0\" y=\"0\" width=\"720\" height=\"480\" rx=\"16\" fill=\"#ffffff\"/>
+
+          <!-- TOP EXTERNAL INGRESS: Google Cloud IAP Tunnel -->
+          <g id="node-iap" class="interactive-node" data-category="security" data-res="iap">
+            <rect x="220" y="14" width="280" height="42" rx="10"
+                  fill="url(#grad-iap)" stroke="#be123c" stroke-width="1" filter="url(#card-shadow)"/>
+            <text x="360" y="30" text-anchor="middle" dominant-baseline="central"
+                  font-size="12" font-weight="700" fill="#ffffff">🛡️ Google Cloud IAP Proxy (35.235.240.0/20)</text>
+            <text x="360" y="44" text-anchor="middle" dominant-baseline="central"
+                  font-size="10" font-weight="500" fill="#ffe4e6">Zero-Trust TCP:22 SSH Tunneling</text>
+          </g>
+
+          <!-- IAP Stream Arrows down to Firewalls -->
+          <path d="M 280 56 C 280 75, 170 70, 170 88"
+                stroke="#e11d48" stroke-width="1.6" stroke-dasharray="4 3"
+                marker-end="url(#arrow-rose)" fill="none"/>
+          <path d="M 440 56 C 440 75, 550 70, 550 88"
+                stroke="#e11d48" stroke-width="1.6" stroke-dasharray="4 3"
+                marker-end="url(#arrow-rose)" fill="none"/>
+
+          <!-- ================= VPC-A CONTAINER (LEFT) ================= -->
+          <g id="node-vpc-a" class="interactive-node" data-category="network" data-res="vpc-a">
+            <rect x="16" y="70" width="310" height="394" rx="14"
+                  fill="url(#grad-vpca)" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="6 5" filter="url(#card-shadow)"/>
+            <rect x="16" y="70" width="310" height="30" rx="14" fill="#eff6ff"/>
+            <text x="171" y="86" text-anchor="middle" dominant-baseline="central"
+                  font-size="12" font-weight="700" fill="#1e40af">☁️ VPC Network: vpc-a</text>
+          </g>
+
+          <!-- Firewall: vpc-a-allow -->
+          <g id="node-fwa" class="interactive-node" data-category="security" data-res="fwa">
+            <rect x="32" y="112" width="278" height="52" rx="8"
+                  fill="url(#grad-fwa)" stroke="#bfdbfe" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <text x="171" y="128" text-anchor="middle" dominant-baseline="central"
+                  font-size="12" font-weight="700" fill="#1e3a8a">🛡️ Firewall: vpc-a-allow</text>
+            <text x="171" y="146" text-anchor="middle" dominant-baseline="central"
+                  font-size="10.5" font-weight="500" fill="#3b82f6">Allow TCP:22, ICMP from 10.20.0.0/24 &amp; IAP</text>
+          </g>
+
+          <!-- Subnet: subnet-a -->
+          <g id="node-subnet-a" class="interactive-node" data-category="network" data-res="subnet-a">
+            <rect x="32" y="176" width="278" height="236" rx="10"
+                  fill="#ffffff" stroke="#93c5fd" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <rect x="32" y="176" width="278" height="28" rx="10" fill="#eff6ff"/>
+            <text x="171" y="191" text-anchor="middle" dominant-baseline="central"
+                  font-size="11.5" font-weight="700" fill="#1e40af">🌐 subnet-a &bull; 10.10.0.0/24 (us-central1)</text>
+          </g>
+
+          <!-- Compute Instance: vm-a -->
+          <g id="node-vm-a" class="interactive-node" data-category="compute" data-res="vm-a">
+            <rect x="48" y="216" width="246" height="76" rx="8"
+                  fill="url(#grad-vma)" stroke="#bfdbfe" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <text x="171" y="236" text-anchor="middle" dominant-baseline="central"
+                  font-size="13" font-weight="700" fill="#1e3a8a">⚡ vm-a (e2-micro)</text>
+            <text x="171" y="254" text-anchor="middle" dominant-baseline="central"
+                  font-size="11" font-weight="500" fill="#3b82f6">Debian 12 &bull; us-central1-a</text>
+            <text x="171" y="272" text-anchor="middle" dominant-baseline="central"
+                  font-size="10.5" font-weight="600" fill="#059669">NIC: subnet-a (IP: 10.10.0.x)</text>
+          </g>
+
+          <!-- Output: vm_a_ip -->
+          <g id="node-out-a" class="interactive-node" data-category="compute" data-res="out-a">
+            <rect x="48" y="304" width="246" height="32" rx="6"
+                  fill="#fdf4ff" stroke="#f0abfc" stroke-width="1.2"/>
+            <text x="171" y="320" text-anchor="middle" dominant-baseline="central"
+                  font-size="11" font-weight="700" fill="#a21eaf">💎 Output: vm_a_ip</text>
+          </g>
+
+          <!-- Internal Ping Status A -->
+          <rect x="48" y="348" width="246" height="26" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+          <text x="171" y="361" text-anchor="middle" dominant-baseline="central"
+                font-size="10" font-weight="600" fill="#047857">📡 Accepts SSH (22) &amp; Ping (ICMP)</text>
+
+
+          <!-- ================= VPC-B CONTAINER (RIGHT) ================= -->
+          <g id="node-vpc-b" class="interactive-node" data-category="network" data-res="vpc-b">
+            <rect x="394" y="70" width="310" height="394" rx="14"
+                  fill="url(#grad-vpcb)" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="6 5" filter="url(#card-shadow)"/>
+            <rect x="394" y="70" width="310" height="30" rx="14" fill="#f5f3ff"/>
+            <text x="549" y="86" text-anchor="middle" dominant-baseline="central"
+                  font-size="12" font-weight="700" fill="#5b21b6">☁️ VPC Network: vpc-b</text>
+          </g>
+
+          <!-- Firewall: vpc-b-allow -->
+          <g id="node-fwb" class="interactive-node" data-category="security" data-res="fwb">
+            <rect x="410" y="112" width="278" height="52" rx="8"
+                  fill="url(#grad-fwb)" stroke="#ddd6fe" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <text x="549" y="128" text-anchor="middle" dominant-baseline="central"
+                  font-size="12" font-weight="700" fill="#4c1d95">🛡️ Firewall: vpc-b-allow</text>
+            <text x="549" y="146" text-anchor="middle" dominant-baseline="central"
+                  font-size="10.5" font-weight="500" fill="#7c3aed">Allow TCP:22, ICMP from 10.10.0.0/24 &amp; IAP</text>
+          </g>
+
+          <!-- Subnet: subnet-b -->
+          <g id="node-subnet-b" class="interactive-node" data-category="network" data-res="subnet-b">
+            <rect x="410" y="176" width="278" height="236" rx="10"
+                  fill="#ffffff" stroke="#c4b5fd" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <rect x="410" y="176" width="278" height="28" rx="10" fill="#f5f3ff"/>
+            <text x="549" y="191" text-anchor="middle" dominant-baseline="central"
+                  font-size="11.5" font-weight="700" fill="#5b21b6">🌐 subnet-b &bull; 10.20.0.0/24 (us-central1)</text>
+          </g>
+
+          <!-- Compute Instance: vm-b -->
+          <g id="node-vm-b" class="interactive-node" data-category="compute" data-res="vm-b">
+            <rect x="426" y="216" width="246" height="76" rx="8"
+                  fill="url(#grad-vmb)" stroke="#ddd6fe" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <text x="549" y="236" text-anchor="middle" dominant-baseline="central"
+                  font-size="13" font-weight="700" fill="#4c1d95">⚡ vm-b (e2-micro)</text>
+            <text x="549" y="254" text-anchor="middle" dominant-baseline="central"
+                  font-size="11" font-weight="500" fill="#7c3aed">Debian 12 &bull; us-central1-a</text>
+            <text x="549" y="272" text-anchor="middle" dominant-baseline="central"
+                  font-size="10.5" font-weight="600" fill="#059669">NIC: subnet-b (IP: 10.20.0.x)</text>
+          </g>
+
+          <!-- Output: vm_b_ip -->
+          <g id="node-out-b" class="interactive-node" data-category="compute" data-res="out-b">
+            <rect x="426" y="304" width="246" height="32" rx="6"
+                  fill="#fdf4ff" stroke="#f0abfc" stroke-width="1.2"/>
+            <text x="549" y="320" text-anchor="middle" dominant-baseline="central"
+                  font-size="11" font-weight="700" fill="#a21eaf">💎 Output: vm_b_ip</text>
+          </g>
+
+          <!-- Internal Ping Status B -->
+          <rect x="426" y="348" width="246" height="26" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+          <text x="549" y="361" text-anchor="middle" dominant-baseline="central"
+                font-size="10" font-weight="600" fill="#047857">📡 Accepts SSH (22) &amp; Ping (ICMP)</text>
+
+
+          <!-- ================= VPC PEERING CONNECTIONS (CENTER) ================= -->
+          <!-- Bidirectional Peering Lines -->
+          <line x1="294" y1="254" x2="426" y2="254"
+                stroke="#059669" stroke-width="2.5" stroke-dasharray="5 3"
+                marker-end="url(#arrow-emerald)" marker-start="url(#arrow-emerald)" fill="none"/>
+
+          <!-- VPC Peering Badge / Bridge -->
+          <g id="node-peering" class="interactive-node" data-category="peering" data-res="peering">
+            <rect x="300" y="222" width="120" height="64" rx="10"
+                  fill="#ffffff" stroke="#7c3aed" stroke-width="1.8" filter="url(#card-shadow)"/>
+            <rect x="300" y="222" width="120" height="20" rx="10" fill="#f5f3ff"/>
+            <text x="360" y="233" text-anchor="middle" dominant-baseline="central"
+                  font-size="10" font-weight="700" fill="#7c3aed">🔗 VPC PEERING</text>
+            <text x="360" y="250" text-anchor="middle" dominant-baseline="central"
+                  font-size="10" font-weight="700" fill="#0f172a">a-to-b &bull; b-to-a</text>
+            <text x="360" y="268" text-anchor="middle" dominant-baseline="central"
+                  font-size="9" font-weight="600" fill="#059669">Private Mesh Route</text>
+          </g>
+        </svg>

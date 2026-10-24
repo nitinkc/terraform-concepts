@@ -22,7 +22,7 @@ source is [`service-dependency-architecture.drawio`](https://github.com/nitinkc/
 
 | | |
 |---|---|
-| Source of truth for layout | [`acme-sampleapp-multirepo-sandbox-elaborate/README.md`](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo-sandbox-elaborate/README.md) |
+| Source of truth for layout | [`../../acme-sampleapp-multirepo`](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo-sandbox-elaborate/README.md) |
 | Source of truth for running it | [`RUNBOOK.md`](runbook.md) — apply order, Consul dev agent, teardown |
 | Concept → file lookup | [Architect's Reference](../reference/index.md) |
 

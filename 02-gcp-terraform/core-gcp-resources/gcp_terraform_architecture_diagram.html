@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="glean-artifact-type" content="visual_content">
+  <title>GCP Terraform Architecture Diagram</title>
+  <style>
+    :root {
+      --bg-base: #0a0d14;
+      --bg-surface: #111726;
+      --bg-card: #161f33;
+      --bg-card-hover: #1e2a45;
+      --bg-glass: rgba(22, 31, 51, 0.75);
+      --border-subtle: #23314d;
+      --border-bright: #3b82f6;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      /* Vibrant Palette */
+      --cyan-neon: #00f2fe;
+      --blue-electric: #38bdf8;
+      --blue-glow: rgba(56, 189, 248, 0.25);
+      --emerald-neon: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --amber-neon: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.25);
+      --purple-neon: #a855f7;
+      --purple-glow: rgba(168, 85, 247, 0.25);
+      --pink-neon: #ec4899;
+      --pink-glow: rgba(236, 72, 153, 0.25);
+      --coral-neon: #fb7185;
+      --teal-neon: #14b8a6;
+      --teal-glow: rgba(20, 184, 166, 0.25);
+      
+      --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      --glow-blue: 0 0 15px rgba(56, 189, 248, 0.4);
+      --glow-green: 0 0 15px rgba(16, 185, 129, 0.4);
+      --glow-purple: 0 0 15px rgba(168, 85, 247, 0.4);
+      --glow-amber: 0 0 15px rgba(245, 158, 11, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: radial-gradient(circle at 15% 15%, #131b2e 0%, #0a0d14 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .app-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Top HUD / Header */
+    .header-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 20px 28px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #38bdf8, #a855f7, #ec4899, #10b981, #f59e0b);
+    }
+
+    .project-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .project-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .project-meta h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-gcp {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--blue-electric);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+    }
+
+    .project-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .project-sub span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .project-sub strong {
+      color: var(--cyan-neon);
+      font-weight: 600;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    /* Stats HUD */
+    .hud-stats {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .stat-badge {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 10px 18px;
+      text-align: center;
+      min-width: 95px;
+      transition: all 0.2s ease;
+    }
+
+    .stat-badge:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-badge.add {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: rgba(16, 185, 129, 0.08);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
+    }
+
+    .stat-badge.add .num {
+      color: #34d399;
+      text-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+    }
+
+    .stat-badge.change .num { color: #fbbf24; }
+    .stat-badge.destroy .num { color: #f87171; }
+
+    .stat-badge .num {
+      font-size: 22px;
+      font-weight: 800;
+      font-family: ui-monospace, monospace;
+      line-height: 1.1;
+    }
+
+    .stat-badge .lbl {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 2px;
+    }
+
+    /* Toolbar / Filter Nav */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--bg-surface);
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pill-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .pill-btn.active[data-filter="all"] {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: #ffffff;
+      border-color: #60a5fa;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .pill-btn.active[data-filter="compute"] {
+      background: linear-gradient(135deg, #0284c7, #0284c7);
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
+    .pill-btn.active[data-filter="storage"] {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #ffffff;
+      border-color: #34d399;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .pill-btn.active[data-filter="iam"] {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      color: #ffffff;
+      border-color: #fbbf24;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .toolbar-tip {
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar-tip kbd {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #cbd5e1;
+    }
+
+    /* Main Grid Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Diagram Canvas Container */
+    .diagram-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .svg-wrapper {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* SVG Interactive Node Styling */
+    .node-interactive {
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease, opacity 0.25s ease;
+    }
+
+    .node-interactive:hover {
+      filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.6)) brightness(1.1);
+    }
+
+    .node-interactive.selected rect.node-box-main {
+      stroke: #00f2fe !important;
+      stroke-width: 2.5px !important;
+      filter: drop-shadow(0 0 14px rgba(0, 242, 254, 0.8)) !important;
+    }
+
+    .node-interactive.dimmed {
+      opacity: 0.18 !important;
+      filter: grayscale(0.8) opacity(0.2) !important;
+    }
+
+    /* Inspector Side Drawer */
+    .inspector-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: var(--card-shadow);
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .inspector-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    .inspector-panel::-webkit-scrollbar-thumb {
+      background: var(--border-subtle);
+      border-radius: 3px;
+    }
+
+    .inspector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      gap: 12px;
+    }
+
+    .inspector-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .inspector-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      word-break: break-all;
+    }
+
+    .inspector-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      align-self: flex-start;
+      white-space: nowrap;
+    }
+
+    .inspector-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Attributes Table */
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: rgba(10, 13, 20, 0.6);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .meta-table th, .meta-table td {
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .meta-table tr:last-child th, .meta-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .meta-table th {
+      color: var(--text-dim);
+      font-weight: 600;
+      width: 38%;
+      background: rgba(17, 23, 38, 0.5);
+    }
+
+    .meta-table td {
+      color: var(--text-main);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11.5px;
+      word-break: break-all;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* HCL Code Snippet Box */
+    .code-box {
+      background: #090c12;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      overflow-x: auto;
+      color: #e2e8f0;
+      position: relative;
+    }
+
+    .code-box .kw { color: #f472b6; font-weight: 600; }
+    .code-box .str { color: #34d399; }
+    .code-box .res { color: #38bdf8; font-weight: 600; }
+    .code-box .attr { color: #fbbf24; }
+    .code-box .comm { color: #64748b; font-style: italic; }
+
+    /* Outputs Bar */
+    .outputs-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 18px 24px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .outputs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .outputs-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .output-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .output-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .output-key {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--blue-electric);
+      font-family: ui-monospace, monospace;
+    }
+
+    .output-val {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-family: ui-monospace, monospace;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container" data-glean-id="app-root">
+    
+    <!-- Top HUD Header -->
+    <header class="header-card" data-glean-id="project-header">
+      <div class="project-meta">
+        <div class="project-title-row">
+          <h1>Google Cloud Infrastructure</h1>
+          <span class="badge-gcp">Terraform Plan Execution</span>
+        </div>
+        <div class="project-sub">
+          <span>Project: <strong>my-devops-journey-502420</strong></span>
+          <span>Project #: <strong>999543194632</strong></span>
+          <span>Primary Region: <strong>us-central1</strong></span>
+          <span>East Region: <strong>us-east1</strong></span>
+        </div>
+      </div>
+      <div class="hud-stats" data-glean-id="plan-summary-stats">
+        <div class="stat-badge add">
+          <div class="num">+16</div>
+          <div class="lbl">To Add</div>
+        </div>
+        <div class="stat-badge change">
+          <div class="num">0</div>
+          <div class="lbl">To Change</div>
+        </div>
+        <div class="stat-badge destroy">
+          <div class="num">0</div>
+          <div class="lbl">To Destroy</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Toolbar Filters -->
+    <div class="toolbar" data-glean-id="filter-toolbar">
+      <div class="filter-pills">
+        <button type="button" class="pill-btn active" data-filter="all">🌐 All Architecture (16)</button>
+        <button type="button" class="pill-btn" data-filter="compute">⚡ VPC &amp; Compute (3)</button>
+        <button type="button" class="pill-btn" data-filter="storage">🗄️ Cloud Storage [4 Buckets]</button>
+        <button type="button" class="pill-btn" data-filter="iam">🔑 IAM &amp; Service Accounts [8 SAs + 1 Role]</button>
+      </div>
+      <div class="toolbar-tip">
+        <span>💡 Click any resource block to inspect terraform configuration &amp; HCL</span>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="main-grid">
+      
+      <!-- Interactive SVG Canvas -->
+      <section class="diagram-panel" data-glean-id="diagram-canvas">
+        <div class="svg-wrapper" id="svg-host">
+          <svg viewBox="0 0 1020 830" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Gradients -->
+              <linearGradient id="grad-vpc" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0284c7" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="#0369a1" stop-opacity="0.04"/>
+              </linearGradient>
+              
+              <linearGradient id="grad-subnet" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0369a1" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#0f172a" stop-opacity="0.4"/>
+              </linearGradient>
+
+              <linearGradient id="grad-vm-header" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0284c7"/>
+                <stop offset="100%" stop-color="#0284c7"/>
+              </linearGradient>
+
+              <linearGradient id="grad-gcs" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#059669" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="#064e3b" stop-opacity="0.04"/>
+              </linearGradient>
+
+              <linearGradient id="grad-iam" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#d97706" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="#78350f" stop-opacity="0.04"/>
+              </linearGradient>
+
+              <linearGradient id="grad-lifecycle" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/>
+                <stop offset="33%" stop-color="#0284c7" stop-opacity="0.2"/>
+                <stop offset="66%" stop-color="#f59e0b" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#a855f7" stop-opacity="0.2"/>
+              </linearGradient>
+
+              <!-- Markers -->
+              <marker id="arrow-cyan" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#00f2fe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+
+              <marker id="arrow-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+
+              <marker id="arrow-amber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+
+              <marker id="arrow-purple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M1 1L9 5L1 9" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+            </defs>
+
+            <!-- ================= PROJECT OUTER BOUNDARY ================= -->
+            <rect x="8" y="8" width="1004" height="814" rx="16" fill="#0d1322" stroke="#1e2c47" stroke-width="1.5"/>
+            
+            <!-- Project Header Label -->
+            <g transform="translate(24, 28)">
+              <circle cx="8" cy="8" r="5" fill="#38bdf8" />
+              <text x="20" y="12" font-size="13" font-weight="800" fill="#f8fafc" letter-spacing="0.3">GCP Project: my-devops-journey-502420</text>
+              <text x="320" y="12" font-size="11" fill="#64748b">•</text>
+              <text x="332" y="12" font-size="11" font-weight="600" fill="#94a3b8">Project ID: 999543194632</text>
+              <text x="490" y="12" font-size="11" fill="#64748b">•</text>
+              <text x="502" y="12" font-size="11" font-weight="600" fill="#38bdf8">16 Resources to Provision</text>
+            </g>
+
+            <!-- ================= ZONE 1: VPC & COMPUTE (LEFT) ================= -->
+            <!-- VPC Node -->
+            <g class="node-interactive" data-category="compute" data-resource-id="vpc" transform="translate(24, 55)">
+              <rect class="node-box-main" x="0" y="0" width="410" height="745" rx="14" fill="url(#grad-vpc)" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="8 4"/>
+              
+              <rect x="14" y="12" width="22" height="22" rx="6" fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" stroke-width="1"/>
+              <text x="25" y="27" font-size="11" font-weight="800" fill="#38bdf8" text-anchor="middle">V</text>
+              <text x="44" y="24" font-size="13" font-weight="800" fill="#e2e8f0">VPC: fde-training-vpc</text>
+              <text x="44" y="38" font-size="10" fill="#94a3b8">google_compute_network • auto_create_subnetworks: false</text>
+
+              <!-- Data Source Badge -->
+              <g class="node-interactive" data-category="compute" data-resource-id="data-vpc" transform="translate(230, 10)">
+                <rect class="node-box-main" x="0" y="0" width="165" height="28" rx="6" fill="#132038" stroke="#38bdf8" stroke-width="0.8"/>
+                <text x="10" y="18" font-size="9.5" font-weight="700" fill="#38bdf8">data.google_compute_network</text>
+              </g>
+
+              <!-- Subnet Node -->
+              <g class="node-interactive" data-category="compute" data-resource-id="subnet" transform="translate(14, 52)">
+                <rect class="node-box-main" x="0" y="0" width="382" height="670" rx="12" fill="url(#grad-subnet)" stroke="#0369a1" stroke-width="1.2"/>
+                
+                <rect x="12" y="12" width="20" height="20" rx="5" fill="rgba(2, 132, 199, 0.3)" stroke="#38bdf8" stroke-width="0.8"/>
+                <text x="22" y="26" font-size="10" font-weight="800" fill="#38bdf8" text-anchor="middle">S</text>
+                <text x="40" y="22" font-size="12" font-weight="700" fill="#f1f5f9">Subnet: fde-training-subnet</text>
+                <text x="40" y="36" font-size="10" fill="#38bdf8">CIDR: 10.0.1.0/24 • Region: us-central1</text>
+
+                <!-- Compute Engine VM Node -->
+                <g class="node-interactive" data-category="compute" data-resource-id="vm" transform="translate(12, 50)">
+                  <rect class="node-box-main" x="0" y="0" width="358" height="598" rx="12" fill="#111827" stroke="#2563eb" stroke-width="1.5"/>
+                  
+                  <!-- VM Header Bar -->
+                  <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 346 0 C 352.63 0 358 5.37 358 12 L 358 48 L 0 48 Z" fill="url(#grad-vm-header)"/>
+                  <text x="16" y="24" font-size="13" font-weight="800" fill="#ffffff">module.fde_vm</text>
+                  <text x="16" y="40" font-size="10.5" font-weight="600" fill="#bae6fd">fde-app-server • e2-medium (us-central1-a)</text>
+                  <rect x="250" y="12" width="94" height="22" rx="6" fill="#0369a1" stroke="#38bdf8" stroke-width="0.8"/>
+                  <text x="297" y="26" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle">+ TO CREATE</text>
+
+                  <!-- VM Internal Blocks -->
+                  <!-- 1. OS & Image -->
+                  <g transform="translate(14, 60)">
+                    <rect x="0" y="0" width="330" height="60" rx="8" fill="#1a2333" stroke="#2a3952" stroke-width="1"/>
+                    <text x="12" y="18" font-size="9" font-weight="700" fill="#94a3b8" letter-spacing="0.5">OPERATING SYSTEM / IMAGE</text>
+                    <text x="12" y="36" font-size="12" font-weight="700" fill="#f8fafc">debian-cloud / debian-12</text>
+                    <text x="12" y="50" font-size="9.5" fill="#64748b">Architecture: (known) • Snapshot: (none)</text>
+                  </g>
+
+                  <!-- 2. Network Interface (nic0) -->
+                  <g transform="translate(14, 130)">
+                    <rect x="0" y="0" width="330" height="92" rx="8" fill="#1a2333" stroke="#2a3952" stroke-width="1"/>
+                    <text x="12" y="18" font-size="9" font-weight="700" fill="#38bdf8" letter-spacing="0.5">NETWORK INTERFACE (nic0)</text>
+                    <text x="12" y="36" font-size="11" font-weight="600" fill="#e2e8f0">Subnet: fde-training-subnet</text>
+                    <text x="12" y="52" font-size="10" fill="#94a3b8">Internal IP: (known after apply)</text>
+                    
+                    <!-- NAT IP Box -->
+                    <rect x="12" y="62" width="130" height="22" rx="5" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="0.8"/>
+                    <text x="77" y="76" font-size="9.5" font-weight="700" fill="#34d399" text-anchor="middle">⚡ External NAT Access</text>
+                    
+                    <rect x="150" y="62" width="168" height="22" rx="5" fill="rgba(56, 189, 248, 0.12)" stroke="#0284c7" stroke-width="0.8"/>
+                    <text x="234" y="76" font-size="9.5" font-weight="600" fill="#38bdf8" text-anchor="middle">Network Tier: PREMIUM</text>
+                  </g>
+
+                  <!-- 3. Boot Disk -->
+                  <g transform="translate(14, 232)">
+                    <rect x="0" y="0" width="330" height="74" rx="8" fill="#1a2333" stroke="#2a3952" stroke-width="1"/>
+                    <text x="12" y="18" font-size="9" font-weight="700" fill="#f59e0b" letter-spacing="0.5">BOOT DISK &amp; STORAGE</text>
+                    <text x="12" y="36" font-size="11" font-weight="600" fill="#e2e8f0">Auto Delete: true • Mode: READ_WRITE</text>
+                    <text x="12" y="52" font-size="9.5" fill="#94a3b8">Device Name &amp; Key: (known after apply)</text>
+                    <text x="12" y="65" font-size="9" fill="#64748b">KMS: Google-Managed Encryption (SHA-256)</text>
+                  </g>
+
+                  <!-- 4. Lifecycle / Tags -->
+                  <g transform="translate(14, 316)">
+                    <rect x="0" y="0" width="330" height="64" rx="8" fill="#1a2333" stroke="#2a3952" stroke-width="1"/>
+                    <text x="12" y="18" font-size="9" font-weight="700" fill="#a855f7" letter-spacing="0.5">SECURITY &amp; PROVISIONING</text>
+                    <text x="12" y="36" font-size="10.5" font-weight="600" fill="#c084fc">Deletion Policy: DELETE • Protection: false</text>
+                    <text x="12" y="52" font-size="9.5" fill="#94a3b8">Label: goog-terraform-provisioned = true</text>
+                  </g>
+
+                  <!-- 5. Output Card Inside VM -->
+                  <g transform="translate(14, 390)">
+                    <rect x="0" y="0" width="330" height="190" rx="8" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+                    <text x="12" y="18" font-size="9.5" font-weight="700" fill="#38bdf8" letter-spacing="0.5">TERRAFORM OUTPUTS LINKED</text>
+                    
+                    <g transform="translate(10, 28)">
+                      <rect x="0" y="0" width="310" height="34" rx="6" fill="#162032" stroke="#24344d" stroke-width="1"/>
+                      <text x="10" y="15" font-size="9" font-weight="700" fill="#38bdf8">server_internal_ip</text>
+                      <text x="10" y="28" font-size="10" font-family="monospace" fill="#94a3b8">(known after apply)</text>
+                    </g>
+
+                    <g transform="translate(10, 68)">
+                      <rect x="0" y="0" width="310" height="34" rx="6" fill="#162032" stroke="#24344d" stroke-width="1"/>
+                      <text x="10" y="15" font-size="9" font-weight="700" fill="#38bdf8">default_network_self_link</text>
+                      <text x="10" y="28" font-size="10" font-family="monospace" fill="#94a3b8">(known after apply)</text>
+                    </g>
+
+                    <g transform="translate(10, 108)">
+                      <rect x="0" y="0" width="310" height="70" rx="6" fill="#132033" stroke="#1d4ed8" stroke-width="1"/>
+                      <text x="10" y="16" font-size="9" font-weight="700" fill="#60a5fa">RUNTIME CONNECTION</text>
+                      <text x="10" y="32" font-size="10" fill="#cbd5e1">Uses <tspan fill="#fbbf24" font-weight="700">acme-web-app</tspan> SA</text>
+                      <text x="10" y="48" font-size="9.5" fill="#a855f7">Authorized for Cloud SQL Database</text>
+                      <text x="10" y="62" font-size="8.5" fill="#64748b">Roles: roles/cloudsql.client</text>
+                    </g>
+                  </g>
+
+                </g>
+              </g>
+            </g>
+
+            <!-- ================= ZONE 2: CLOUD STORAGE (TOP RIGHT) ================= -->
+            <g class="node-interactive" data-category="storage" data-resource-id="gcs-group" transform="translate(450, 55)">
+              <rect class="node-box-main" x="0" y="0" width="546" height="360" rx="14" fill="url(#grad-gcs)" stroke="#10b981" stroke-width="1.5"/>
+              
+              <rect x="14" y="12" width="22" height="22" rx="6" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="1"/>
+              <text x="25" y="27" font-size="11" font-weight="800" fill="#10b981" text-anchor="middle">G</text>
+              <text x="44" y="24" font-size="13" font-weight="800" fill="#e2e8f0">Cloud Storage (4 Buckets)</text>
+              <text x="44" y="38" font-size="10" fill="#94a3b8">Uniform Bucket-Level Access • Standard / Multi-tier • Soft-Delete Enabled</text>
+
+              <!-- Bucket 1: Demo Sandbox (Top Left) -->
+              <g class="node-interactive" data-category="storage" data-resource-id="bucket-demo" transform="translate(14, 50)">
+                <rect class="node-box-main" x="0" y="0" width="252" height="120" rx="8" fill="#111c2e" stroke="#10b981" stroke-width="1"/>
+                <text x="10" y="18" font-size="10.5" font-weight="800" fill="#f8fafc">acme-demo-my-devops...</text>
+                <text x="10" y="32" font-size="9" fill="#34d399">Location: US (Multi-Region) • STANDARD</text>
+                <text x="10" y="46" font-size="8.5" fill="#94a3b8">google_storage_bucket.demo</text>
+                
+                <!-- Labels -->
+                <g transform="translate(10, 58)">
+                  <rect x="0" y="0" width="105" height="18" rx="4" fill="rgba(168, 85, 247, 0.2)" stroke="#a855f7" stroke-width="0.6"/>
+                  <text x="52" y="12" font-size="8" font-weight="700" fill="#c084fc" text-anchor="middle">env: sandbox</text>
+                  
+                  <rect x="112" y="0" width="114" height="18" rx="4" fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" stroke-width="0.6"/>
+                  <text x="169" y="12" font-size="8" font-weight="700" fill="#38bdf8" text-anchor="middle">by: terraform</text>
+                </g>
+
+                <g transform="translate(10, 84)">
+                  <rect x="0" y="0" width="226" height="24" rx="4" fill="#0f172a" stroke="#1e293b" stroke-width="0.8"/>
+                  <text x="8" y="16" font-size="8.5" font-weight="600" fill="#94a3b8">Uniform Access: <tspan fill="#34d399">true</tspan> • Force Destroy: <tspan fill="#f87171">false</tspan></text>
+                </g>
+              </g>
+
+              <!-- Bucket 2: Workspace Demo (Top Right) -->
+              <g class="node-interactive" data-category="storage" data-resource-id="bucket-workspace" transform="translate(280, 50)">
+                <rect class="node-box-main" x="0" y="0" width="252" height="120" rx="8" fill="#111c2e" stroke="#10b981" stroke-width="1"/>
+                <text x="10" y="18" font-size="10.5" font-weight="800" fill="#f8fafc">acme-default-demo-my...</text>
+                <text x="10" y="32" font-size="9" fill="#34d399">Location: US (Multi-Region) • STANDARD</text>
+                <text x="10" y="46" font-size="8.5" fill="#94a3b8">google_storage_bucket.workspace_demo</text>
+                
+                <!-- Labels -->
+                <g transform="translate(10, 58)">
+                  <rect x="0" y="0" width="105" height="18" rx="4" fill="rgba(168, 85, 247, 0.2)" stroke="#a855f7" stroke-width="0.6"/>
+                  <text x="52" y="12" font-size="8" font-weight="700" fill="#c084fc" text-anchor="middle">env: sandbox</text>
+                  
+                  <rect x="112" y="0" width="114" height="18" rx="4" fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" stroke-width="0.6"/>
+                  <text x="169" y="12" font-size="8" font-weight="700" fill="#38bdf8" text-anchor="middle">by: terraform</text>
+                </g>
+
+                <g transform="translate(10, 84)">
+                  <rect x="0" y="0" width="226" height="24" rx="4" fill="#0f172a" stroke="#1e293b" stroke-width="0.8"/>
+                  <text x="8" y="16" font-size="8.5" font-weight="600" fill="#94a3b8">Workspace Target Bucket</text>
+                </g>
+              </g>
+
+              <!-- Bucket 3: East Region Demo (Middle Left) -->
+              <g class="node-interactive" data-category="storage" data-resource-id="bucket-east" transform="translate(14, 180)">
+                <rect class="node-box-main" x="0" y="0" width="518" height="52" rx="8" fill="#132338" stroke="#14b8a6" stroke-width="1"/>
+                <text x="12" y="20" font-size="11" font-weight="800" fill="#2dd4bf">acme-east-my-devops-journey-502420</text>
+                <text x="12" y="36" font-size="9" fill="#94a3b8">google_storage_bucket.east_region_demo • STANDARD</text>
+                <rect x="360" y="12" width="144" height="26" rx="6" fill="rgba(20, 184, 166, 0.2)" stroke="#14b8a6" stroke-width="1"/>
+                <text x="432" y="28" font-size="10" font-weight="800" fill="#2dd4bf" text-anchor="middle">📍 Region: US-EAST1</text>
+              </g>
+
+              <!-- Bucket 4: Lifecycle Automated Transitions (Bottom Span) -->
+              <g class="node-interactive" data-category="storage" data-resource-id="bucket-lifecycle" transform="translate(14, 242)">
+                <rect class="node-box-main" x="0" y="0" width="518" height="106" rx="8" fill="url(#grad-lifecycle)" stroke="#34d399" stroke-width="1.2"/>
+                <text x="12" y="18" font-size="11" font-weight="800" fill="#f8fafc">acme-lifecycle-my-devops-journey-502420</text>
+                <text x="12" y="32" font-size="9" fill="#94a3b8">Automated Tier Transition Lifecycle Engine (3 Transition Rules):</text>
+
+                <!-- Flow Stages -->
+                <g transform="translate(10, 42)">
+                  <!-- Tier 1: Standard -->
+                  <rect x="0" y="0" width="105" height="52" rx="6" fill="#0f1c2e" stroke="#10b981" stroke-width="1"/>
+                  <text x="52" y="16" font-size="9" font-weight="800" fill="#34d399" text-anchor="middle">STANDARD</text>
+                  <text x="52" y="30" font-size="8" fill="#94a3b8" text-anchor="middle">Age: 0 Days</text>
+                  <text x="52" y="44" font-size="8.5" font-weight="700" fill="#f1f5f9" text-anchor="middle">Hot Storage</text>
+
+                  <line x1="108" y1="26" x2="124" y2="26" stroke="#00f2fe" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+
+                  <!-- Tier 2: Nearline -->
+                  <rect x="128" y="0" width="105" height="52" rx="6" fill="#0f1c2e" stroke="#0284c7" stroke-width="1"/>
+                  <text x="180" y="16" font-size="9" font-weight="800" fill="#38bdf8" text-anchor="middle">NEARLINE</text>
+                  <text x="180" y="30" font-size="8" fill="#94a3b8" text-anchor="middle">Age &gt; 30 Days</text>
+                  <text x="180" y="44" font-size="8.5" font-weight="700" fill="#f1f5f9" text-anchor="middle">Monthly Backup</text>
+
+                  <line x1="236" y1="26" x2="252" y2="26" stroke="#00f2fe" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+
+                  <!-- Tier 3: Coldline -->
+                  <rect x="256" y="0" width="105" height="52" rx="6" fill="#0f1c2e" stroke="#f59e0b" stroke-width="1"/>
+                  <text x="308" y="16" font-size="9" font-weight="800" fill="#fbbf24" text-anchor="middle">COLDLINE</text>
+                  <text x="308" y="30" font-size="8" fill="#94a3b8" text-anchor="middle">Age &gt; 90 Days</text>
+                  <text x="308" y="44" font-size="8.5" font-weight="700" fill="#f1f5f9" text-anchor="middle">Quarterly Cold</text>
+
+                  <line x1="364" y1="26" x2="380" y2="26" stroke="#00f2fe" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+
+                  <!-- Tier 4: Archive -->
+                  <rect x="384" y="0" width="105" height="52" rx="6" fill="#0f1c2e" stroke="#a855f7" stroke-width="1"/>
+                  <text x="436" y="16" font-size="9" font-weight="800" fill="#c084fc" text-anchor="middle">ARCHIVE</text>
+                  <text x="436" y="30" font-size="8" fill="#94a3b8" text-anchor="middle">Age &gt; 365 Days</text>
+                  <text x="436" y="44" font-size="8.5" font-weight="700" fill="#f1f5f9" text-anchor="middle">Yearly Long-term</text>
+                </g>
+              </g>
+
+            </g>
+
+            <!-- ================= ZONE 3: IAM & SERVICE ACCOUNTS (BOTTOM RIGHT) ================= -->
+            <g class="node-interactive" data-category="iam" data-resource-id="iam-group" transform="translate(450, 425)">
+              <rect class="node-box-main" x="0" y="0" width="546" height="375" rx="14" fill="url(#grad-iam)" stroke="#f59e0b" stroke-width="1.5"/>
+              
+              <rect x="14" y="12" width="22" height="22" rx="6" fill="rgba(245, 158, 11, 0.2)" stroke="#f59e0b" stroke-width="1"/>
+              <text x="25" y="27" font-size="11" font-weight="800" fill="#f59e0b" text-anchor="middle">I</text>
+              <text x="44" y="24" font-size="13" font-weight="800" fill="#e2e8f0">IAM &amp; Service Accounts (8 SAs + 1 Role Binding)</text>
+              <text x="44" y="38" font-size="10" fill="#94a3b8">Resource Identities • Environment Scopes • Module Instances</text>
+
+              <!-- App Runtime SAs (Top Dual Cards) -->
+              <!-- 1. acme-web-app (With SQL Client Role) -->
+              <g class="node-interactive" data-category="iam" data-resource-id="sa-app" transform="translate(14, 50)">
+                <rect class="node-box-main" x="0" y="0" width="252" height="96" rx="8" fill="#1e1828" stroke="#f59e0b" stroke-width="1.2"/>
+                <text x="10" y="18" font-size="11" font-weight="800" fill="#fcd34d">acme-web-app</text>
+                <text x="10" y="32" font-size="8.5" fill="#94a3b8">google_service_account.gsa</text>
+                <text x="10" y="45" font-size="8.5" fill="#cbd5e1">Display: "My Test App"</text>
+                
+                <!-- Bound Role -->
+                <rect x="10" y="55" width="232" height="30" rx="5" fill="#2d1a3c" stroke="#a855f7" stroke-width="0.8"/>
+                <text x="16" y="70" font-size="8.5" font-weight="700" fill="#c084fc">ROLE BINDING:</text>
+                <text x="16" y="81" font-size="8.5" font-weight="600" fill="#e9d5ff">roles/cloudsql.client</text>
+              </g>
+
+              <!-- 2. acme-web-app-v2 (Backend SA via module) -->
+              <g class="node-interactive" data-category="iam" data-resource-id="sa-backend" transform="translate(280, 50)">
+                <rect class="node-box-main" x="0" y="0" width="252" height="96" rx="8" fill="#1e1828" stroke="#a855f7" stroke-width="1.2"/>
+                <text x="10" y="18" font-size="11" font-weight="800" fill="#c084fc">acme-web-app-v2</text>
+                <text x="10" y="32" font-size="8.5" fill="#94a3b8">module.backend_sa.google_service_account.this</text>
+                <text x="10" y="45" font-size="8.5" fill="#cbd5e1">Display: "My Test App v2 (via module)"</text>
+                
+                <rect x="10" y="55" width="232" height="30" rx="5" fill="#18233c" stroke="#38bdf8" stroke-width="0.8"/>
+                <text x="16" y="70" font-size="8.5" font-weight="700" fill="#38bdf8">MODULE OUTPUT EXPORT:</text>
+                <text x="16" y="81" font-size="8" font-family="monospace" fill="#93c5fd">backend_sa_email</text>
+              </g>
+
+              <!-- Module App SAs [dev, stg] -->
+              <g transform="translate(14, 156)">
+                <!-- Dev App SA -->
+                <g class="node-interactive" data-category="iam" data-resource-id="sa-module-dev" transform="translate(0, 0)">
+                  <rect class="node-box-main" x="0" y="0" width="252" height="66" rx="8" fill="#161f30" stroke="#0284c7" stroke-width="1"/>
+                  <text x="10" y="18" font-size="10.5" font-weight="800" fill="#38bdf8">module.app_sa["dev"]</text>
+                  <text x="10" y="32" font-size="8.5" fill="#cbd5e1">ID: acme-dev-app • "Dev App SA"</text>
+                  <rect x="10" y="42" width="70" height="16" rx="3" fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" stroke-width="0.5"/>
+                  <text x="45" y="53" font-size="8" font-weight="700" fill="#38bdf8" text-anchor="middle">DEV APP</text>
+                </g>
+
+                <!-- Staging App SA -->
+                <g class="node-interactive" data-category="iam" data-resource-id="sa-module-stg" transform="translate(266, 0)">
+                  <rect class="node-box-main" x="0" y="0" width="252" height="66" rx="8" fill="#161f30" stroke="#f97316" stroke-width="1"/>
+                  <text x="10" y="18" font-size="10.5" font-weight="800" fill="#fb923c">module.app_sa["stg"]</text>
+                  <text x="10" y="32" font-size="8.5" fill="#cbd5e1">ID: acme-stg-app • "Staging App SA"</text>
+                  <rect x="10" y="42" width="80" height="16" rx="3" fill="rgba(249, 115, 22, 0.2)" stroke="#f97316" stroke-width="0.5"/>
+                  <text x="50" y="53" font-size="8" font-weight="700" fill="#fb923c" text-anchor="middle">STG APP</text>
+                </g>
+              </g>
+
+              <!-- Direct Environment SAs (List vs Set) -->
+              <g transform="translate(14, 232)">
+                <text x="4" y="12" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ENVIRONMENT TARGET SERVICE ACCOUNTS (COUNT / SET ITERATORS):</text>
+                
+                <g transform="translate(0, 20)">
+                  <!-- List 0: dev -->
+                  <g class="node-interactive" data-category="iam" data-resource-id="sa-list-dev" transform="translate(0, 0)">
+                    <rect class="node-box-main" x="0" y="0" width="122" height="88" rx="6" fill="#111827" stroke="#38bdf8" stroke-width="0.8"/>
+                    <text x="8" y="16" font-size="9" font-weight="700" fill="#38bdf8">env_sa_list[0]</text>
+                    <text x="8" y="30" font-size="10" font-weight="800" fill="#f8fafc">acme-dev</text>
+                    <text x="8" y="44" font-size="8" fill="#94a3b8">SA for dev env</text>
+                    <rect x="8" y="58" width="55" height="18" rx="3" fill="rgba(56, 189, 248, 0.15)"/>
+                    <text x="35" y="70" font-size="7.5" font-weight="700" fill="#38bdf8" text-anchor="middle">LIST[0]</text>
+                  </g>
+
+                  <!-- List 1: staging -->
+                  <g class="node-interactive" data-category="iam" data-resource-id="sa-list-staging" transform="translate(132, 0)">
+                    <rect class="node-box-main" x="0" y="0" width="122" height="88" rx="6" fill="#111827" stroke="#38bdf8" stroke-width="0.8"/>
+                    <text x="8" y="16" font-size="9" font-weight="700" fill="#38bdf8">env_sa_list[1]</text>
+                    <text x="8" y="30" font-size="10" font-weight="800" fill="#f8fafc">acme-staging</text>
+                    <text x="8" y="44" font-size="8" fill="#94a3b8">SA for staging env</text>
+                    <rect x="8" y="58" width="55" height="18" rx="3" fill="rgba(56, 189, 248, 0.15)"/>
+                    <text x="35" y="70" font-size="7.5" font-weight="700" fill="#38bdf8" text-anchor="middle">LIST[1]</text>
+                  </g>
+
+                  <!-- Set: int -->
+                  <g class="node-interactive" data-category="iam" data-resource-id="sa-set-int" transform="translate(264, 0)">
+                    <rect class="node-box-main" x="0" y="0" width="122" height="88" rx="6" fill="#111827" stroke="#ec4899" stroke-width="0.8"/>
+                    <text x="8" y="16" font-size="9" font-weight="700" fill="#f472b6">env_sa_set["int"]</text>
+                    <text x="8" y="30" font-size="10" font-weight="800" fill="#f8fafc">acme-int</text>
+                    <text x="8" y="44" font-size="8" fill="#94a3b8">SA for int env</text>
+                    <rect x="8" y="58" width="55" height="18" rx="3" fill="rgba(236, 72, 153, 0.15)"/>
+                    <text x="35" y="70" font-size="7.5" font-weight="700" fill="#f472b6" text-anchor="middle">SET["int"]</text>
+                  </g>
+
+                  <!-- Set: stg -->
+                  <g class="node-interactive" data-category="iam" data-resource-id="sa-set-stg" transform="translate(396, 0)">
+                    <rect class="node-box-main" x="0" y="0" width="122" height="88" rx="6" fill="#111827" stroke="#ec4899" stroke-width="0.8"/>
+                    <text x="8" y="16" font-size="9" font-weight="700" fill="#f472b6">env_sa_set["stg"]</text>
+                    <text x="8" y="30" font-size="10" font-weight="800" fill="#f8fafc">acme-stg</text>
+                    <text x="8" y="44" font-size="8" fill="#94a3b8">SA for stg env</text>
+                    <rect x="8" y="58" width="55" height="18" rx="3" fill="rgba(236, 72, 153, 0.15)"/>
+                    <text x="35" y="70" font-size="7.5" font-weight="700" fill="#f472b6" text-anchor="middle">SET["stg"]</text>
+                  </g>
+                </g>
+              </g>
+
+            </g>
+
+          </svg>
+        </div>
+      </section>
+
+      <!-- Component Inspector Panel (Right Drawer) -->
+      <aside class="inspector-panel" id="inspector-card" data-glean-id="component-inspector">
+        <div class="inspector-header">
+          <div class="inspector-title-wrap">
+            <h2 class="inspector-title" id="inspector-name">Architecture Overview</h2>
+            <span class="inspector-badge" id="inspector-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;">16 PLANNED RESOURCES</span>
+          </div>
+        </div>
+        
+        <p class="inspector-desc" id="inspector-desc">
+          Click on any cloud resource, VPC network, service account, or storage bucket in the architecture diagram to inspect its Terraform plan configuration.
+        </p>
+
+        <div class="section-title"><span>📋 Resource Attributes</span></div>
+        <div id="inspector-details-container">
+          <table class="meta-table" id="details-table">
+            <tbody>
+              <tr><th>Project</th><td>my-devops-journey-502420</td></tr>
+              <tr><th>Total Planned</th><td>16 to add, 0 change, 0 destroy</td></tr>
+              <tr><th>Compute</th><td>1 VM (e2-medium) in custom VPC</td></tr>
+              <tr><th>Storage</th><td>4 GCS Buckets (US Multi &amp; East)</td></tr>
+              <tr><th>Security</th><td>8 Service Accounts + 1 IAM Role</td></tr>
+              <tr><th>Status</th><td>Ready for apply</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-title"><span>💻 Terraform Configuration (HCL)</span></div>
+        <pre class="code-box" id="inspector-code"><span class="comm"># Execution Plan Summary</span>
+<span class="kw">terraform</span> apply
+
+<span class="comm"># Plan: 16 to add, 0 to change, 0 to destroy.</span>
+<span class="comm"># Target: projects/my-devops-journey-502420</span></pre>
+      </aside>
+
+    </div>
+
+    <!-- Outputs Section -->
+    <div class="outputs-container" data-glean-id="outputs-section">
+      <div class="outputs-header">
+        <div class="outputs-title">
+          <span>📤 Terraform Plan Outputs</span>
+        </div>
+      </div>
+      <div class="output-grid">
+        <div class="output-item">
+          <span class="output-key">app_sa_emails</span>
+          <span class="output-val">{ dev = "acme-dev-app@...", stg = "acme-stg-app@..." }</span>
+        </div>
+        <div class="output-item">
+          <span class="output-key">backend_sa_email</span>
+          <span class="output-val">"acme-web-app-v2@my-devops-journey-502420.iam..."</span>
+        </div>
+        <div class="output-item">
+          <span class="output-key">service_account</span>
+          <span class="output-val">{ email = "acme-web-app@...", id = "acme-web-app" }</span>
+        </div>
+        <div class="output-item">
+          <span class="output-key">project_number</span>
+          <span class="output-val">"999543194632"</span>
+        </div>
+        <div class="output-item">
+          <span class="output-key">server_internal_ip</span>
+          <span class="output-val">(known after apply)</span>
+        </div>
+        <div class="output-item">
+          <span class="output-key">default_network_self_link</span>
+          <span class="output-val">(known after apply)</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Component Registry for All 16 Plan Resources + Groups
+    const resourceData = {
+      'vm': {
+        title: 'module.fde_vm.google_compute_instance.vm',
+        badge: 'COMPUTE ENGINE VM',
+        badgeBg: 'rgba(56, 189, 248, 0.2)',
+        badgeColor: '#38bdf8',
+        desc: 'Compute Engine virtual machine provisioned via module with Debian 12 and external NAT internet access in us-central1-a.',
+        table: [
+          ['Instance Name', 'fde-app-server'],
+          ['Machine Type', 'e2-medium'],
+          ['Zone', 'us-central1-a'],
+          ['OS Image', 'debian-cloud/debian-12'],
+          ['Subnetwork', 'fde-training-subnet'],
+          ['Network IP', '(known after apply)'],
+          ['Access Config', 'Public NAT IP enabled'],
+          ['Deletion Policy', 'DELETE (protection = false)'],
+          ['Boot Disk', 'Auto-delete: true, READ_WRITE']
+        ],
+        code: `module "fde_vm" {
+  source       = "./modules/compute_instance"
+  name         = "fde-app-server"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-12"
+    }
+    auto_delete = true
+    mode        = "READ_WRITE"
+  }
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnet.id
+    access_config {} // Public NAT IP
+  }
+}`
+      },
+      'vpc': {
+        title: 'google_compute_network.vpc',
+        badge: 'CUSTOM VPC NETWORK',
+        badgeBg: 'rgba(56, 189, 248, 0.2)',
+        badgeColor: '#38bdf8',
+        desc: 'Virtual Private Cloud isolated software-defined network with custom subnet mode enabled.',
+        table: [
+          ['VPC Name', 'fde-training-vpc'],
+          ['Auto Subnets', 'false (Custom subnetting)'],
+          ['Project', 'my-devops-journey-502420'],
+          ['Enforcement', 'AFTER_CLASSIC_FIREWALL'],
+          ['Deletion Policy', 'DELETE']
+        ],
+        code: `resource "google_compute_network" "vpc" {
+  name                    = "fde-training-vpc"
+  auto_create_subnetworks = false
+  delete_default_routes_on_create = false
+  deletion_policy         = "DELETE"
+}`
+      },
+      'subnet': {
+        title: 'google_compute_subnetwork.subnet',
+        badge: 'REGIONAL SUBNETWORK',
+        badgeBg: 'rgba(2, 132, 199, 0.25)',
+        badgeColor: '#38bdf8',
+        desc: 'Custom regional IP prefix allocated for application virtual machines.',
+        table: [
+          ['Subnet Name', 'fde-training-subnet'],
+          ['IP CIDR Range', '10.0.1.0/24'],
+          ['Region', 'us-central1'],
+          ['Parent VPC', 'fde-training-vpc'],
+          ['Private Google Access', '(known after apply)']
+        ],
+        code: `resource "google_compute_subnetwork" "subnet" {
+  name          = "fde-training-subnet"
+  ip_cidr_range = "10.0.1.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.vpc.id
+}`
+      },
+      'data-vpc': {
+        title: 'data.google_compute_network.default',
+        badge: 'DATA SOURCE READ',
+        badgeBg: 'rgba(56, 189, 248, 0.15)',
+        badgeColor: '#38bdf8',
+        desc: 'Data source reading the attributes of the VPC network during apply execution.',
+        table: [
+          ['Data Source', 'data.google_compute_network.default'],
+          ['Target Name', 'fde-training-vpc'],
+          ['Status', 'Read during apply (depends on VPC resource)']
+        ],
+        code: `data "google_compute_network" "default" {
+  name = "fde-training-vpc"
+  depends_on = [google_compute_network.vpc]
+}`
+      },
+      'gcs-group': {
+        title: 'Cloud Storage Group',
+        badge: '4 GCS BUCKETS',
+        badgeBg: 'rgba(16, 185, 129, 0.2)',
+        badgeColor: '#10b981',
+        desc: 'Four standard cloud storage buckets spanning US Multi-Region and US-EAST1 regional deployments with automated tier lifecycles.',
+        table: [
+          ['Total Buckets', '4 Buckets'],
+          ['Multi-Region (US)', 'acme-demo, acme-default-demo, acme-lifecycle'],
+          ['Regional (US-EAST1)', 'acme-east-my-devops-journey-502420'],
+          ['Uniform Access', 'Enabled across all buckets'],
+          ['Lifecycle Rules', 'Active on acme-lifecycle (30d, 90d, 365d)']
+        ],
+        code: `# 4 Buckets provisioned:
+- google_storage_bucket.demo
+- google_storage_bucket.workspace_demo
+- google_storage_bucket.east_region_demo
+- google_storage_bucket.lifecycle_demo`
+      },
+      'bucket-demo': {
+        title: 'google_storage_bucket.demo',
+        badge: 'CLOUD STORAGE BUCKET',
+        badgeBg: 'rgba(16, 185, 129, 0.2)',
+        badgeColor: '#10b981',
+        desc: 'Multi-region standard bucket tagged with environment labels for sandbox workloads.',
+        table: [
+          ['Bucket Name', 'acme-demo-my-devops-journey-502420'],
+          ['Location', 'US (Multi-Region)'],
+          ['Storage Class', 'STANDARD'],
+          ['Uniform Access', 'true'],
+          ['Labels', 'environment = "sandbox", managed_by = "terraform"']
+        ],
+        code: `resource "google_storage_bucket" "demo" {
+  name                        = "acme-demo-my-devops-journey-502420"
+  location                    = "US"
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+  labels = {
+    environment = "sandbox"
+    managed_by  = "terraform"
+    project     = "my-devops-journey-502420"
+  }
+}`
+      },
+      'bucket-workspace': {
+        title: 'google_storage_bucket.workspace_demo',
+        badge: 'WORKSPACE BUCKET',
+        badgeBg: 'rgba(16, 185, 129, 0.2)',
+        badgeColor: '#10b981',
+        desc: 'Default workspace sandbox bucket managed via Terraform state.',
+        table: [
+          ['Bucket Name', 'acme-default-demo-my-devops-journey-502420'],
+          ['Location', 'US (Multi-Region)'],
+          ['Storage Class', 'STANDARD'],
+          ['Uniform Access', 'true'],
+          ['Labels', 'environment = "sandbox", managed_by = "terraform"']
+        ],
+        code: `resource "google_storage_bucket" "workspace_demo" {
+  name                        = "acme-default-demo-my-devops-journey-502420"
+  location                    = "US"
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+  labels = {
+    environment = "sandbox"
+    managed_by  = "terraform"
+    project     = "my-devops-journey-502420"
+  }
+}`
+      },
+      'bucket-east': {
+        title: 'google_storage_bucket.east_region_demo',
+        badge: 'REGIONAL STORAGE',
+        badgeBg: 'rgba(20, 184, 166, 0.2)',
+        badgeColor: '#14b8a6',
+        desc: 'Dedicated regional storage bucket located in US-EAST1 for geo-distributed assets.',
+        table: [
+          ['Bucket Name', 'acme-east-my-devops-journey-502420'],
+          ['Location', 'US-EAST1 (Regional)'],
+          ['Storage Class', 'STANDARD'],
+          ['Uniform Access', 'true'],
+          ['Provisioned By', 'Terraform']
+        ],
+        code: `resource "google_storage_bucket" "east_region_demo" {
+  name                        = "acme-east-my-devops-journey-502420"
+  location                    = "US-EAST1"
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+}`
+      },
+      'bucket-lifecycle': {
+        title: 'google_storage_bucket.lifecycle_demo',
+        badge: 'LIFECYCLE STORAGE',
+        badgeBg: 'rgba(16, 185, 129, 0.2)',
+        badgeColor: '#34d399',
+        desc: 'Automated cost optimization storage bucket with 3 progressive storage tier lifecycle rules.',
+        table: [
+          ['Bucket Name', 'acme-lifecycle-my-devops-journey-502420'],
+          ['Location', 'US (Multi-Region)'],
+          ['Default Class', 'STANDARD (Hot)'],
+          ['Rule 1 (Nearline)', 'Transition after 30 days (SetStorageClass NEARLINE)'],
+          ['Rule 2 (Coldline)', 'Transition after 90 days (SetStorageClass COLDLINE)'],
+          ['Rule 3 (Archive)', 'Transition after 365 days (SetStorageClass ARCHIVE)']
+        ],
+        code: `resource "google_storage_bucket" "lifecycle_demo" {
+  name                        = "acme-lifecycle-my-devops-journey-502420"
+  location                    = "US"
+  uniform_bucket_level_access = true
+
+  lifecycle_rule {
+    action    { type = "SetStorageClass", storage_class = "NEARLINE" }
+    condition { age = 30 }
+  }
+  lifecycle_rule {
+    action    { type = "SetStorageClass", storage_class = "COLDLINE" }
+    condition { age = 90 }
+  }
+  lifecycle_rule {
+    action    { type = "SetStorageClass", storage_class = "ARCHIVE" }
+    condition { age = 365 }
+  }
+}`
+      },
+      'iam-group': {
+        title: 'IAM & Security Group',
+        badge: '8 SAs + 1 ROLE BINDING',
+        badgeBg: 'rgba(245, 158, 11, 0.2)',
+        badgeColor: '#f59e0b',
+        desc: 'Comprehensive IAM matrix comprising runtime service accounts, environment list & set iterators, module SAs, and Cloud SQL client access.',
+        table: [
+          ['Runtime SAs', 'acme-web-app, acme-web-app-v2'],
+          ['Module App SAs', 'acme-dev-app, acme-stg-app (via module.app_sa)'],
+          ['List Iterators', 'acme-dev, acme-staging (env_sa_list[0..1])'],
+          ['Set Iterators', 'acme-int, acme-stg (env_sa_set["int"|"stg"])'],
+          ['IAM Roles Granted', 'roles/cloudsql.client -> acme-web-app']
+        ],
+        code: `# 8 Service Accounts + 1 IAM Role Binding:
+- google_service_account.gsa ("acme-web-app")
+- google_project_iam_member.sa_sql_client ("roles/cloudsql.client")
+- module.backend_sa.google_service_account.this ("acme-web-app-v2")
+- module.app_sa["dev"].google_service_account.this ("acme-dev-app")
+- module.app_sa["stg"].google_service_account.this ("acme-stg-app")
+- google_service_account.env_sa_list[0] ("acme-dev")
+- google_service_account.env_sa_list[1] ("acme-staging")
+- google_service_account.env_sa_set["int"] ("acme-int")
+- google_service_account.env_sa_set["stg"] ("acme-stg")`
+      },
+      'sa-app': {
+        title: 'google_service_account.gsa + IAM Member',
+        badge: 'APP SERVICE ACCOUNT',
+        badgeBg: 'rgba(245, 158, 11, 0.2)',
+        badgeColor: '#fbbf24',
+        desc: 'Primary web application service account authorized with project-level Cloud SQL client permissions.',
+        table: [
+          ['Account ID', 'acme-web-app'],
+          ['Display Name', 'My Test App'],
+          ['Email', 'acme-web-app@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['IAM Role Bound', 'roles/cloudsql.client (google_project_iam_member.sa_sql_client)'],
+          ['Output Key', 'service_account = { email, id }']
+        ],
+        code: `resource "google_service_account" "gsa" {
+  account_id   = "acme-web-app"
+  display_name = "My Test App"
+}
+
+resource "google_project_iam_member" "sa_sql_client" {
+  project = "my-devops-journey-502420"
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:\${google_service_account.gsa.email}"
+}`
+      },
+      'sa-backend': {
+        title: 'module.backend_sa.google_service_account.this',
+        badge: 'MODULE BACKEND SA',
+        badgeBg: 'rgba(168, 85, 247, 0.2)',
+        badgeColor: '#c084fc',
+        desc: 'Next-generation backend runtime service account created via reusable backend_sa module.',
+        table: [
+          ['Account ID', 'acme-web-app-v2'],
+          ['Display Name', 'My Test App v2 (via module)'],
+          ['Email', 'acme-web-app-v2@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['Output Key', 'backend_sa_email']
+        ],
+        code: `module "backend_sa" {
+  source       = "./modules/service_account"
+  account_id   = "acme-web-app-v2"
+  display_name = "My Test App v2 (via module)"
+}`
+      },
+      'sa-module-dev': {
+        title: 'module.app_sa["dev"].google_service_account.this',
+        badge: 'MODULE APP SA (DEV)',
+        badgeBg: 'rgba(56, 189, 248, 0.2)',
+        badgeColor: '#38bdf8',
+        desc: 'Development application service account instantiated via for_each module map.',
+        table: [
+          ['Account ID', 'acme-dev-app'],
+          ['Display Name', 'Dev App SA'],
+          ['Email', 'acme-dev-app@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['Output Key', 'app_sa_emails["dev"]']
+        ],
+        code: `module "app_sa" {
+  for_each     = toset(["dev", "stg"])
+  source       = "./modules/service_account"
+  account_id   = "acme-\${each.key}-app"
+  display_name = "\${title(each.key)} App SA"
+}`
+      },
+      'sa-module-stg': {
+        title: 'module.app_sa["stg"].google_service_account.this',
+        badge: 'MODULE APP SA (STG)',
+        badgeBg: 'rgba(249, 115, 22, 0.2)',
+        badgeColor: '#fb923c',
+        desc: 'Staging application service account instantiated via for_each module map.',
+        table: [
+          ['Account ID', 'acme-stg-app'],
+          ['Display Name', 'Staging App SA'],
+          ['Email', 'acme-stg-app@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['Output Key', 'app_sa_emails["stg"]']
+        ],
+        code: `module "app_sa" {
+  for_each     = toset(["dev", "stg"])
+  source       = "./modules/service_account"
+  account_id   = "acme-stg-app"
+  display_name = "Staging App SA"
+}`
+      },
+      'sa-list-dev': {
+        title: 'google_service_account.env_sa_list[0]',
+        badge: 'LIST SA [0]',
+        badgeBg: 'rgba(56, 189, 248, 0.15)',
+        badgeColor: '#38bdf8',
+        desc: 'Direct service account created via list index count iteration for dev environment.',
+        table: [
+          ['Account ID', 'acme-dev'],
+          ['Display Name', 'SA for dev env'],
+          ['Email', 'acme-dev@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['Iteration', 'count.index = 0']
+        ],
+        code: `resource "google_service_account" "env_sa_list" {
+  count        = length(var.env_list)
+  account_id   = "acme-\${var.env_list[count.index]}"
+  display_name = "SA for \${var.env_list[count.index]} env"
+}`
+      },
+      'sa-list-staging': {
+        title: 'google_service_account.env_sa_list[1]',
+        badge: 'LIST SA [1]',
+        badgeBg: 'rgba(56, 189, 248, 0.15)',
+        badgeColor: '#38bdf8',
+        desc: 'Direct service account created via list index count iteration for staging environment.',
+        table: [
+          ['Account ID', 'acme-staging'],
+          ['Display Name', 'SA for staging env'],
+          ['Email', 'acme-staging@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['Iteration', 'count.index = 1']
+        ],
+        code: `resource "google_service_account" "env_sa_list" {
+  count        = 2
+  account_id   = "acme-staging"
+  display_name = "SA for staging env"
+}`
+      },
+      'sa-set-int': {
+        title: 'google_service_account.env_sa_set["int"]',
+        badge: 'SET SA ["int"]',
+        badgeBg: 'rgba(236, 72, 153, 0.2)',
+        badgeColor: '#f472b6',
+        desc: 'Direct service account created via for_each set iteration for integration environment.',
+        table: [
+          ['Account ID', 'acme-int'],
+          ['Display Name', 'SA for int env'],
+          ['Email', 'acme-int@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['Iteration', 'each.key = "int"']
+        ],
+        code: `resource "google_service_account" "env_sa_set" {
+  for_each     = toset(["int", "stg"])
+  account_id   = "acme-\${each.key}"
+  display_name = "SA for \${each.key} env"
+}`
+      },
+      'sa-set-stg': {
+        title: 'google_service_account.env_sa_set["stg"]',
+        badge: 'SET SA ["stg"]',
+        badgeBg: 'rgba(236, 72, 153, 0.2)',
+        badgeColor: '#f472b6',
+        desc: 'Direct service account created via for_each set iteration for stg environment.',
+        table: [
+          ['Account ID', 'acme-stg'],
+          ['Display Name', 'SA for stg env'],
+          ['Email', 'acme-stg@my-devops-journey-502420.iam.gserviceaccount.com'],
+          ['Iteration', 'each.key = "stg"']
+        ],
+        code: `resource "google_service_account" "env_sa_set" {
+  for_each     = toset(["int", "stg"])
+  account_id   = "acme-stg"
+  display_name = "SA for stg env"
+}`
+      }
+    };
+
+    // DOM References
+    const inspectorName = document.getElementById('inspector-name');
+    const inspectorBadge = document.getElementById('inspector-badge');
+    const inspectorDesc = document.getElementById('inspector-desc');
+    const detailsTableBody = document.querySelector('#details-table tbody');
+    const inspectorCode = document.getElementById('inspector-code');
+    const filterBtns = document.querySelectorAll('.pill-btn');
+    const nodes = document.querySelectorAll('.node-interactive');
+
+    // Click selection handler
+    nodes.forEach(node => {
+      node.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const resId = node.getAttribute('data-resource-id');
+        if (!resId || !resourceData[resId]) return;
+
+        nodes.forEach(n => n.classList.remove('selected'));
+        node.classList.add('selected');
+
+        const data = resourceData[resId];
+        inspectorName.textContent = data.title;
+        inspectorBadge.textContent = data.badge;
+        inspectorBadge.style.background = data.badgeBg || 'rgba(56, 189, 248, 0.2)';
+        inspectorBadge.style.color = data.badgeColor || '#38bdf8';
+        inspectorBadge.style.borderColor = data.badgeColor || '#38bdf8';
+        inspectorDesc.textContent = data.desc;
+
+        detailsTableBody.innerHTML = data.table.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('');
+        inspectorCode.textContent = data.code;
+      });
+    });
+
+    // Filter Navigation Handler
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.getAttribute('data-filter');
+        nodes.forEach(node => {
+          const category = node.getAttribute('data-category');
+          if (filter === 'all' || category === filter) {
+            node.classList.remove('dimmed');
+          } else {
+            node.classList.add('dimmed');
+          }
+        });
+      });
+    });
+
+    // GleanBridge PDF Print Integration
+    if (window.GleanBridge) {
+      window.GleanBridge.postMessage({
+        actionId: 'export-pdf',
+        type: 'glean-add-menu',
+        metadata: { label: 'Export Architecture as PDF', icon: 'export' }
+      });
+      window.GleanBridge.onMessage('action', function(data) {
+        if (data.actionId === 'export-pdf') window.print();
+      });
+    }
+  </script>
+</body>
+</html>

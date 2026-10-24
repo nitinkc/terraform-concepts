@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="glean-artifact-type" content="visual_content">
+  <title>GCP VPC Peering & Compute Architecture</title>
+  <style>
+    :root {
+      --artifact-background: #f8fafc;
+      --artifact-background-card: #ffffff;
+      --artifact-background-light: #f1f5f9;
+      --artifact-background-mid: #e2e8f0;
+      --artifact-border-light: #e2e8f0;
+      --artifact-border-dark: #cbd5e1;
+      --artifact-text-primary: #0f172a;
+      --artifact-text-secondary: #64748b;
+      --artifact-text-muted: #94a3b8;
+      
+      /* Vibrant Cloud Accent Palette */
+      --c-gcp-blue: #2563eb;
+      --c-gcp-blue-bg: #eff6ff;
+      --c-gcp-blue-border: #bfdbfe;
+      
+      --c-purple: #7c3aed;
+      --c-purple-bg: #f5f3ff;
+      --c-purple-border: #ddd6fe;
+
+      --c-emerald: #059669;
+      --c-emerald-bg: #ecfdf5;
+      --c-emerald-border: #a7f3d0;
+
+      --c-amber: #d97706;
+      --c-amber-bg: #fffbeb;
+      --c-amber-border: #fde68a;
+
+      --c-rose: #e11d48;
+      --c-rose-bg: #fff1f2;
+      --c-rose-border: #fecdd3;
+
+      --c-cyan: #0891b2;
+      --c-cyan-bg: #ecfeff;
+      --c-cyan-border: #a5f3fc;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    }
+
+    html[data-theme='dark'] {
+      --artifact-background: #090d16;
+      --artifact-background-card: #111827;
+      --artifact-background-light: #1f2937;
+      --artifact-background-mid: #374151;
+      --artifact-border-light: #1f2937;
+      --artifact-border-dark: #374151;
+      --artifact-text-primary: #f8fafc;
+      --artifact-text-secondary: #94a3b8;
+      --artifact-text-muted: #64748b;
+
+      --c-gcp-blue: #60a5fa;
+      --c-gcp-blue-bg: #172554;
+      --c-gcp-blue-border: #1e40af;
+
+      --c-purple: #a78bfa;
+      --c-purple-bg: #2e1065;
+      --c-purple-border: #5b21b6;
+
+      --c-emerald: #34d399;
+      --c-emerald-bg: #064e3b;
+      --c-emerald-border: #065f46;
+
+      --c-amber: #fbbf24;
+      --c-amber-bg: #451a03;
+      --c-amber-border: #78350f;
+
+      --c-rose: #fb7185;
+      --c-rose-bg: #4c0519;
+      --c-rose-border: #881337;
+
+      --c-cyan: #22d3ee;
+      --c-cyan-bg: #083344;
+      --c-cyan-border: #155e75;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 32px 24px;
+    }
+
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Hero Banner Header */
+    .hero-banner {
+      background: linear-gradient(135deg, var(--c-gcp-blue-bg) 0%, var(--c-purple-bg) 100%);
+      border: 1px solid var(--c-gcp-blue-border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hero-tags {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-family: "SF Mono", "IBM Plex Mono", monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-blue { background: var(--c-gcp-blue); color: #ffffff; }
+    .badge-emerald { background: var(--c-emerald-bg); color: var(--c-emerald); border: 1px solid var(--c-emerald-border); }
+    .badge-purple { background: var(--c-purple-bg); color: var(--c-purple); border: 1px solid var(--c-purple-border); }
+    .badge-rose { background: var(--c-rose-bg); color: var(--c-rose); border: 1px solid var(--c-rose-border); }
+    .badge-cyan { background: var(--c-cyan-bg); color: var(--c-cyan); border: 1px solid var(--c-cyan-border); }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+    }
+
+    .hero-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--artifact-text-primary);
+    }
+
+    .hero-subtitle {
+      font-size: 14px;
+      color: var(--artifact-text-secondary);
+      max-width: 650px;
+    }
+
+    .hero-metrics {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .pill-metric {
+      background: var(--artifact-background-card);
+      border: 1px solid var(--artifact-border-light);
+      padding: 12px 18px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pill-metric-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--c-gcp-blue);
+      line-height: 1.1;
+    }
+
+    .pill-metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--artifact-text-secondary);
+    }
+
+    /* Colorful Feature Cards Grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: var(--artifact-background-card);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border: 1px solid var(--artifact-border-light);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .card-blue::before { background: var(--c-gcp-blue); }
+    .card-purple::before { background: var(--c-purple); }
+    .card-emerald::before { background: var(--c-emerald); }
+    .card-rose::before { background: var(--c-rose); }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-icon-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .icon-blue { background: var(--c-gcp-blue-bg); color: var(--c-gcp-blue); }
+    .icon-purple { background: var(--c-purple-bg); color: var(--c-purple); }
+    .icon-emerald { background: var(--c-emerald-bg); color: var(--c-emerald); }
+    .icon-rose { background: var(--c-rose-bg); color: var(--c-rose); }
+
+    .card-heading {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--artifact-text-primary);
+    }
+
+    .card-text {
+      font-size: 12px;
+      color: var(--artifact-text-secondary);
+      line-height: 1.4;
+    }
+
+    .card-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .chip {
+      font-family: "SF Mono", "IBM Plex Mono", monospace;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 500;
+      background: var(--artifact-background-light);
+      color: var(--artifact-text-primary);
+      border: 1px solid var(--artifact-border-light);
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 12px 18px;
+      background: var(--artifact-background-card);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 12px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: var(--artifact-background-light);
+      border: 1px solid var(--artifact-border-light);
+      color: var(--artifact-text-secondary);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .filter-btn:hover {
+      background: var(--artifact-background-mid);
+      color: var(--artifact-text-primary);
+    }
+
+    .filter-btn.active {
+      background: var(--c-gcp-blue);
+      border-color: var(--c-gcp-blue);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-counter {
+      background: rgba(255, 255, 255, 0.25);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    .filter-btn:not(.active) .btn-counter {
+      background: var(--artifact-background-mid);
+      color: var(--artifact-text-secondary);
+    }
+
+    /* Diagram & Inspector Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .diagram-panel {
+      background: var(--artifact-background-card);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 16px;
+      padding: 20px;
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      user-select: none;
+    }
+
+    .interactive-node {
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .interactive-node:hover {
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
+    }
+
+    .interactive-node.selected rect {
+      stroke: var(--c-gcp-blue) !important;
+      stroke-width: 2.5px !important;
+      filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.35));
+    }
+
+    .interactive-node.dimmed {
+      opacity: 0.2;
+    }
+
+    /* Inspector Panel */
+    .inspector-panel {
+      background: var(--artifact-background-card);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 20px;
+    }
+
+    .inspector-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-bottom: 1px solid var(--artifact-border-light);
+      padding-bottom: 14px;
+    }
+
+    .inspector-type {
+      font-family: "SF Mono", "IBM Plex Mono", monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--c-gcp-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .inspector-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--artifact-text-primary);
+    }
+
+    .inspector-desc {
+      font-size: 13px;
+      color: var(--artifact-text-secondary);
+      line-height: 1.4;
+    }
+
+    .spec-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .spec-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .spec-key {
+      font-family: "SF Mono", "IBM Plex Mono", monospace;
+      font-size: 11px;
+      color: var(--artifact-text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .spec-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--artifact-text-primary);
+      background: var(--artifact-background-light);
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--artifact-border-light);
+      font-family: "SF Mono", "IBM Plex Mono", monospace;
+      word-break: break-all;
+    }
+
+    /* Execution Plan Table */
+    .summary-card {
+      background: var(--artifact-background-card);
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-title-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--artifact-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .resource-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .resource-table th {
+      text-align: left;
+      padding: 12px 14px;
+      background: var(--artifact-background-light);
+      color: var(--artifact-text-secondary);
+      font-weight: 700;
+      font-family: "SF Mono", "IBM Plex Mono", monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .resource-table th:first-child { border-radius: 8px 0 0 8px; }
+    .resource-table th:last-child { border-radius: 0 8px 8px 0; }
+
+    .resource-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--artifact-border-light);
+      color: var(--artifact-text-primary);
+    }
+
+    .resource-table tr:hover td {
+      background: var(--artifact-background-light);
+    }
+
+    .action-tag-create {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: "SF Mono", "IBM Plex Mono", monospace;
+      background: var(--c-emerald-bg);
+      color: var(--c-emerald);
+      border: 1px solid var(--c-emerald-border);
+    }
+
+    .mono-cell {
+      font-family: "SF Mono", "IBM Plex Mono", monospace;
+      font-size: 12px;
+      color: var(--artifact-text-secondary);
+    }
+
+    @media print {
+      @page { size: auto !important; }
+
+      body {
+        margin: 0;
+        padding: 0.4in 0.6in;
+        background: #fff;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .container, .dashboard, .shell, main {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+
+      .main-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      .inspector-panel {
+        display: none !important;
+      }
+
+      .controls-bar {
+        display: none !important;
+      }
+
+      section, [class*="section"], .hero-banner, .feature-grid, .diagram-panel, .summary-card {
+        break-inside: avoid;
+        margin-bottom: 20px !important;
+      }
+
+      button, [role="button"], .interactive-only {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Hero Banner Header -->
+    <section class="hero-banner" data-glean-id="hero-banner">
+      <div class="hero-left">
+        <div class="hero-tags">
+          <span class="badge badge-blue"><span class="pulse-dot"></span>Terraform Plan</span>
+          <span class="badge badge-purple">Google Cloud Platform</span>
+          <span class="badge badge-emerald">Plan: 10 to Add</span>
+        </div>
+        <h1 class="hero-title">GCP VPC Peering &amp; Compute Architecture</h1>
+        <p class="hero-subtitle">
+          Execution plan topology for project <code>my-devops-journey-502420</code>. Multi-VPC mesh connected via bidirectional VPC Peering, with isolated subnets and Google Cloud IAP secure bastion-less ingress.
+        </p>
+      </div>
+      <div class="hero-metrics">
+        <div class="pill-metric">
+          <span class="pill-metric-num">2</span>
+          <span class="pill-metric-label">VPC Networks</span>
+        </div>
+        <div class="pill-metric">
+          <span class="pill-metric-num">2</span>
+          <span class="pill-metric-label">VMs (e2-micro)</span>
+        </div>
+        <div class="pill-metric">
+          <span class="pill-metric-num">2</span>
+          <span class="pill-metric-label">VPC Peerings</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Colorful Architecture Feature Blocks -->
+    <section class="feature-grid" data-glean-id="feature-blocks">
+      <!-- Block 1: Dual VPC Mesh -->
+      <div class="feature-card card-blue" data-glean-id="card-network">
+        <div class="card-top">
+          <span class="card-heading">Dual Custom VPCs</span>
+          <div class="card-icon-badge icon-blue">🌐</div>
+        </div>
+        <p class="card-text">Fully isolated custom VPC networks with dedicated subnets spanning <code>us-central1</code>.</p>
+        <div class="card-chips">
+          <span class="chip">vpc-a: 10.10.0.0/24</span>
+          <span class="chip">vpc-b: 10.20.0.0/24</span>
+        </div>
+      </div>
+
+      <!-- Block 2: Bidirectional VPC Peering -->
+      <div class="feature-card card-purple" data-glean-id="card-peering">
+        <div class="card-top">
+          <span class="card-heading">VPC Peering Fabric</span>
+          <div class="card-icon-badge icon-purple">🔗</div>
+        </div>
+        <p class="card-text">Direct Google backbone routing connecting <code>vpc-a</code> and <code>vpc-b</code> with zero bandwidth bottlenecks.</p>
+        <div class="card-chips">
+          <span class="chip">a-to-b</span>
+          <span class="chip">b-to-a</span>
+          <span class="chip">IPV4_ONLY</span>
+        </div>
+      </div>
+
+      <!-- Block 3: Compute Workloads -->
+      <div class="feature-card card-emerald" data-glean-id="card-compute">
+        <div class="card-top">
+          <span class="card-heading">Debian 12 Instances</span>
+          <div class="card-icon-badge icon-emerald">⚡</div>
+        </div>
+        <p class="card-text">Lightweight <code>e2-micro</code> compute nodes in zone <code>us-central1-a</code> with dynamic IP outputs.</p>
+        <div class="card-chips">
+          <span class="chip">vm-a</span>
+          <span class="chip">vm-b</span>
+          <span class="chip">Outputs: vm_a_ip, vm_b_ip</span>
+        </div>
+      </div>
+
+      <!-- Block 4: Security & IAP Ingress -->
+      <div class="feature-card card-rose" data-glean-id="card-security">
+        <div class="card-top">
+          <span class="card-heading">Zero-Trust IAP &amp; Ping</span>
+          <div class="card-icon-badge icon-rose">🛡️</div>
+        </div>
+        <p class="card-text">Strict firewall rules permitting IAP TCP:22 SSH tunneling and inter-VPC ICMP health checks.</p>
+        <div class="card-chips">
+          <span class="chip">TCP:22 (IAP)</span>
+          <span class="chip">ICMP (Cross-VPC)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Filter Controls -->
+    <div class="controls-bar" data-glean-id="controls-bar">
+      <div class="filter-group">
+        <button type="button" class="filter-btn active" data-filter="all" onclick="filterCategory('all')">
+          All Layers <span class="btn-counter">10</span>
+        </button>
+        <button type="button" class="filter-btn" data-filter="network" onclick="filterCategory('network')">
+          🌐 VPCs &amp; Subnets <span class="btn-counter">4</span>
+        </button>
+        <button type="button" class="filter-btn" data-filter="peering" onclick="filterCategory('peering')">
+          🔗 VPC Peering <span class="btn-counter">2</span>
+        </button>
+        <button type="button" class="filter-btn" data-filter="compute" onclick="filterCategory('compute')">
+          ⚡ Compute Instances <span class="btn-counter">2</span>
+        </button>
+        <button type="button" class="filter-btn" data-filter="security" onclick="filterCategory('security')">
+          🛡️ Firewalls &amp; IAP <span class="btn-counter">2</span>
+        </button>
+      </div>
+      <span style="font-size: 12px; color: var(--artifact-text-secondary); font-weight: 500;">
+        💡 Click any element in the diagram to inspect properties
+      </span>
+    </div>
+
+    <!-- Diagram & Inspector Grid -->
+    <div class="main-grid" data-glean-id="main-grid">
+      
+      <!-- SVG Diagram Panel -->
+      <div class="diagram-panel" data-glean-id="diagram-panel">
+        <svg viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg" id="archSvg">
+          <defs>
+            <!-- Drop Shadow for Nodes -->
+            <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="115%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/>
+            </filter>
+
+            <!-- Arrow Markers -->
+            <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#2563eb"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#7c3aed"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#059669"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="arrow-rose" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#e11d48"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+
+            <!-- Gradients -->
+            <linearGradient id="grad-vpca" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.04"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.02"/>
+            </linearGradient>
+
+            <linearGradient id="grad-vpcb" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.04"/>
+              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.02"/>
+            </linearGradient>
+
+            <linearGradient id="grad-iap" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#e11d48"/>
+              <stop offset="100%" stop-color="#be123c"/>
+            </linearGradient>
+
+            <linearGradient id="grad-peering" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2563eb"/>
+              <stop offset="50%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#2563eb"/>
+            </linearGradient>
+
+            <linearGradient id="grad-fwa" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#eff6ff"/>
+              <stop offset="100%" stop-color="#dbeafe"/>
+            </linearGradient>
+
+            <linearGradient id="grad-fwb" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f5f3ff"/>
+              <stop offset="100%" stop-color="#ede9fe"/>
+            </linearGradient>
+
+            <linearGradient id="grad-vma" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="100%" stop-color="#eff6ff"/>
+            </linearGradient>
+
+            <linearGradient id="grad-vmb" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="100%" stop-color="#f5f3ff"/>
+            </linearGradient>
+          </defs>
+
+          <!-- TOP EXTERNAL INGRESS: Google Cloud IAP Tunnel -->
+          <g id="node-iap" class="interactive-node" data-category="security" data-res="iap" onclick="selectResource('iap')">
+            <rect x="220" y="14" width="280" height="42" rx="10"
+                  fill="url(#grad-iap)" stroke="#be123c" stroke-width="1" filter="url(#card-shadow)"/>
+            <text x="360" y="30" text-anchor="middle" dominant-baseline="central"
+                  font-size="12" font-weight="700" fill="#ffffff">🛡️ Google Cloud IAP Proxy (35.235.240.0/20)</text>
+            <text x="360" y="44" text-anchor="middle" dominant-baseline="central"
+                  font-size="10" font-weight="500" fill="#ffe4e6">Zero-Trust TCP:22 SSH Tunneling</text>
+          </g>
+
+          <!-- IAP Stream Arrows down to Firewalls -->
+          <path d="M 280 56 C 280 75, 170 70, 170 88"
+                stroke="#e11d48" stroke-width="1.6" stroke-dasharray="4 3"
+                marker-end="url(#arrow-rose)" fill="none"/>
+          <path d="M 440 56 C 440 75, 550 70, 550 88"
+                stroke="#e11d48" stroke-width="1.6" stroke-dasharray="4 3"
+                marker-end="url(#arrow-rose)" fill="none"/>
+
+          <!-- ================= VPC-A CONTAINER (LEFT) ================= -->
+          <g id="node-vpc-a" class="interactive-node" data-category="network" data-res="vpc-a" onclick="selectResource('vpc-a')">
+            <rect x="16" y="70" width="310" height="394" rx="14"
+                  fill="url(#grad-vpca)" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="6 5" filter="url(#card-shadow)"/>
+            <rect x="16" y="70" width="310" height="30" rx="14" fill="#eff6ff"/>
+            <text x="171" y="86" text-anchor="middle" dominant-baseline="central"
+                  font-size="12" font-weight="700" fill="#1e40af">☁️ VPC Network: vpc-a</text>
+          </g>
+
+          <!-- Firewall: vpc-a-allow -->
+          <g id="node-fwa" class="interactive-node" data-category="security" data-res="fwa" onclick="selectResource('fwa')">
+            <rect x="32" y="112" width="278" height="52" rx="8"
+                  fill="url(#grad-fwa)" stroke="#bfdbfe" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <text x="171" y="128" text-anchor="middle" dominant-baseline="central"
+                  font-size="12" font-weight="700" fill="#1e3a8a">🛡️ Firewall: vpc-a-allow</text>
+            <text x="171" y="146" text-anchor="middle" dominant-baseline="central"
+                  font-size="10.5" font-weight="500" fill="#3b82f6">Allow TCP:22, ICMP from 10.20.0.0/24 &amp; IAP</text>
+          </g>
+
+          <!-- Subnet: subnet-a -->
+          <g id="node-subnet-a" class="interactive-node" data-category="network" data-res="subnet-a" onclick="selectResource('subnet-a')">
+            <rect x="32" y="176" width="278" height="236" rx="10"
+                  fill="#ffffff" stroke="#93c5fd" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <rect x="32" y="176" width="278" height="28" rx="10" fill="#eff6ff"/>
+            <text x="171" y="191" text-anchor="middle" dominant-baseline="central"
+                  font-size="11.5" font-weight="700" fill="#1e40af">🌐 subnet-a &bull; 10.10.0.0/24 (us-central1)</text>
+          </g>
+
+          <!-- Compute Instance: vm-a -->
+          <g id="node-vm-a" class="interactive-node" data-category="compute" data-res="vm-a" onclick="selectResource('vm-a')">
+            <rect x="48" y="216" width="246" height="76" rx="8"
+                  fill="url(#grad-vma)" stroke="#bfdbfe" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <text x="171" y="236" text-anchor="middle" dominant-baseline="central"
+                  font-size="13" font-weight="700" fill="#1e3a8a">⚡ vm-a (e2-micro)</text>
+            <text x="171" y="254" text-anchor="middle" dominant-baseline="central"
+                  font-size="11" font-weight="500" fill="#3b82f6">Debian 12 &bull; us-central1-a</text>
+            <text x="171" y="272" text-anchor="middle" dominant-baseline="central"
+                  font-size="10.5" font-weight="600" fill="#059669">NIC: subnet-a (IP: 10.10.0.x)</text>
+          </g>
+
+          <!-- Output: vm_a_ip -->
+          <g id="node-out-a" class="interactive-node" data-category="compute" data-res="out-a" onclick="selectResource('out-a')">
+            <rect x="48" y="304" width="246" height="32" rx="6"
+                  fill="#fdf4ff" stroke="#f0abfc" stroke-width="1.2"/>
+            <text x="171" y="320" text-anchor="middle" dominant-baseline="central"
+                  font-size="11" font-weight="700" fill="#a21eaf">💎 Output: vm_a_ip</text>
+          </g>
+
+          <!-- Internal Ping Status A -->
+          <rect x="48" y="348" width="246" height="26" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+          <text x="171" y="361" text-anchor="middle" dominant-baseline="central"
+                font-size="10" font-weight="600" fill="#047857">📡 Accepts SSH (22) &amp; Ping (ICMP)</text>
+
+
+          <!-- ================= VPC-B CONTAINER (RIGHT) ================= -->
+          <g id="node-vpc-b" class="interactive-node" data-category="network" data-res="vpc-b" onclick="selectResource('vpc-b')">
+            <rect x="394" y="70" width="310" height="394" rx="14"
+                  fill="url(#grad-vpcb)" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="6 5" filter="url(#card-shadow)"/>
+            <rect x="394" y="70" width="310" height="30" rx="14" fill="#f5f3ff"/>
+            <text x="549" y="86" text-anchor="middle" dominant-baseline="central"
+                  font-size="12" font-weight="700" fill="#5b21b6">☁️ VPC Network: vpc-b</text>
+          </g>
+
+          <!-- Firewall: vpc-b-allow -->
+          <g id="node-fwb" class="interactive-node" data-category="security" data-res="fwb" onclick="selectResource('fwb')">
+            <rect x="410" y="112" width="278" height="52" rx="8"
+                  fill="url(#grad-fwb)" stroke="#ddd6fe" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <text x="549" y="128" text-anchor="middle" dominant-baseline="central"
+                  font-size="12" font-weight="700" fill="#4c1d95">🛡️ Firewall: vpc-b-allow</text>
+            <text x="549" y="146" text-anchor="middle" dominant-baseline="central"
+                  font-size="10.5" font-weight="500" fill="#7c3aed">Allow TCP:22, ICMP from 10.10.0.0/24 &amp; IAP</text>
+          </g>
+
+          <!-- Subnet: subnet-b -->
+          <g id="node-subnet-b" class="interactive-node" data-category="network" data-res="subnet-b" onclick="selectResource('subnet-b')">
+            <rect x="410" y="176" width="278" height="236" rx="10"
+                  fill="#ffffff" stroke="#c4b5fd" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <rect x="410" y="176" width="278" height="28" rx="10" fill="#f5f3ff"/>
+            <text x="549" y="191" text-anchor="middle" dominant-baseline="central"
+                  font-size="11.5" font-weight="700" fill="#5b21b6">🌐 subnet-b &bull; 10.20.0.0/24 (us-central1)</text>
+          </g>
+
+          <!-- Compute Instance: vm-b -->
+          <g id="node-vm-b" class="interactive-node" data-category="compute" data-res="vm-b" onclick="selectResource('vm-b')">
+            <rect x="426" y="216" width="246" height="76" rx="8"
+                  fill="url(#grad-vmb)" stroke="#ddd6fe" stroke-width="1.2" filter="url(#card-shadow)"/>
+            <text x="549" y="236" text-anchor="middle" dominant-baseline="central"
+                  font-size="13" font-weight="700" fill="#4c1d95">⚡ vm-b (e2-micro)</text>
+            <text x="549" y="254" text-anchor="middle" dominant-baseline="central"
+                  font-size="11" font-weight="500" fill="#7c3aed">Debian 12 &bull; us-central1-a</text>
+            <text x="549" y="272" text-anchor="middle" dominant-baseline="central"
+                  font-size="10.5" font-weight="600" fill="#059669">NIC: subnet-b (IP: 10.20.0.x)</text>
+          </g>
+
+          <!-- Output: vm_b_ip -->
+          <g id="node-out-b" class="interactive-node" data-category="compute" data-res="out-b" onclick="selectResource('out-b')">
+            <rect x="426" y="304" width="246" height="32" rx="6"
+                  fill="#fdf4ff" stroke="#f0abfc" stroke-width="1.2"/>
+            <text x="549" y="320" text-anchor="middle" dominant-baseline="central"
+                  font-size="11" font-weight="700" fill="#a21eaf">💎 Output: vm_b_ip</text>
+          </g>
+
+          <!-- Internal Ping Status B -->
+          <rect x="426" y="348" width="246" height="26" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+          <text x="549" y="361" text-anchor="middle" dominant-baseline="central"
+                font-size="10" font-weight="600" fill="#047857">📡 Accepts SSH (22) &amp; Ping (ICMP)</text>
+
+
+          <!-- ================= VPC PEERING CONNECTIONS (CENTER) ================= -->
+          <!-- Bidirectional Peering Lines -->
+          <line x1="294" y1="254" x2="426" y2="254"
+                stroke="#059669" stroke-width="2.5" stroke-dasharray="5 3"
+                marker-end="url(#arrow-emerald)" marker-start="url(#arrow-emerald)" fill="none"/>
+
+          <!-- VPC Peering Badge / Bridge -->
+          <g id="node-peering" class="interactive-node" data-category="peering" data-res="peering" onclick="selectResource('peering')">
+            <rect x="300" y="222" width="120" height="64" rx="10"
+                  fill="#ffffff" stroke="#7c3aed" stroke-width="1.8" filter="url(#card-shadow)"/>
+            <rect x="300" y="222" width="120" height="20" rx="10" fill="#f5f3ff"/>
+            <text x="360" y="233" text-anchor="middle" dominant-baseline="central"
+                  font-size="10" font-weight="700" fill="#7c3aed">🔗 VPC PEERING</text>
+            <text x="360" y="250" text-anchor="middle" dominant-baseline="central"
+                  font-size="10" font-weight="700" fill="#0f172a">a-to-b &bull; b-to-a</text>
+            <text x="360" y="268" text-anchor="middle" dominant-baseline="central"
+                  font-size="9" font-weight="600" fill="#059669">Private Mesh Route</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Inspector Sidebar -->
+      <aside class="inspector-panel" id="inspectorPanel" data-glean-id="inspector-panel">
+        <div class="inspector-header">
+          <span class="inspector-type" id="inspBadge">RESOURCE DETAILS</span>
+          <h2 class="inspector-title" id="inspTitle">Select an Element</h2>
+          <p class="inspector-desc" id="inspDesc">Click on any diagram block or layer to explore its Terraform execution attributes.</p>
+        </div>
+        <div class="spec-list" id="inspSpecs">
+          <div class="spec-item">
+            <span class="spec-key">Provider</span>
+            <span class="spec-val">google (hashicorp)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-key">Plan Status</span>
+            <span class="spec-val">+ 10 to create</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Execution Plan Table -->
+    <section class="summary-card" data-glean-id="summary-card">
+      <div class="section-title-wrap">
+        <h2 class="section-title">📋 Terraform Execution Plan Matrix</h2>
+        <span class="badge badge-emerald">Ready for terraform apply</span>
+      </div>
+      <table class="resource-table">
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Resource Type</th>
+            <th>Identifier</th>
+            <th>Primary Configuration &bull; Scope</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="action-tag-create">+ CREATE</span></td>
+            <td class="mono-cell">google_compute_network</td>
+            <td><strong>network-a (vpc-a)</strong></td>
+            <td>Custom mode (<code>auto_create_subnetworks = false</code>)</td>
+          </tr>
+          <tr>
+            <td><span class="action-tag-create">+ CREATE</span></td>
+            <td class="mono-cell">google_compute_network</td>
+            <td><strong>network-b (vpc-b)</strong></td>
+            <td>Custom mode (<code>auto_create_subnetworks = false</code>)</td>
+          </tr>
+          <tr>
+            <td><span class="action-tag-create">+ CREATE</span></td>
+            <td class="mono-cell">google_compute_subnetwork</td>
+            <td><strong>subnet-a</strong></td>
+            <td>CIDR: <code>10.10.0.0/24</code> &bull; Region: <code>us-central1</code> &bull; Network: <code>vpc-a</code></td>
+          </tr>
+          <tr>
+            <td><span class="action-tag-create">+ CREATE</span></td>
+            <td class="mono-cell">google_compute_subnetwork</td>
+            <td><strong>subnet-b</strong></td>
+            <td>CIDR: <code>10.20.0.0/24</code> &bull; Region: <code>us-central1</code> &bull; Network: <code>vpc-b</code></td>
+          </tr>
+          <tr>
+            <td><span class="action-tag-create">+ CREATE</span></td>
+            <td class="mono-cell">google_compute_network_peering</td>
+            <td><strong>a_to_b</strong></td>
+            <td>Peering <code>vpc-a</code> → <code>vpc-b</code> &bull; <code>export_subnet_routes = true</code></td>
+          </tr>
+          <tr>
+            <td><span class="action-tag-create">+ CREATE</span></td>
+            <td class="mono-cell">google_compute_network_peering</td>
+            <td><strong>b_to_a</strong></td>
+            <td>Peering <code>vpc-b</code> → <code>vpc-a</code> &bull; <code>export_subnet_routes = true</code></td>
+          </tr>
+          <tr>
+            <td><span class="action-tag-create">+ CREATE</span></td>
+            <td class="mono-cell">google_compute_instance</td>
+            <td><strong>a (vm-a)</strong></td>
+            <td><code>e2-micro</code> &bull; Debian 12 &bull; Subnet-A &bull; Zone: <code>us-central1-a</code></td>
+          </tr>
+          <tr>
+            <td><span class="action-tag-create">+ CREATE</span></td>
+            <td class="mono-cell">google_compute_instance</td>
+            <td><strong>b (vm-b)</strong></td>
+            <td><code>e2-micro</code> &bull; Debian 12 &bull; Subnet-B &bull; Zone: <code>us-central1-a</code></td>
+          </tr>
+          <tr>
+            <td><span class="action-tag-create">+ CREATE</span></td>
+            <td class="mono-cell">google_compute_firewall</td>
+            <td><strong>a_allow (vpc-a-allow)</strong></td>
+            <td>Ingress TCP:22, ICMP &bull; Sources: <code>10.20.0.0/24</code> (Subnet B), <code>35.235.240.0/20</code></td>
+          </tr>
+          <tr>
+            <td><span class="action-tag-create">+ CREATE</span></td>
+            <td class="mono-cell">google_compute_firewall</td>
+            <td><strong>b_allow (vpc-b-allow)</strong></td>
+            <td>Ingress TCP:22, ICMP &bull; Sources: <code>10.10.0.0/24</code> (Subnet A), <code>35.235.240.0/20</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <script>
+    const resourceData = {
+      'vpc-a': {
+        badge: 'google_compute_network',
+        title: 'network-a (vpc-a)',
+        desc: 'Custom-mode virtual private cloud hosting Subnet A and compute instance vm-a.',
+        specs: [
+          { k: 'Project', v: 'my-devops-journey-502420' },
+          { k: 'Auto Subnets', v: 'false (Custom Mode)' },
+          { k: 'Firewall Policy Order', v: 'AFTER_CLASSIC_FIREWALL' },
+          { k: 'Action', v: '+ create' }
+        ]
+      },
+      'vpc-b': {
+        badge: 'google_compute_network',
+        title: 'network-b (vpc-b)',
+        desc: 'Custom-mode virtual private cloud hosting Subnet B and compute instance vm-b.',
+        specs: [
+          { k: 'Project', v: 'my-devops-journey-502420' },
+          { k: 'Auto Subnets', v: 'false (Custom Mode)' },
+          { k: 'Firewall Policy Order', v: 'AFTER_CLASSIC_FIREWALL' },
+          { k: 'Action', v: '+ create' }
+        ]
+      },
+      'subnet-a': {
+        badge: 'google_compute_subnetwork',
+        title: 'subnet-a',
+        desc: 'Regional subnet in vpc-a hosting VM-A with inter-VPC routing to subnet-b.',
+        specs: [
+          { k: 'CIDR Block', v: '10.10.0.0/24' },
+          { k: 'Region', v: 'us-central1' },
+          { k: 'Network', v: 'vpc-a' },
+          { k: 'Action', v: '+ create' }
+        ]
+      },
+      'subnet-b': {
+        badge: 'google_compute_subnetwork',
+        title: 'subnet-b',
+        desc: 'Regional subnet in vpc-b hosting VM-B with inter-VPC routing to subnet-a.',
+        specs: [
+          { k: 'CIDR Block', v: '10.20.0.0/24' },
+          { k: 'Region', v: 'us-central1' },
+          { k: 'Network', v: 'vpc-b' },
+          { k: 'Action', v: '+ create' }
+        ]
+      },
+      'peering': {
+        badge: 'google_compute_network_peering',
+        title: 'a_to_b ↔ b_to_a',
+        desc: 'Bidirectional VPC network peering creating direct low-latency private connectivity between vpc-a and vpc-b.',
+        specs: [
+          { k: 'Peering A → B', v: 'name: a-to-b (vpc-a → vpc-b)' },
+          { k: 'Peering B → A', v: 'name: b-to-a (vpc-b → vpc-a)' },
+          { k: 'Stack Type', v: 'IPV4_ONLY' },
+          { k: 'Export Subnet Routes', v: 'true' },
+          { k: 'Action', v: '+ 2 to create' }
+        ]
+      },
+      'vm-a': {
+        badge: 'google_compute_instance',
+        title: 'instance.a (vm-a)',
+        desc: 'Compute Engine virtual machine deployed in subnet-a within us-central1-a.',
+        specs: [
+          { k: 'Machine Type', v: 'e2-micro' },
+          { k: 'Zone', v: 'us-central1-a' },
+          { k: 'OS Boot Disk', v: 'debian-cloud/debian-12' },
+          { k: 'Subnetwork', v: 'subnet-a (10.10.0.0/24)' },
+          { k: 'Action', v: '+ create' }
+        ]
+      },
+      'vm-b': {
+        badge: 'google_compute_instance',
+        title: 'instance.b (vm-b)',
+        desc: 'Compute Engine virtual machine deployed in subnet-b within us-central1-a.',
+        specs: [
+          { k: 'Machine Type', v: 'e2-micro' },
+          { k: 'Zone', v: 'us-central1-a' },
+          { k: 'OS Boot Disk', v: 'debian-cloud/debian-12' },
+          { k: 'Subnetwork', v: 'subnet-b (10.20.0.0/24)' },
+          { k: 'Action', v: '+ create' }
+        ]
+      },
+      'fwa': {
+        badge: 'google_compute_firewall',
+        title: 'a_allow (vpc-a-allow)',
+        desc: 'Firewall rule protecting vpc-a, permitting SSH (22) and Ping (ICMP) from Subnet B and Google IAP.',
+        specs: [
+          { k: 'Network', v: 'vpc-a' },
+          { k: 'Allowed Protocols', v: 'tcp:22 (SSH), icmp (Ping)' },
+          { k: 'Source Range 1', v: '10.20.0.0/24 (Subnet B)' },
+          { k: 'Source Range 2', v: '35.235.240.0/20 (Google IAP)' },
+          { k: 'Priority', v: '1000' }
+        ]
+      },
+      'fwb': {
+        badge: 'google_compute_firewall',
+        title: 'b_allow (vpc-b-allow)',
+        desc: 'Firewall rule protecting vpc-b, permitting SSH (22) and Ping (ICMP) from Subnet A and Google IAP.',
+        specs: [
+          { k: 'Network', v: 'vpc-b' },
+          { k: 'Allowed Protocols', v: 'tcp:22 (SSH), icmp (Ping)' },
+          { k: 'Source Range 1', v: '10.10.0.0/24 (Subnet A)' },
+          { k: 'Source Range 2', v: '35.235.240.0/20 (Google IAP)' },
+          { k: 'Priority', v: '1000' }
+        ]
+      },
+      'iap': {
+        badge: 'gcp infrastructure',
+        title: 'Identity-Aware Proxy (IAP)',
+        desc: 'Google Cloud managed TCP forwarding proxy enabling secure browser and CLI SSH into private VMs without bastion hosts.',
+        specs: [
+          { k: 'IAP IP Range', v: '35.235.240.0/20' },
+          { k: 'Target Ports', v: 'TCP:22' },
+          { k: 'Authentication', v: 'Google Cloud IAM & Context-Aware' }
+        ]
+      },
+      'out-a': {
+        badge: 'terraform output',
+        title: 'vm_a_ip',
+        desc: 'Exported internal IP address of vm-a on subnet-a (10.10.0.0/24).',
+        specs: [
+          { k: 'Output Name', v: 'vm_a_ip' },
+          { k: 'Value', v: '(known after apply)' },
+          { k: 'Source', v: 'google_compute_instance.a.network_interface[0].network_ip' }
+        ]
+      },
+      'out-b': {
+        badge: 'terraform output',
+        title: 'vm_b_ip',
+        desc: 'Exported internal IP address of vm-b on subnet-b (10.20.0.0/24).',
+        specs: [
+          { k: 'Output Name', v: 'vm_b_ip' },
+          { k: 'Value', v: '(known after apply)' },
+          { k: 'Source', v: 'google_compute_instance.b.network_interface[0].network_ip' }
+        ]
+      }
+    };
+
+    function selectResource(resKey) {
+      const data = resourceData[resKey];
+      if (!data) return;
+
+      document.getElementById('inspBadge').textContent = data.badge;
+      document.getElementById('inspTitle').textContent = data.title;
+      document.getElementById('inspDesc').textContent = data.desc;
+
+      const specsContainer = document.getElementById('inspSpecs');
+      specsContainer.innerHTML = data.specs.map(s => `
+        <div class="spec-item">
+          <span class="spec-key">${s.k}</span>
+          <span class="spec-val">${s.v}</span>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.interactive-node').forEach(node => {
+        if (node.getAttribute('data-res') === resKey) {
+          node.classList.add('selected');
+        } else {
+          node.classList.remove('selected');
+        }
+      });
+    }
+
+    function filterCategory(category) {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-filter') === category);
+      });
+
+      document.querySelectorAll('.interactive-node').forEach(node => {
+        const cat = node.getAttribute('data-category');
+        if (category === 'all' || cat === category) {
+          node.classList.remove('dimmed');
+        } else {
+          node.classList.add('dimmed');
+        }
+      });
+
+      if (category === 'compute') selectResource('vm-a');
+      else if (category === 'network') selectResource('vpc-a');
+      else if (category === 'peering') selectResource('peering');
+      else if (category === 'security') selectResource('fwa');
+      else selectResource('peering');
+    }
+
+    // Default selection
+    selectResource('peering');
+
+    // GleanBridge PDF export hook
+    if (window.GleanBridge) {
+      window.GleanBridge.postMessage({
+        actionId: 'export-pdf',
+        type: 'glean-add-menu',
+        metadata: { label: 'Export as PDF', icon: 'export' }
+      });
+      window.GleanBridge.onMessage('action', function(data) {
+        if (data.actionId === 'export-pdf') window.print();
+      });
+    }
+  </script>
+</body>
+</html>
