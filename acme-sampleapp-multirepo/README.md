@@ -93,10 +93,10 @@ organizational preference. Each repo:
 
 ## Dependency graph
 
-[![Acme Sample App service and Terraform dependency graph](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/service-dependency-architecture.svg)](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/service-dependency-architecture.svg)
+[![Acme Sample App service and Terraform dependency graph](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo/diagrams/service-dependency-architecture.svg)](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo/diagrams/service-dependency-architecture.svg)
 
 _Arrows show dependency direction. Each colored service box owns an independent Terraform
-state and lifecycle. [Open the editable draw.io source](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/service-dependency-architecture.drawio)._
+state and lifecycle. [Open the editable draw.io source](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo/diagrams/service-dependency-architecture.drawio)._
 
 `infrastructure` also reads `backend`'s published service-account email
 (`infrastructure/infra/iam.tf`) — the *grant* runs in `infrastructure` (it
@@ -106,7 +106,7 @@ the other way. This is worth sitting with: **"who owns the resource" and
 
 ## Detailed system overview
 
-[![Detailed Acme Sample App runtime, platform, contract, and Terraform ownership diagram](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/acme-application-system-overview.svg)](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/acme-application-system-overview.svg)
+[![Detailed Acme Sample App runtime, platform, contract, and Terraform ownership diagram](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo/diagrams/acme-application-system-overview.svg)](https://raw.githubusercontent.com/nitinkc/terraform-concepts/main/acme-sampleapp-multirepo/diagrams/acme-application-system-overview.svg)
 
 Use this view to recall four aspects together:
 
@@ -118,7 +118,7 @@ Use this view to recall four aspects together:
 4. **Cross-root contracts:** dashed purple lines represent deliberately published JSON
    outputs in Consul, not direct access to another root's state.
 
-[Open the editable draw.io source](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/acme-application-system-overview.drawio).
+[Open the editable draw.io source](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo/diagrams/acme-application-system-overview.drawio).
 
 ## Consul key map (the actual contract between repos)
 

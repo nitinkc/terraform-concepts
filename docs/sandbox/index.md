@@ -16,13 +16,13 @@ actually feels like.
 
 The arrows show dependency direction; each colored service box owns an independent Terraform
 state and lifecycle. Select the diagram to open the full-size lightbox view. The editable
-source is [`service-dependency-architecture.drawio`](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo-sandbox-elaborate/diagrams/service-dependency-architecture.drawio).
+source is [`service-dependency-architecture.drawio`](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo/diagrams/service-dependency-architecture.drawio).
 
 ## Before you touch it
 
 | | |
 |---|---|
-| Source of truth for layout | [`../../acme-sampleapp-multirepo`](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo-sandbox-elaborate/README.md) |
+| Source of truth for layout | [`../../acme-sampleapp-multirepo`](https://github.com/nitinkc/terraform-concepts/blob/main/acme-sampleapp-multirepo/README.md) |
 | Source of truth for running it | [`RUNBOOK.md`](runbook.md) — apply order, Consul dev agent, teardown |
 | Concept → file lookup | [Architect's Reference](../reference/index.md) |
 
@@ -80,4 +80,4 @@ Two things worth sitting with before moving on:
 
 ## Reference — sandbox README
 
---8<-- "acme-sampleapp-multirepo-sandbox-elaborate/README.md:body"
+--8<-- "acme-sampleapp-multirepo/README.md:body"

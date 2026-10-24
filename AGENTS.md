@@ -54,10 +54,10 @@ terraform validate
 terraform plan
 
 # Acme shell syntax:
-for script in acme-sampleapp-multirepo-sandbox-elaborate/*.sh; do bash -n "$script"; done
+for script in acme-sampleapp-multirepo/*.sh; do bash -n "$script"; done
 
 # Read-only live checks; --plans refreshes live state:
-cd acme-sampleapp-multirepo-sandbox-elaborate
+cd acme-sampleapp-multirepo
 ./verify-session.sh
 ./verify-session.sh --plans
 
