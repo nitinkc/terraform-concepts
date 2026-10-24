@@ -11,17 +11,18 @@ resource "google_service_account" "gsa" {
 # Step 4: indexed multiple resources (adds 4 resources)
 # creates dev and qa
 # Prefer `for_each` over `count` - Reserve `count` for simple "N identical copies" or conditional 0/1 patterns.
-resource "google_service_account" "env_sa_list" {
-  # count is used with type    = list(string)
-
-  # count        = length(var.environments) # count — create multiple resources from one block
-  # account_id   = "acme-${var.environments[count.index]}"
-  # display_name = "SA for ${var.environments[count.index]} env"
-
+resource "google_service_account" "env_sa_set" {
   # used with   type    = set(string)
   for_each     = var.environment_set
   account_id   = "${local.name_prefix}-${each.value}" #get from local name prefix
   display_name = "SA for ${each.value} env"
+}
+
+resource "google_service_account" "env_sa_list" {
+  # count is used with type    = list(string)
+  count        = length(var.environment_list) # count — create multiple resources from one block
+  account_id   = "acme-${var.environment_list[count.index]}"
+  display_name = "SA for ${var.environment_list[count.index]} env"
 }
 
 

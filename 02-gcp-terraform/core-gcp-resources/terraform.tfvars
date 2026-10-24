@@ -6,5 +6,5 @@
 # and wondering why nothing happened is the classic precedence mistake.
 project_id = "my-devops-journey-502420" # <-- replace with your own GCP project ID
 
-# Step 15 : variable presedence
-environments = ["dev", "staging"]
+# Step 15 : variable precedence
+# environments = ["dev", "staging"]

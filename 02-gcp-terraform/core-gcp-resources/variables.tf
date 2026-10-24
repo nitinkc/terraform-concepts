@@ -14,8 +14,7 @@ variable "zone" {
 
 
 variable "environment_list" {
-  # type    = list(string)
-  type    = set(string)
+  type    = list(string)
   default = ["dev", "staging"]
 }
 
@@ -23,7 +22,6 @@ variable "environment_set" {
   type    = set(string)
   default = ["int", "stg"]
 }
-
 
 # Step 13 For-each over modules
 variable "service_accounts" {

@@ -5,6 +5,7 @@ module "fde_vm" {
   machine_type  = "e2-medium"
   zone          = "us-central1-a"
   subnetwork_id = google_compute_subnetwork.subnet.id
+  project_id    = var.project_id
 }
 
 output "server_internal_ip" {

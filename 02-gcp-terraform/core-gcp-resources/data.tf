@@ -8,7 +8,7 @@ output "project_number" {
 }
 
 data "google_compute_network" "default" {
-  name = "default"
+  name    = "default"
   project = var.project_id
 }
 
