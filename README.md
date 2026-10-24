@@ -22,6 +22,7 @@ The repository is deliberately two layers:
 - **`01-basics/` and `02-gcp-terraform/`** are small, isolated demonstrations. One concept
   per directory, safe to break, safe to delete. Every explanation and code snippet is consolidated in
   [`docs/reference/`](docs/reference/index.md).
+
 - **`acme-sampleapp-multirepo`** is the main project. Its five
   independent Terraform roots model organisation-style repository boundaries, state
   ownership, Consul contracts, GKE, Cloud SQL, Helm and Workload Identity. It bills real

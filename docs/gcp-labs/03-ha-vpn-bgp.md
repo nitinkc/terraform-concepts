@@ -39,11 +39,11 @@ A critical architectural distinction in Google Cloud hybrid networking is the se
 [![Cloud Routers and HA VPN Gateways](../assets/diagrams/gcp-labs/3-ha-vpn-routers-gateways.svg)](../assets/diagrams/gcp-labs/3-ha-vpn-routers-gateways.svg)
 
 1. **Cloud Routers (`ha-vpn-router-a` & `ha-vpn-router-b`) — Pure Control Plane:**
-   - User data packets **never** pass through Cloud Router.
-   - Cloud Router is purely a **BGP speaker** that establishes TCP port `179` sessions over the tunnel's link-local `169.254.x.x/30` IPs, exchanges prefix advertisements (`10.10.0.0/24` ↔ `10.20.0.0/24`), and programs next-hop routes into the VPC route table.
-   - **Why two different ASNs (`65001` vs. `65002`)?** BGP between two autonomous networks uses **eBGP (External BGP)**, which requires distinct private ASNs (`64512`–`65534` per RFC 6996).
+    - User data packets **never** pass through Cloud Router.
+    - Cloud Router is purely a **BGP speaker** that establishes TCP port `179` sessions over the tunnel's link-local `169.254.x.x/30` IPs, exchanges prefix advertisements (`10.10.0.0/24` ↔ `10.20.0.0/24`), and programs next-hop routes into the VPC route table.
+    - **Why two different ASNs (`65001` vs. `65002`)?** BGP between two autonomous networks uses **eBGP (External BGP)**, which requires distinct private ASNs (`64512`–`65534` per RFC 6996).
 2. **HA VPN Gateways (`ha-vpn-gw-a` & `ha-vpn-gw-b`) — Dual-Interface Data Plane:**
-   - Each `google_compute_ha_vpn_gateway` automatically allocates **two independent external IPv4 addresses** (`GW IF 0` and `GW IF 1`) backed by separate physical/logical failure domains in GCP. You never create `google_compute_address` resources manually for HA VPN.
+    - Each `google_compute_ha_vpn_gateway` automatically allocates **two independent external IPv4 addresses** (`GW IF 0` and `GW IF 1`) backed by separate physical/logical failure domains in GCP. You never create `google_compute_address` resources manually for HA VPN.
 
 ```hcl
 resource "google_compute_router" "router_a" {

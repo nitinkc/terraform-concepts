@@ -19,12 +19,14 @@ HCL is purely functional — there are no procedural `if` statements or mutable 
 | **Splat (`[*]`)** | `google_service_account.sa[*].email` | Works on **lists / `count` resources**. For `for_each` maps, use `values(map)[*].email` or a `for` expression. |
 
 ### 2. `for` Expressions (Data Transformation, Not Resource Loops)
+
 - **`[for x in coll : ...]` (square brackets)** produces a **tuple/list**.
 - **`{ for k, v in coll : k => v if cond }` (curly braces)** produces an **object/map**, optionally filtered by `if`.
 - Filtering a map in `locals` before passing it to a module's `for_each` keeps conditionality out of reusable child modules.
 
 ### 3. The `count = 0` Empty-List Trap
 HCL cannot conditionally declare a block; instead, `count = var.enabled ? 1 : 0` creates a **list of 0 or 1 instances**.
+
 - When `count = 0`, `google_sql_database_instance.main` is an **empty list `[]`**, *not* an object with `null` fields.
 - Referencing `google_sql_database_instance.main.name` fails (`Because count is set, its attributes must be accessed on specific instances`).
 - Referencing `google_sql_database_instance.main[0].name` when `count = 0` fails (`Invalid index: list has 0 elements`).
@@ -38,15 +40,17 @@ HCL cannot conditionally declare a block; instead, `count = var.enabled ? 1 : 0`
   ```
 
 ### 4. Guard Propagation (Production Architecture Deep-Dive)
+
 - **The Rule:** **A guard only protects the exact expression it wraps.** Every downstream consumer of a conditionally created or filtered resource must either:
-  1. Iterate over the **exact same filtered keyset**, OR
-  2. Carry its own defensive guard (`try()`, `one()`, `length() > 0`).
+    1. Iterate over the **exact same filtered keyset**, OR
+    2. Carry its own defensive guard (`try()`, `one()`, `length() > 0`).
 - **Real Incident Pattern (`infrastructure/infra`):**
-  - `local.program_gcp_by_env` filtered `["dev", "qa", "prod"]` down to only environments whose upstream GKE cluster existed (`dev` and `qa`, skipping `prod`).
-  - Downstream resources in `secrets.tf` and `outputs.tf` still iterated over the *unfiltered* `for_each = toset(local.environments)` and indexed `local.program_gcp_by_env[each.key]` — crashing on `"prod"` with `Invalid index`.
-  - **Architectural Fix:** Define `local.available_environments = toset(keys(local.program_gcp_by_env))` once, and drive every downstream `for_each` from `local.available_environments`.
+    - `local.program_gcp_by_env` filtered `["dev", "qa", "prod"]` down to only environments whose upstream GKE cluster existed (`dev` and `qa`, skipping `prod`).
+    - Downstream resources in `secrets.tf` and `outputs.tf` still iterated over the *unfiltered* `for_each = toset(local.environments)` and indexed `local.program_gcp_by_env[each.key]` — crashing on `"prod"` with `Invalid index`.
+    - **Architectural Fix:** Define `local.available_environments = toset(keys(local.program_gcp_by_env))` once, and drive every downstream `for_each` from `local.available_environments`.
 
 ### 5. Design Judgment: When to Guard (`try()`) vs. When to Fail Fast
+
 - **Do NOT blanket-wrap every external read in `try(..., "")`.**
 - **Guard when the dependency is genuinely optional** and the application has a valid fallback (e.g., in `backend/infra/cloudsql.tf`, missing Cloud SQL Consul keys safely evaluate `cloudsql_enabled = false` so the backend runs in mock-data mode).
 - **Fail fast when the dependency is a hard prerequisite** (e.g., in `backend/infra/main.tf`, missing `infrastructure` SSO secrets call `jsondecode()` directly without `try()`, failing immediately at `plan` time rather than deploying a broken pod).

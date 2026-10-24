@@ -38,6 +38,7 @@ If you ever need *real* VPC separation: three clusters (or GKE multi-network / S
 GKE **Standard, zonal, private nodes, Dataplane V2, Workload Identity, Gateway API**. Zonal keeps you on the free-tier management-fee credit (one zonal/Autopilot cluster per billing account). **Spot** `e2-standard-2` ×2–3 nodes. Standard (not Autopilot) because you want to see node tags, routes, NAT and pod ranges — Autopilot hides them.
 
 ### D3 — Where do "service accounts + cross-stack values" live? (your Consul/other question)
+
 - **Identities are deterministic names**, not looked-up values: `pipeline-np@…`, `orders-app@…`. A name you can compute needs no lookup service.
 - **Cross-stack outputs** (VPC self-link, subnet names): use **GCS remote state + `terraform_remote_state`**. Reason: zero extra infra, works with GitLab shared runners, IAM-protected.
 - **Consul = optional stretch S4.** A private Consul can't be reached by gitlab.com shared runners; you'd need a self-hosted runner on the free-tier e2-micro in the VPC. Great learning (it forces you through the network doors), poor *day-one* choice.
@@ -384,6 +385,7 @@ include:
 ```
 Hints: in `platform/terraform-modules` → Settings → CI/CD → *Job token permissions* → add the groups that consume it. Tag modules (`git tag v0.1.0`) and pin `?ref=`. Shared runners have a monthly minute quota (≈400 on Free; verify) — keep jobs lean, cache nothing fancy.
 **Break-it exercises**
+
 1. Run a job on a **feature branch** with `TF_SA=$SA_P`: STS exchange must be **denied**. Read the error and map it to the `root_group_ref` attribute.
 2. Switch `TF_SA` to `$SA_P_RO`: succeeds with read-only (the "feature branches get read-only plan view" behaviour).
 3. Protect `main` ⇒ `ref_protected=true` ⇒ `SA_P` works from `main` only.
@@ -395,6 +397,7 @@ Hints: in `platform/terraform-modules` → Settings → CI/CD → *Job token per
 
 **Goal:** custom VPC with IPAM from §2, PGA, Cloud NAT with 2 static IPs, tag-scoped routes, firewall, private DNS for Google APIs. A variable `training_wheels` keeps a normal default route until P8.
 **Nuances revealed (write each down in your own words):**
+
 - Cloud NAT only translates traffic whose route's next hop is `default-internet-gateway`.
 - `delete_default_routes_on_create` is a **create-time** flag — toggling later forces VPC replacement; so manage your own default route as a resource instead.
 - Network tags / SAs are **node-level**: pods ride on the node's identity.
@@ -524,6 +527,7 @@ output "subnet_name"       { value = google_compute_subnetwork.gke_main.name }
 output "network_name"      { value = google_compute_network.main.name }
 ```
 Hints:
+
 - Use a throwaway **IAP-only VM** in `ops` (no external IP, tag `iap-ssh`) to test doors:
   ```bash
   gcloud compute instances create probe --zone us-central1-a --machine-type e2-micro \
@@ -531,6 +535,7 @@ Hints:
   gcloud compute ssh probe --zone us-central1-a --tunnel-through-iap -- curl -sI https://example.com
   ```
   Remove the `allowed-open-nat` tag and re-test: with `training_wheels=true` it still works (tw route); after P8 it won't. That contrast **is** the lesson.
+
 - Network Intelligence → *Connectivity Tests* (`gcloud network-management connectivity-tests create …`) will tell you which route/firewall decides a packet.
 **Verify:**
 ```bash
@@ -902,6 +907,7 @@ app.listen(8080);
 Call graph: **orders → payments, orders → inventory**; payments ↔ inventory **denied**. Env: `PAYMENTS_URL=http://payments.dom-payments.svc.cluster.local`, `INVENTORY_URL=http://inventory.dom-inventory.svc.cluster.local`.
 
 ### 7d. App CI (Tier 3): build → push to Artifact Registry → bump tag in `flux-releases`
+
 - Image build on GitLab shared runners with Docker-in-Docker; authenticate to AR using WIF (same `id_tokens` pattern as P2, SA = a push-only GSA created in `bootstrap`/`gke-platform` with `roles/artifactregistry.writer`; get a token with `gcloud auth print-access-token` and `docker login -u oauth2accesstoken`).
 - Tag bump: a job commits `image.tag: $CI_COMMIT_SHORT_SHA` into `apps/np/<domain>/helmrelease.yaml` in `flux-releases`. (Stretch: replace with Flux Image Automation.)
 - Remember the rule from §3: `AR_REPO` is defined only at `applications/`.
@@ -1048,6 +1054,7 @@ Then expose the bucket name to the chart via Flux `postBuild.substitute` / HelmR
 Rough order of magnitude while up (verify current pricing; use the budget alarm): 2–3 spot `e2-standard-2`, one Cloud NAT gateway, 2 in-use static IPs, one internal LB, small PDs → **a few dollars per day**; near-zero when destroyed (keep state buckets). Cloud SQL, HA VPN tunnels and external LBs are the expensive stretch items — run them for hours, not days.
 
 Teardown order (reverse of build) — script it as `destroy-all.sh` like your earlier ones:
+
 1. `flux suspend` apps → delete `Gateway` objects (so LB resources are removed before the VPC) 
 2. `gke-platform` → `network` (NAT/router/addresses) → keep `bootstrap`
 3. Orphans to check: `gcloud compute forwarding-rules list`, `addresses list`, `disks list`, `routers list`.

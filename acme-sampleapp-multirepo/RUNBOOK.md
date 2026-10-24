@@ -225,14 +225,17 @@ either to `true`:
 - You're paying for **1 running `e2-small` node** (spot pricing for `np`,
   on-demand for `p`) — order of cents/hour, but it accrues the whole time
   it's running, not just while you're actively using it.
+
 - **Turn it off when you're done for the session.** `terraform destroy`
   from `sample-program/infra` removes the cluster and node pool. There's no
   "pause" — destroy and re-apply next session is the normal workflow for a
   lab cluster.
+
 - Consider enabling **only `enable_gke_np`** rather than both — one cluster
   is enough to exercise the entire dependency graph end to end (`backend`
   and `frontend` both read `local.program_gcp` keyed by `p_or_np`, and any
   non-`default` Terraform workspace resolves to `np`).
+
 - Check current GKE/Compute Engine pricing for your region before leaving
   anything running unattended — prices change and this file won't stay
   current.

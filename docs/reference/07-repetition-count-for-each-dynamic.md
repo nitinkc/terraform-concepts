@@ -17,26 +17,30 @@ First identify **what** is being repeated: whole resources/modules vs. nested bl
 
 - **Default to `for_each`** for almost all collections of cloud resources or modules.
 - **Reserve `count` strictly for:**
-  1. Conditional creation (`count = var.enabled ? 1 : 0`).
-  2. $N$ identical, stateless copies where individual identity never matters.
+    1. Conditional creation (`count = var.enabled ? 1 : 0`).
+    2. $N$ identical, stateless copies where individual identity never matters.
 
 ### 2. Two `for_each` Failure Modes to Memorize
+
 1. **Plan-Time Unknown Keys:** Keys in `for_each` must be known during `plan` (cannot be derived from computed attributes like `google_compute_instance.vm.id`). Use static map keys from `var.*` or `local.*`, and put the computed resource attributes in the map *values* instead.
 2. **`list(string)` vs. `set(string)`:** `for_each` rejects a raw `list(string)` because lists allow duplicate elements and numeric ordering. Declare the variable as `type = set(string)`, or convert explicitly with `toset(var.list)` (which deduplicates and keys by string value).
-   - *Migrating `count` to `for_each`:* Changing a resource from `count` (`env_sa[0]`) to `for_each` (`env_sa["dev"]`) changes its state address and will destroy + recreate every instance unless you migrate state with `moved {}` blocks or `terraform state mv`.
+    - *Migrating `count` to `for_each`:* Changing a resource from `count` (`env_sa[0]`) to `for_each` (`env_sa["dev"]`) changes its state address and will destroy + recreate every instance unless you migrate state with `moved {}` blocks or `terraform state mv`.
 
 ### 3. `for_each` Over Modules
+
 - Applying `for_each` to a `module` block creates keyed module instances:
   `module.app_sa["dev"].google_service_account.this`.
+
 - If the `for_each` map is empty (`{}`), Terraform cleanly creates **zero instances** with no error (used by `module "gke"` in `sample-program/infra/main.tf` when both `enable_gke_p` and `enable_gke_np` are `false`).
 - Collect outputs across keyed module instances using a `for` comprehension:
   `{ for k, m in module.app_sa : k => m.email }`.
 
 ### 4. `dynamic` Blocks: Anatomy & Readability Trade-Off
+
 - **Anatomy:**
-  - Outer label (`dynamic "lifecycle_rule"`) must match the exact nested block name expected by the provider schema.
-  - `for_each` supplies the collection.
-  - `content { ... }` defines the generated nested block body, referencing `lifecycle_rule.value.<field>` (or a custom iterator name set via `iterator = rule`).
+    - Outer label (`dynamic "lifecycle_rule"`) must match the exact nested block name expected by the provider schema.
+    - `for_each` supplies the collection.
+    - `content { ... }` defines the generated nested block body, referencing `lifecycle_rule.value.<field>` (or a custom iterator name set via `iterator = rule`).
 - **State impact:** Converting 3 static `lifecycle_rule {}` blocks into a `dynamic "lifecycle_rule"` block produces a **no-op plan** (`0 to change`) and does not alter `terraform state list`, because there is still only one `google_storage_bucket` resource.
 - **Architect's Rule:** `dynamic` hurts readability when overused. Use it when nested blocks are parameterized via module variables or vary by environment (e.g., firewall `allow` rules, RBAC `rule` blocks, storage `lifecycle_rule` transitions).
 

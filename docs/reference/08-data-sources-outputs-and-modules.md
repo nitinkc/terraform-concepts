@@ -16,39 +16,42 @@
 
 - **External Availability Dependency:** Because `data` sources query live on every run (never serving a cached value from state unless `-refresh=false` is explicitly passed), every `data` block makes your `plan` dependent on that external API/object being reachable.
 - **Why `data "google_client_config" "default"` Must Be a Data Source:**
-  - GCP OAuth2 access tokens expire every **1 hour**.
-  - A `resource` only updates during `apply` if drift is detected, which would leave downstream `kubernetes` and `helm` providers with an expired token on subsequent plans.
-  - A `data` source re-fetches a fresh access token live on every single `plan` and `apply`.
+    - GCP OAuth2 access tokens expire every **1 hour**.
+    - A `resource` only updates during `apply` if drift is detected, which would leave downstream `kubernetes` and `helm` providers with an expired token on subsequent plans.
+    - A `data` source re-fetches a fresh access token live on every single `plan` and `apply`.
 
 ### 2. Outputs: Public Interface & CLI Extraction
+
 - Outputs are a root or child module's **public API** — anything not exported in an `output` block is private encapsulated state.
 - **CLI Extraction (`-raw` vs. `-json`):**
-  - `terraform output -raw <name>` strips quotes for shell scripts (`export SA=$(terraform output -raw email)`), but **only works on primitive values** (`string`, `number`, `bool`).
-  - Calling `-raw` on a `map`, `list`, or `object` fails. Use `terraform output -json <name> | jq -r '.key'` for structured outputs.
+    - `terraform output -raw <name>` strips quotes for shell scripts (`export SA=$(terraform output -raw email)`), but **only works on primitive values** (`string`, `number`, `bool`).
+    - Calling `-raw` on a `map`, `list`, or `object` fails. Use `terraform output -json <name> | jq -r '.key'` for structured outputs.
 - **Plaintext State & Sensitive Contagion:**
-  - Every output value is stored in **plaintext** in `terraform.tfstate`.
-  - If an output references any `sensitive` variable or resource attribute, Terraform fails validation unless the `output` block also declares `sensitive = true`.
+    - Every output value is stored in **plaintext** in `terraform.tfstate`.
+    - If an output references any `sensitive` variable or resource attribute, Terraform fails validation unless the `output` block also declares `sensitive = true`.
 
 ### 3. Module Architecture & Encapsulation Rules
+
 - **Root module:** the working directory where you run `terraform init`/`apply`.
 - **Child module:** a directory invoked via `module "<name>" { source = "..." }`.
 - **Strict Scope Boundary:** A parent root can only pass inputs declared in the child's `variables.tf` and read values exported in the child's `outputs.tf`. Neither can read the other's `locals` or unexported resources directly.
 - **State Addressing & Refactoring Trap:**
-  - Resources inside a child module are addressed as `module.<module_name>.<resource_type>.<local_name>` (commonly named `this` inside single-resource-class modules: `module.backend_sa.google_service_account.this`).
-  - **Extracting an existing root resource into a child module changes its state address** → Terraform plans a **Destroy + Create** unless you add a `moved { from = ... to = module.x... }` block or run `terraform state mv`.
+    - Resources inside a child module are addressed as `module.<module_name>.<resource_type>.<local_name>` (commonly named `this` inside single-resource-class modules: `module.backend_sa.google_service_account.this`).
+    - **Extracting an existing root resource into a child module changes its state address** → Terraform plans a **Destroy + Create** unless you add a `moved { from = ... to = module.x... }` block or run `terraform state mv`.
 - **Module Sources & Versioning:**
-  - Local path (`./modules/gcp-vm`): evolves in lockstep with the repo; re-read directly.
-  - Remote Git/Registry (`git::https://...//modules/vpc?ref=v1.4.0`): cached in `.terraform/modules/` during `init`. Always pin tags/versions; upgrading requires `terraform init -upgrade`.
+    - Local path (`./modules/gcp-vm`): evolves in lockstep with the repo; re-read directly.
+    - Remote Git/Registry (`git::https://...//modules/vpc?ref=v1.4.0`): cached in `.terraform/modules/` during `init`. Always pin tags/versions; upgrading requires `terraform init -upgrade`.
 - **Architect's Heuristics — When NOT to Write a Module:**
-  1. **Never wrap a single resource** unless enforcing mandatory org-wide security defaults.
-  2. **Require at least 2 callers** before abstracting (1 caller = unnecessary indirection).
-  3. **Keep environment conditionals out of child modules** — filter maps in the caller's `locals` and `for_each` the module from the outside.
+    1. **Never wrap a single resource** unless enforcing mandatory org-wide security defaults.
+    2. **Require at least 2 callers** before abstracting (1 caller = unnecessary indirection).
+    3. **Keep environment conditionals out of child modules** — filter maps in the caller's `locals` and `for_each` the module from the outside.
 
 ### 4. Declarative vs. Imperative Escape Hatches (`archive_file` vs. `null_resource`)
+
 - **`data "archive_file"` (Safe Declarative Escape):** Zips local source directories during `plan` and exposes `output_md5` / `output_base64sha256`. Feeding `output_md5` into a Cloud Function or object name integrates local file changes directly into the Terraform DAG.
 - **`null_resource` / `terraform_data` + `provisioner "local-exec"` (Imperative Last Resort):**
-  - Runs arbitrary shell commands on the machine executing Terraform; only re-runs when its `triggers` map changes.
-  - **Code Smell & Security Risk:** Untracked by state diffing, marks resources tainted on failure, and is the primary **CI/CD PR arbitrary code execution exploit vector** (see [§10](10-architecture-multirepo-gke-and-cicd.md)). Prefer cloud-init, startup scripts, or Kubernetes Jobs.
+    - Runs arbitrary shell commands on the machine executing Terraform; only re-runs when its `triggers` map changes.
+    - **Code Smell & Security Risk:** Untracked by state diffing, marks resources tainted on failure, and is the primary **CI/CD PR arbitrary code execution exploit vector** (see [§10](10-architecture-multirepo-gke-and-cicd.md)). Prefer cloud-init, startup scripts, or Kubernetes Jobs.
 
 ---
 

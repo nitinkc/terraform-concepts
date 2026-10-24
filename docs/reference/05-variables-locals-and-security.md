@@ -28,6 +28,7 @@ From **lowest** priority (overridden by everything below it) to **highest** prio
     If `terraform.tfvars` exists in the working directory and sets `enable_gke_np = false`, editing `default = true` in `variables.tf` has **zero effect** — `terraform.tfvars` outranks `default`. Also note: if a variable has no `default` and no source supplies it, `terraform plan` hangs waiting for interactive stdin in CI unless `-input=false` is set.
 
 ### 3. Type Constraints (`list` vs. `set` vs. `object`)
+
 - **Primitives:** `string`, `number`, `bool` (auto-converted where unambiguous, e.g., `"1"` ↔ `1`).
 - **`list(T)`:** ordered, 0-indexed, allows duplicates → pairs with `count`.
 - **`set(T)`:** unordered, unique elements only, no numeric indexing → required when passing a list of strings to `for_each` (or convert via `toset(var.list)`).
@@ -35,18 +36,21 @@ From **lowest** priority (overridden by everything below it) to **highest** prio
 - **`object({ attr = type, opt = optional(string, "default") })`:** strongly typed schema for module inputs (`map(object({...}))` is the standard production pattern for `for_each` over modules).
 
 ### 4. Input `validation {}` Blocks
+
 - Evaluated during `validate`/`plan` **before** any provider API calls.
 - Can only reference the variable being validated (`var.<self>`). Use `contains()`, `can(regex(...))`, or length bounds to fail fast on typos before a 15-minute cloud apply starts.
 
 ### 5. `sensitive = true` is CLI Masking, NOT Encryption
+
 - Setting `sensitive = true` on a `variable` or `output` redacts the value as `(sensitive value)` in terminal stdout and CI logs, and taints any derived expression so you must explicitly mark downstream outputs `sensitive = true` as well.
 - **It does NOT encrypt or redact the value in `terraform.tfstate`.** The raw secret is written in plaintext JSON into the state file and into any resource attribute consuming it.
 - **Architectural Rules for Secrets:**
-  1. Never create `google_service_account_key` in Terraform (writes a permanent private key into state); use **Workload Identity** instead.
-  2. Never commit `terraform.tfstate` or secret-bearing `.tfvars` files.
-  3. Store secret payloads out-of-band in Secret Manager / Vault, or pass only secret resource IDs/references across modules.
+    1. Never create `google_service_account_key` in Terraform (writes a permanent private key into state); use **Workload Identity** instead.
+    2. Never commit `terraform.tfstate` or secret-bearing `.tfvars` files.
+    3. Store secret payloads out-of-band in Secret Manager / Vault, or pass only secret resource IDs/references across modules.
 
 ### 6. Volatile Functions (`timestamp()`, `uuid()`) Cause Perpetual Diffs
+
 - `timestamp()` evaluates to a new value on every `plan`, preventing any resource that references it from ever converging (`~ update in-place` on every run).
 - Fix with `lifecycle { ignore_changes = [...] }` on the target attribute, or use the `time_static` / `random_id` resources which persist their generated value in state once.
 

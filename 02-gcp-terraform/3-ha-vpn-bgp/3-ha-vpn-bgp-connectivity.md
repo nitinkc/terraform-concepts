@@ -56,28 +56,29 @@ In this lab, we connect the **exact same two subnets** using **HA VPN + Cloud Ro
 ### Key BGP Concepts Demonstrated in `main.tf`
 
 1. **Why two different ASNs (`65001` vs `65002`)?**
-   - BGP between two networks uses **eBGP (External BGP)**, which requires each side to have a distinct Autonomous System Number.
-   - Private ASNs come from RFC 6996 (`64512`–`65534`). Note: `65515` is reserved by Google for Partner Interconnect, and `16550` for Cloud VPN/Interconnect in specific contexts.
+    - BGP between two networks uses **eBGP (External BGP)**, which requires each side to have a distinct Autonomous System Number.
+    - Private ASNs come from RFC 6996 (`64512`–`65534`). Note: `65515` is reserved by Google for Partner Interconnect, and `16550` for Cloud VPN/Interconnect in specific contexts.
 2. **Why `169.254.x.x/30` inside the tunnels?**
-   - An IPsec tunnel is a point-to-point virtual wire. For BGP (which runs over TCP port `179`) to open a socket across that wire, both ends of the tunnel need an IP address.
-   - GCP requires RFC 3927 link-local (`169.254.0.0/16`) `/30` subnets. Each `/30` gives 2 usable host IPs:
-     - **Tunnel 0:** Router A = `169.254.0.1/30` ↔ Router B = `169.254.0.2/30`
-     - **Tunnel 1:** Router A = `169.254.1.1/30` ↔ Router B = `169.254.1.2/30`
+    - An IPsec tunnel is a point-to-point virtual wire. For BGP (which runs over TCP port `179`) to open a socket across that wire, both ends of the tunnel need an IP address.
+    - GCP requires RFC 3927 link-local (`169.254.0.0/16`) `/30` subnets. Each `/30` gives 2 usable host IPs:
+        - **Tunnel 0:** Router A = `169.254.0.1/30` ↔ Router B = `169.254.0.2/30`
+        - **Tunnel 1:** Router A = `169.254.1.1/30` ↔ Router B = `169.254.1.2/30`
 3. **Active/Active ECMP vs. Active/Passive (`advertised_route_priority`)**
-   - Both `router_a_peer0` and `router_a_peer1` set `advertised_route_priority = 100` (BGP **MED** — Multi-Exit Discriminator; lower value = higher preference).
-   - Because both tunnels advertise `10.10.0.0/24` with the **same** priority (`100`), VPC B installs **both** tunnels as equal-cost next hops and load-balances traffic across them using **ECMP (Equal-Cost Multi-Path)**.
-   - If you wanted **Active/Passive** instead, you would set Tunnel 0's priority to `100` and Tunnel 1's priority to `200`.
+    - Both `router_a_peer0` and `router_a_peer1` set `advertised_route_priority = 100` (BGP **MED** — Multi-Exit Discriminator; lower value = higher preference).
+    - Because both tunnels advertise `10.10.0.0/24` with the **same** priority (`100`), VPC B installs **both** tunnels as equal-cost next hops and load-balances traffic across them using **ECMP (Equal-Cost Multi-Path)**.
+    - If you wanted **Active/Passive** instead, you would set Tunnel 0's priority to `100` and Tunnel 1's priority to `200`.
 4. **Custom Route Advertisements (Hub-and-Spoke / On-Premises)**
-   - By default, `advertise_mode = "DEFAULT"` advertises all subnets in the VPC.
-   - If `vpn-vpc-a` also needed to advertise an on-premises summary route or a peered CIDR (e.g., `192.168.0.0/16`), you would change `router_a` or `router_a_peer0` to:
-     ```hcl
-     advertise_mode    = "CUSTOM"
-     advertised_groups = ["ALL_SUBNETS"]
-     advertised_ip_ranges {
-       range       = "192.168.0.0/16"
-       description = "On-prem corporate network"
-     }
-     ```
+    - By default, `advertise_mode = "DEFAULT"` advertises all subnets in the VPC.
+    - If `vpn-vpc-a` also needed to advertise an on-premises summary route or a peered CIDR (e.g., `192.168.0.0/16`), you would change `router_a` or `router_a_peer0` to:
+
+        ```hcl
+        advertise_mode    = "CUSTOM"
+        advertised_groups = ["ALL_SUBNETS"]
+        advertised_ip_ranges {
+          range       = "192.168.0.0/16"
+          description = "On-prem corporate network"
+        }
+        ```
 
 ---
 

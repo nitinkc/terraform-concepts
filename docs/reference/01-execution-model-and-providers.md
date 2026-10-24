@@ -17,8 +17,8 @@ Every `terraform plan` compares **three** sources of truth:
 
 - **HCL always wins.** Manual console edits create drift that the next `apply` reverts to match HCL.
 - **Core vs. Provider split:**
-  - **Terraform Core** (the CLI binary) knows HCL syntax, the dependency graph (DAG), state management, and meta-arguments (`count`, `for_each`, `depends_on`, `lifecycle`, `provider`). It knows *nothing* about cloud APIs.
-  - **Provider Plugins** (e.g., `hashicorp/google`) own resource schemas, API calls, and whether a field change is an in-place `PATCH` or a destructive `ForceNew` replacement.
+    - **Terraform Core** (the CLI binary) knows HCL syntax, the dependency graph (DAG), state management, and meta-arguments (`count`, `for_each`, `depends_on`, `lifecycle`, `provider`). It knows *nothing* about cloud APIs.
+    - **Provider Plugins** (e.g., `hashicorp/google`) own resource schemas, API calls, and whether a field change is an in-place `PATCH` or a destructive `ForceNew` replacement.
 
 ### 2. `required_providers` vs. `provider {}` (Interview Classic)
 They look similar, live in different blocks, and run at different lifecycle stages:
@@ -32,14 +32,15 @@ They look similar, live in different blocks, and run at different lifecycle stag
 - **Unused providers in `required_providers`** (e.g., declaring `hashicorp/random` when no `random_*` resource exists) still force plugin downloads on every `init` — clean them up.
 
 ### 3. `terraform init`, Version Constraints & `.terraform.lock.hcl`
+
 - **`init` never touches `terraform.tfstate`.** It only downloads provider binaries into `.terraform/`, initializes the backend, and writes `.terraform.lock.hcl`. It is idempotent and safe to run at any time.
 - **Constraint vs. Lock:**
-  - **Constraint (`version = "~> 8.0"`)**: range of *acceptable* versions written by you.
-  - **Lock file (`.terraform.lock.hcl`)**: exact version and cryptographic checksums *chosen* by `init`.
+    - **Constraint (`version = "~> 8.0"`)**: range of *acceptable* versions written by you.
+    - **Lock file (`.terraform.lock.hcl`)**: exact version and cryptographic checksums *chosen* by `init`.
 - **Commit `.terraform.lock.hcl` to Git; gitignore `.terraform/`.** Binaries in `.terraform/` are OS/architecture-specific, so teammates and CI runners still run `terraform init` to download their platform's binary pinned to the lock file's exact version.
 - **Pessimistic constraint operator (`~>`):**only the **last digit** specified is allowed to increment:
-  - `~> 2.4.1` means `>= 2.4.1, < 2.5.0` (patch updates only).
-  - `~> 2.4` means `>= 2.4.0, < 3.0.0` (minor updates allowed).
+    - `~> 2.4.1` means `>= 2.4.1, < 2.5.0` (patch updates only).
+    - `~> 2.4` means `>= 2.4.0, < 3.0.0` (minor updates allowed).
 - **`terraform init` vs `terraform init -upgrade`:** plain `init` strictly honors `.terraform.lock.hcl`; `-upgrade` re-resolves the newest version allowed by the constraint and updates the lock file.
 - **Pinning the CLI:** `required_version = ">= 1.7, < 2.0"` inside `terraform {}` prevents syntax errors when a config uses newer language features (`moved`, `import` blocks, `optional()`).
 
@@ -52,6 +53,7 @@ Credentials should be ambient — **never hardcode keys in HCL**. The `google` p
 4. **Compute/GKE Metadata Server**: attached Service Account when running inside GCP (GCE, GKE Workload Identity, Cloud Build).
 
 ### 5. Provider Aliasing (Multi-Region / Multi-Project)
+
 - The `provider` block **without** an `alias` is the default provider.
 - Add `alias = "us_east"` on a second `provider "google"` block and route resources via `provider = google.us_east` (reference identifier, **no quotes**).
 - **Module rule:** Child modules inherit default providers automatically, but **never** inherit aliased providers implicitly. Pass them explicitly via `providers = { google = google.us_east }` on the `module` block. Child modules must never declare their own `provider {}` configuration blocks.

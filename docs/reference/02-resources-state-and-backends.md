@@ -10,39 +10,46 @@
 ```hcl
 resource "<provider_type>" "<local_name>" { ... }
 ```
+
 - **First label (`google_service_account`)**: fixed by the provider plugin.
 - **Second label (`gsa`)**: local identifier chosen by you, unique per resource type within the module.
 - Together, `google_service_account.gsa` is the **resource address** — the primary key in `terraform.tfstate`.
 
 ### 2. Why `terraform.tfstate` Must Exist
+
 1. **Identity Mapping (Load-Bearing):** Cloud APIs have no native concept of "this bucket belongs to this `.tf` file." State maps HCL addresses (`google_service_account.gsa`) to real cloud IDs (`projects/.../serviceAccounts/...`).
 2. **Performance:** Caching attributes avoids querying every cloud resource when unnecessary and prevents API rate-limiting at scale.
 3. **Dependency & Metadata:** Stores resource dependency edges (necessary for correct destroy ordering even after a block is deleted from HCL) and provider-computed values.
 
 ### 3. `terraform apply` is Non-Atomic (Per-Resource Commit)
+
 - **Interview Highlight:** Terraform `apply` is **not transactional**. There is no automatic rollback if resource #7 of 7 fails.
 - As each individual resource finishes creation, Terraform immediately records it in state.
 - If a 7-resource apply fails on #7 (e.g., a transient network error or unreachable Consul endpoint), the first 6 resources are live and durably tracked in state. Re-running `terraform plan` shows only `1 to add` (idempotent convergence).
 
 ### 4. Missing Resource vs. Missing State (Provider-Specific Failure Modes)
+
 - **Delete the real resource, keep state:** During `plan`, the refresh phase queries the provider, sees the resource is gone, and proposes **recreating** it (`+ create`).
 - **Delete the state file, keep the real resource:** Terraform has complete amnesia. It does *not* scan the cloud to rediscover orphans; it plans to create everything fresh.
-  - **File-based providers (`local_file`):** silently overwrite/clobber the existing file on disk.
-  - **Cloud APIs (`google_service_account`, `google_storage_bucket`):** reject duplicate identifiers with `Error 409: AlreadyExists`. Recovery requires `terraform import`.
+    - **File-based providers (`local_file`):** silently overwrite/clobber the existing file on disk.
+    - **Cloud APIs (`google_service_account`, `google_storage_bucket`):** reject duplicate identifiers with `Error 409: AlreadyExists`. Recovery requires `terraform import`.
 - **Empty State File Trap:** A `terraform.tfstate` file existing on disk does not prove resources are tracked — an initialized or destroyed root still has a valid JSON state file with `"resources": []`. Always check `terraform state list`.
 
 ### 5. Remote Backends (GCS) & The Chicken-and-Egg Problem
 Moving state from local disk to a remote backend (`backend "gcs"`) provides:
+
 - **State Locking:** prevents concurrent `apply` runs from corrupting state.
 - **Encryption at Rest:** Google-managed encryption or CMEK (local state is always unencrypted plaintext JSON).
 - **Versioning & Recovery:** GCS object versioning allows rolling back accidental state corruption.
 
 **Two Backend Constraints to Remember:**
+
 1. **Bootstrap Chicken-and-Egg:** `terraform init` connects to the backend *before* parsing any `resource` blocks. Therefore, a Terraform configuration cannot create the GCS bucket that stores its own state. Create the state bucket out-of-band (`gcloud storage buckets create` / `gsutil mb`) or via a dedicated `bootstrap` root.
 2. **No Variables in `backend {}`:** Backend blocks cannot interpolate `var.*` or `local.*`. Use a **partial backend configuration** (`backend "gcs" {}`) and pass `-backend-config="bucket=..." -backend-config="prefix=..."` during `terraform init`.
-   - *Gotcha:* Omitting `-backend-config` on a partial `gcs` backend does not error with "missing bucket argument" — Terraform queries GCS with an empty bucket name and returns `storage: bucket doesn't exist ... 404`.
+    - *Gotcha:* Omitting `-backend-config` on a partial `gcs` backend does not error with "missing bucket argument" — Terraform queries GCS with an empty bucket name and returns `storage: bucket doesn't exist ... 404`.
 
 ### 6. The `plan` Read-Access Security Constraint
+
 - Running `terraform plan` **requires read access** to the state file.
 - Because state stores every attribute in **plaintext** (including secrets marked `sensitive = true`), **anyone who has IAM permissions to run `terraform plan` against a state file can read every secret inside that state (`terraform state pull`).**
 - This is the primary architectural reason to move `plan`/`apply` off developer laptops and into isolated CI/CD runners.

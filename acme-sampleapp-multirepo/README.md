@@ -54,6 +54,7 @@ The repository is intentionally split into two layers:
 
 - `01-basics/` and `02-gcp-terraform/` are small, isolated demonstrations. Use them
   to learn one Terraform concept at a time without the Acme dependency graph.
+
 - `` is the main project. Its five
   independent Terraform roots model the organization-style repository boundaries,
   state ownership, Consul contracts, GKE, Cloud SQL, Helm, and Workload Identity.
@@ -79,11 +80,13 @@ organizational preference. Each repo:
 - Has **its own lifecycle** — the database shouldn't be destroyed/recreated
   just because the backend redeploys, and the frontend shouldn't need a plan
   run every time a DB migration ships.
+
 - Has **its own state file**, with no shared backend config — blast radius of a
   bad `apply` is contained to one repo. The real project does this with
   `backend "gcs" {}` per repo; this copy uses `backend "local"` per repo so it
   needs no pre-existing bucket. Same isolation property either way: what
   matters is one state file per root, not where that file lives.
+
 - **Publishes what other repos need, and nothing else**, through Consul rather
   than `terraform_remote_state`. `terraform_remote_state` would create a hard
   coupling to another repo's *entire* state file (including things it never
@@ -113,8 +116,10 @@ Use this view to recall four aspects together:
 1. **Runtime path:** user → DNS → ingress → frontend → backend → Cloud SQL.
 2. **Identity and secrets:** the backend uses Workload Identity and reads shared SSO
    credentials from Secret Manager rather than embedding credentials in the pod.
+
 3. **Ownership:** each colored Terraform state owns a separate slice of the platform and
    can be planned and applied independently.
+
 4. **Cross-root contracts:** dashed purple lines represent deliberately published JSON
    outputs in Consul, not direct access to another root's state.
 
@@ -142,17 +147,21 @@ at plan time.
    creating zero, one, or two GKE clusters depending on the enable flags,
    then the `consul_keys` publish at the bottom that builds the exact JSON
    shape every other repo's `local.program_gcp` expects.
+
 1. `infrastructure/infra/main.tf` and `secrets.tf` — good warm-up for the
    `for_each`-over-environments pattern (note: this repo does **not** use
    `terraform.workspace` per environment the way the other repos do — it
    runs a single workspace and fans out with `for_each` instead. Ask
    yourself why that choice might make sense here specifically.)
+
 2. `cloudsql/infra/` — a self-contained, single-purpose repo. Good for seeing
    a full `main.tf` → `iam.tf` → `outputs.tf` flow without the added
    complexity backend has.
+
 3. `backend/infra/main.tf` locals, then `cloudsql.tf`, then the `depends_on`
    block at the bottom of `main.tf` — still the most architecturally dense
    file in the sandbox.
+
 4. `frontend/infra/vip.tf` + `iam.tf` — contrast against backend's `iam.tf`:
    notice everything backend needs (SQL roles, `shell_script` bridge,
    `sso_secret_id` access) that frontend deliberately does **not** need, and

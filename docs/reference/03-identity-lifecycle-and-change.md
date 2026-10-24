@@ -7,11 +7,12 @@
 ## Architect's Points to Keep in Mind
 
 ### 1. Address Identity vs. Cloud Resource Name
+
 - Terraform identifies a resource exclusively by its **HCL address** (`google_service_account.gsa`, `module.app["dev"].google_service_account.this`), **never** by the `name` or `account_id` attribute inside the block.
 - **Renaming a label in HCL = Destroy + Create.** If you change `resource "google_service_account" "gsa"` to `"backend_sa"`, Terraform sees `gsa` removed (`- destroy`) and `backend_sa` added (`+ create`).
 - **Two ways to rename without destroying:**
-  1. **Declarative (`moved` block, Terraform 1.1+ — preferred in GitOps/teams):** committed to Git so every teammate's and CI runner's next plan automatically migrates the state address.
-  2. **Imperative (`terraform state mv`):** mutates state directly; fine for one-off local fixes.
+    1. **Declarative (`moved` block, Terraform 1.1+ — preferred in GitOps/teams):** committed to Git so every teammate's and CI runner's next plan automatically migrates the state address.
+    2. **Imperative (`terraform state mv`):** mutates state directly; fine for one-off local fixes.
 
 ```hcl
 moved {
@@ -21,9 +22,10 @@ moved {
 ```
 
 ### 2. In-Place Update (`~`) vs. Force Replacement (`-/+`)
+
 - **In-place update (`~`):** The underlying cloud API allows mutating the field (e.g., `display_name` on a GCP service account or `labels` on a bucket).
 - **Force replacement (`-/+` `# forces replacement`):** The cloud API treats the field as immutable after creation (e.g., `account_id` on a service account, `name`/`location` on a GCS bucket, or `machine_type` on a `google_container_node_pool`).
-  - *Operational impact:* Changing a GKE node pool's `machine_type` destroys the old node pool and provisions a new one, rescheduling all running pods.
+    - *Operational impact:* Changing a GKE node pool's `machine_type` destroys the old node pool and provisions a new one, rescheduling all running pods.
 - **Deliberate replacement without HCL changes:**
   ```bash
   terraform apply -replace=google_compute_instance.vm
@@ -41,6 +43,7 @@ Every resource supports a `lifecycle {}` block evaluated by Terraform Core:
 | `replace_triggered_by = [...]` | Replaces this resource whenever the referenced resource/attribute changes | Useful when a downstream resource must cycle whenever an upstream config/secret resource is replaced. |
 
 ### 4. When to Use `ignore_changes` (and When Not To)
+
 - **Legitimate use:** Split ownership where an external controller or automation mutates a field at runtime — e.g., a GKE cluster autoscaler changing `node_count`, an external admission controller stamping `annotations` or `labels`, or an attribute populated by a volatile function (`timestamp()`).
 - **Anti-pattern:** Using `ignore_changes` to silence a plan diff you haven't diagnosed yet.
 

@@ -74,6 +74,7 @@ Two things worth sitting with before moving on:
    is an empty map and `module.gke` produces nothing at all — no error, no partial cluster.
    Everything downstream then has to cope with an empty map, which is the
    [guard-propagation rule](../reference/06-expressions-conditionals-and-guards.md).
+
 2. **The filtering happens in `locals`, not in the module.** The module doesn't know it's
    conditional. That separation is why the same module is reusable, and why the guard has
    to be re-applied by every *consumer* of the filtered map rather than once at the source.

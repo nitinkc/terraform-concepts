@@ -27,21 +27,24 @@ None of these commands make mutating calls to cloud infrastructure — they only
     A successful `state mv` or `import` is only proven correct when the subsequent `terraform plan` reports **`No changes. Your infrastructure matches the configuration.`**
 
 ### 3. Three Properties of `import` That Trip Engineers Up
+
 1. **`import` only populates state — it does not write HCL** (unless using Terraform 1.5+ `import {}` blocks with `terraform plan -generate-config-out=generated.tf`). For CLI `terraform import`, you must write the stub `resource` block first.
 2. **`import` does not validate your HCL attributes against reality.** If the real GCS bucket is in `us-central1` and your HCL block says `location = "US"`, `terraform import` succeeds, and the **very next `terraform plan` proposes destroying and recreating the bucket** to match `"US"`. Always inspect the post-import `plan` and align your HCL before applying!
 3. **Import IDs are provider-specific strings**, not HCL names (e.g., `projects/MY_PROJ/serviceAccounts/EMAIL`).
 
 ### 4. Incident Framework: `import` vs. Delete-and-Recreate
 When an `apply` fails partway through (e.g., a `TLS handshake timeout` or partial cluster creation) and the next run hits `Error 409: AlreadyExists`:
+
 1. **Verify before acting:** Check **both** `terraform state list` and live cloud health (`gcloud ... describe`). A transient network timeout on a post-create read-back may mean the resource is already healthy and/or tracked.
 2. **Choose `import` when:** The resource is **healthy** in the cloud and holds state, data, or long provisioning time worth keeping.
 3. **Choose Delete-and-Recreate (`gcloud ... delete` + `terraform apply`) when:** Creation failed mid-flight leaving the resource in a half-built/broken state (e.g., a GKE cluster that failed during initial node pool creation) and **nothing irreplaceable would be lost**. Importing a broken resource just imports drift.
 
 ### 5. Workspaces (`terraform.workspace`) & Production Caveats
+
 - Every config starts in the `default` workspace. Creating a new workspace (`terraform workspace new dev`) creates an isolated state file (`terraform.tfstate.d/dev/terraform.tfstate` locally, or a separate object under the GCS `prefix`) sharing the exact same `.tf` code.
 - **Two Production Caveats (Interview Gold):**
-  1. **Why directory-per-env (`envs/dev/`, `envs/prod/`) usually beats workspaces:** Workspaces share a single backend block and don't naturally isolate credentials or separate GCP projects per environment; worse, target environment selection is invisible CLI state (`workspace select`), making it easy to accidentally apply to `prod`.
-  2. **Naming conventions are not enforced by Terraform:** In `backend/infra`, `local.static_envs = ["dev", "qa"]` and `var.static_env` (a boolean) had no automatic link to `terraform.workspace`. Selecting the `dev` workspace did *not* automatically set `var.static_env = true` — unless code explicitly computes `contains(local.static_envs, terraform.workspace)`, Terraform treats them as unrelated values.
+    1. **Why directory-per-env (`envs/dev/`, `envs/prod/`) usually beats workspaces:** Workspaces share a single backend block and don't naturally isolate credentials or separate GCP projects per environment; worse, target environment selection is invisible CLI state (`workspace select`), making it easy to accidentally apply to `prod`.
+    2. **Naming conventions are not enforced by Terraform:** In `backend/infra`, `local.static_envs = ["dev", "qa"]` and `var.static_env` (a boolean) had no automatic link to `terraform.workspace`. Selecting the `dev` workspace did *not* automatically set `var.static_env = true` — unless code explicitly computes `contains(local.static_envs, terraform.workspace)`, Terraform treats them as unrelated values.
 
 ---
 
