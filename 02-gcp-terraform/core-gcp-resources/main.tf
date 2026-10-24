@@ -19,11 +19,19 @@ terraform {
   }
 }
 
+# Default provider (unaliased) — inherited by all resources and child modules by default
+provider "google" {
+  project = var.project_id
+  region  = var.region
+}
+
 # Step 14 : Provider Aliasing (Multi-Region / Multi-Project)
+# A provider block with an alias is only used by resources that
+# explicitly set provider = google.us_east (like google_storage_bucket.east_region_demo)
 provider "google" {
   alias   = "us_east" # Provider Aliasing
   project = var.project_id
-  region  = var.region
+  region  = "us-east1"
 }
 
 # Step 9 : using modules
