@@ -39,6 +39,18 @@ spec:
             {{- end }}
             - name: API_PORT
               value: {{ .Values.backend.containerPort | quote }}
+            {{- if .Values.externalSecrets.enabled }}
+            - name: SSO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalSecrets.targetSecretName }}
+                  key: client_id
+            - name: SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalSecrets.targetSecretName }}
+                  key: client_secret
+            {{- end }}
             {{- if .Values.cloudSql.enabled }}
             - name: DATABASE_URL
               value: {{ include "acme-sampleapp-backend.databaseUrl" . | quote }}

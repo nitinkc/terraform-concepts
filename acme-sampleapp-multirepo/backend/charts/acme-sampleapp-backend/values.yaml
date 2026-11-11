@@ -107,3 +107,16 @@ serviceAccount:
   name: ""
   # -- Service account annotations (for the Workload Identity binding)
   annotations: {}
+
+# External Secrets Operator delivery of the shared SSO config
+# (created by infrastructure/infra/secrets.tf, IAM granted by backend/infra/iam.tf).
+# Requires the external-secrets controller + a ClusterSecretStore in-cluster.
+externalSecrets:
+  enabled: false
+  # -- SM secret_id to pull, e.g. acme-sampleapp-sso-config-dev
+  remoteKey: ""
+  # -- Pre-created ClusterSecretStore name (gcpsm provider + Workload Identity)
+  clusterSecretStore: ""
+  # -- Secret object ESO creates and the deployment reads env from
+  targetSecretName: sso-config
+  refreshInterval: 1h

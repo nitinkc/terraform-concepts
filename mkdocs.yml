@@ -112,6 +112,8 @@ nav:
       - 9. State Surgery, Drift & Workspaces: reference/09-state-surgery-drift-and-workspaces.md
       - 10. Multi-Repo, GKE, Networking & CI/CD: reference/10-architecture-multirepo-gke-and-cicd.md
       - 11. Master HCL, CLI & Glossary Cheatsheet: reference/11-cli-and-hcl-cheatsheet.md
+      - 12. Security Scanning, Policy & TF in CI: reference/12-security-policy-and-pipelines.md
+      - 13. Secrets Delivery & Vault: reference/13-secrets-delivery-and-vault.md
   - GCP Visual Labs:
       - gcp-labs/index.md
       - 1. Same-VPC 2-Subnet & IAP SSH: gcp-labs/01-same-vpc-2-subnets.md
